@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_wms_box_label">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-family: sans-serif; padding: 4mm;">
+                        <div style="border: 2px solid #000; padding: 3mm; height: 65mm;">
+                            <div style="text-align: center; font-size: 10pt; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 1mm; margin-bottom: 2mm;">
+                                KOB WMS — BOX LABEL
+                            </div>
+                            <div style="font-size: 8pt; line-height: 1.4;">
+                                <strong>Order:</strong>
+                                <span t-field="o.name"/>
+                                <br/>
+                                <strong>Ref:</strong>
+                                <span t-field="o.ref"/>
+                                <br/>
+                                <strong>Customer:</strong>
+                                <span t-field="o.customer"/>
+                                <br/>
+                                <strong>Platform:</strong>
+                                <span t-field="o.platform"/>
+                                <br/>
+                                <strong>Items:</strong>
+                                <span t-field="o.packed_total"/>
+                                /
+                                <span t-field="o.expected_total"/>
+                            </div>
+                            <div style="margin-top: 3mm; padding-top: 2mm; border-top: 1px dashed #000; text-align: center;">
+                                <div t-if="o.box_barcode" style="font-size: 9pt;">
+                                    <strong>BOX:</strong>
+                                    <span t-field="o.box_barcode"/>
+                                </div>
+                                <div t-if="o.box_barcode" style="margin-top: 1mm;">
+                                    <img t-attf-src="/report/barcode/Code128/{{o.box_barcode}}?width=280&amp;height=60"
+                                         style="max-width: 100%;"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

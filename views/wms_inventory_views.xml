@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- 1. Stock on Hand (quants by location/lot)                    -->
+    <!-- ============================================================ -->
+    <record id="action_wms_stock_on_hand" model="ir.actions.act_window">
+        <field name="name">Stock on Hand</field>
+        <field name="res_model">stock.quant</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="domain">[('location_id.usage', '=', 'internal'), ('quantity', '>', 0)]</field>
+        <field name="context">{
+            'search_default_group_location': 1,
+            'search_default_group_product': 1,
+        }</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- 2. Near Expiry Alert                                         -->
+    <!-- ============================================================ -->
+    <record id="view_wms_near_expiry_list" model="ir.ui.view">
+        <field name="name">wms.near.expiry.list</field>
+        <field name="model">stock.lot</field>
+        <field name="arch" type="xml">
+            <list string="Near Expiry Products" create="false" edit="false"
+                  decoration-danger="expiry_days &lt;= 30"
+                  decoration-warning="expiry_days &gt; 30 and expiry_days &lt;= 90"
+                  decoration-info="expiry_days &gt; 90 and expiry_days &lt;= 180">
+                <field name="name" string="Lot"/>
+                <field name="product_id"/>
+                <field name="expiration_date"/>
+                <field name="expiry_days" string="Days Left"/>
+                <field name="product_qty" string="On Hand"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_near_expiry_search" model="ir.ui.view">
+        <field name="name">wms.near.expiry.search</field>
+        <field name="model">stock.lot</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="product_id"/>
+                <filter string="Expired" name="expired"
+                        domain="[('expiration_date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="≤ 30 days" name="30days"
+                        domain="[('expiration_date', '&lt;=', (context_today() + datetime.timedelta(days=30)).strftime('%Y-%m-%d')),
+                                 ('expiration_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="≤ 90 days" name="90days"
+                        domain="[('expiration_date', '&lt;=', (context_today() + datetime.timedelta(days=90)).strftime('%Y-%m-%d')),
+                                 ('expiration_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Product" name="group_product" context="{'group_by': 'product_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_near_expiry" model="ir.actions.act_window">
+        <field name="name">Near Expiry</field>
+        <field name="res_model">stock.lot</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_wms_near_expiry_list"/>
+        <field name="search_view_id" ref="view_wms_near_expiry_search"/>
+        <field name="domain">[('expiration_date', '!=', False),
+                              ('expiration_date', '&lt;=', (context_today() + datetime.timedelta(days=180)).strftime('%Y-%m-%d'))]</field>
+        <field name="context">{'search_default_90days': 1}</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- 3. Restock Pickface                                          -->
+    <!-- ============================================================ -->
+    <record id="view_wms_pickface_restock_list" model="ir.ui.view">
+        <field name="name">wms.pickface.restock</field>
+        <field name="model">wms.pickface</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list string="Pickface Restock" create="false"
+                  decoration-danger="needs_restock"
+                  decoration-warning="current_qty &lt;= max_qty * 0.3">
+                <field name="code"/>
+                <field name="product_id"/>
+                <field name="zone_id"/>
+                <field name="min_qty"/>
+                <field name="max_qty"/>
+                <field name="current_qty"/>
+                <field name="needs_restock" widget="boolean"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_wms_pickface_restock" model="ir.actions.act_window">
+        <field name="name">Restock Pickface</field>
+        <field name="res_model">wms.pickface</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_wms_pickface_restock_list"/>
+        <field name="domain">[('needs_restock', '=', True)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">All pickfaces are stocked!</p>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- 5. Zone/Rack Layout                                          -->
+    <!-- ============================================================ -->
+    <record id="view_wms_zone_layout_kanban" model="ir.ui.view">
+        <field name="name">wms.zone.layout.kanban</field>
+        <field name="model">wms.zone</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="color"/>
+                <field name="rack_count"/>
+                <field name="warehouse_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <strong><field name="name"/></strong>
+                                <field name="code" class="badge text-bg-secondary"/>
+                            </div>
+                            <div>
+                                <field name="warehouse_id"/>
+                            </div>
+                            <div class="mt-1">
+                                <span class="badge text-bg-primary">
+                                    <field name="rack_count"/> racks
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="action_wms_zone_layout" model="ir.actions.act_window">
+        <field name="name">Zone Layout</field>
+        <field name="res_model">wms.zone</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="view_id" ref="view_wms_zone_layout_kanban"/>
+    </record>
+
+</odoo>

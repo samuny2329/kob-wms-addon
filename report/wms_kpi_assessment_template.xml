@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Feature 3: PDF Report -->
+    <record id="report_wms_kpi_assessment" model="ir.actions.report">
+        <field name="name">KPI Assessment Report</field>
+        <field name="model">wms.kpi.assessment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">kob_wms.report_kpi_assessment</field>
+        <field name="report_file">kob_wms.report_kpi_assessment</field>
+        <field name="binding_model_id" ref="model_wms_kpi_assessment"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_kpi_assessment">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center">KPI Assessment Report</h2>
+                        <h4 class="text-center text-muted" t-field="o.name"/>
+
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless">
+                                    <tr><td><strong>Worker:</strong></td><td t-field="o.user_id"/></tr>
+                                    <tr><td><strong>Position:</strong></td><td t-field="o.position"/></tr>
+                                    <tr><td><strong>Season:</strong></td><td t-field="o.season_id"/></tr>
+                                    <tr><td><strong>Status:</strong></td><td t-field="o.state"/></tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless">
+                                    <tr><td><strong>Supervisor:</strong></td><td t-field="o.supervisor_id"/></tr>
+                                    <tr><td><strong>Self Score:</strong></td><td t-field="o.self_score"/></tr>
+                                    <tr><td><strong>Supervisor Score:</strong></td><td t-field="o.supervisor_score"/></tr>
+                                    <tr>
+                                        <td><strong>Final Score:</strong></td>
+                                        <td>
+                                            <span t-field="o.final_score"/>
+                                            <span class="badge bg-primary ms-2" t-field="o.grade"/>
+                                            <span class="text-muted ms-1" t-esc="o.grade_label"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Pillar Scores</h5>
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Pillar</th>
+                                    <th class="text-end">Weight %</th>
+                                    <th class="text-end">Self</th>
+                                    <th class="text-end">Reviewer</th>
+                                    <th class="text-end">W. Self</th>
+                                    <th class="text-end">W. Reviewer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.line_ids" t-as="line">
+                                    <tr>
+                                        <td t-field="line.pillar_id"/>
+                                        <td class="text-end" t-field="line.weight"/>
+                                        <td class="text-end" t-field="line.self_score"/>
+                                        <td class="text-end" t-field="line.reviewer_score"/>
+                                        <td class="text-end" t-field="line.weighted_self"/>
+                                        <td class="text-end" t-field="line.weighted_reviewer"/>
+                                    </tr>
+                                    <t t-foreach="line.score_ids" t-as="sc">
+                                        <tr class="text-muted small">
+                                            <td class="ps-4" t-esc="sc.name"/>
+                                            <td class="text-end" t-esc="'%.0f' % sc.weight"/>
+                                            <td class="text-end" t-esc="sc.self_score_sel"/>
+                                            <td class="text-end" t-esc="sc.reviewer_score_sel"/>
+                                            <td/>
+                                            <td/>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Goals -->
+                        <t t-if="o.goal_ids">
+                            <h5 class="mt-4">Goals &amp; Action Items</h5>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Goal</th>
+                                        <th>Pillar</th>
+                                        <th>Deadline</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.goal_ids" t-as="g">
+                                        <tr>
+                                            <td t-field="g.name"/>
+                                            <td t-field="g.pillar_id"/>
+                                            <td t-field="g.deadline"/>
+                                            <td t-field="g.state"/>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Comments -->
+                        <h5 class="mt-4">Comments</h5>
+                        <table class="table table-sm">
+                            <tr t-if="o.self_comment"><td><strong>Worker:</strong></td><td t-field="o.self_comment"/></tr>
+                            <tr t-if="o.supervisor_comment"><td><strong>Supervisor:</strong></td><td t-field="o.supervisor_comment"/></tr>
+                            <tr t-if="o.manager_comment"><td><strong>Manager:</strong></td><td t-field="o.manager_comment"/></tr>
+                            <tr t-if="o.admin_comment"><td><strong>Director:</strong></td><td t-field="o.admin_comment"/></tr>
+                        </table>
+
+                        <!-- Signatures -->
+                        <div class="row mt-5">
+                            <div class="col-3 text-center">
+                                <div style="border-top: 1px solid #000; padding-top: 5px;">Worker</div>
+                            </div>
+                            <div class="col-3 text-center">
+                                <div style="border-top: 1px solid #000; padding-top: 5px;">Supervisor</div>
+                            </div>
+                            <div class="col-3 text-center">
+                                <div style="border-top: 1px solid #000; padding-top: 5px;">Manager</div>
+                            </div>
+                            <div class="col-3 text-center">
+                                <div style="border-top: 1px solid #000; padding-top: 5px;">Director</div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_stock_picking_form_wms" model="ir.ui.view">
+        <field name="name">stock.picking.form.wms</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_wms_orders" type="object"
+                        class="oe_stat_button" icon="fa-truck"
+                        invisible="wms_sales_order_count == 0">
+                    <field name="wms_sales_order_count" widget="statinfo"
+                           string="WMS Orders"/>
+                </button>
+                <button name="action_create_wms_order" type="object"
+                        class="oe_stat_button" icon="fa-plus-square"
+                        invisible="wms_sales_order_count != 0">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Create WMS</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_sale_order_form_wms" model="ir.ui.view">
+        <field name="name">sale.order.form.wms</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_create_wms_order" type="object"
+                        class="oe_stat_button" icon="fa-truck"
+                        invisible="state not in ('sale', 'done')">
+                    <field name="wms_sales_order_count" widget="statinfo"
+                           string="WMS Orders"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

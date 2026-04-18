@@ -1,0 +1,272 @@
+{
+    "version": 22,
+    "sheets": [
+        {
+            "id": "sh_wms_kpi",
+            "name": "KPI Performance",
+            "colNumber": 10,
+            "rowNumber": 60,
+            "rows": {
+                "0": { "size": 32 },
+                "1": { "size": 10 }
+            },
+            "cols": {
+                "0": { "size": 30 }
+            },
+            "merges": ["B1:I1"],
+            "cells": {
+                "B1": { "content": "KOB WMS — KPI Performance" }
+            },
+            "styles": {
+                "B1": 1
+            },
+            "formats": {},
+            "borders": {},
+            "conditionalFormats": [],
+            "figures": [
+                {
+                    "id": "kpi-bar-worker-score",
+                    "x": 18, "y": 60,
+                    "width": 475, "height": 360,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Worker Score (Top Performers)" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "none",
+                        "metaData": {
+                            "groupBy": ["user_id"],
+                            "measure": "worker_score",
+                            "order": "DESC",
+                            "resModel": "wms.worker.performance",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["user_id"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "fieldMatching": {
+                            "gf_kpi_date": {
+                                "chain": "date",
+                                "type": "date"
+                            },
+                            "gf_kpi_worker": {
+                                "chain": "user_id",
+                                "type": "many2one"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "kpi-bar-actions-by-worker",
+                    "x": 503, "y": 60,
+                    "width": 465, "height": 360,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Actions by Worker" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "top",
+                        "metaData": {
+                            "groupBy": ["user_id"],
+                            "measure": "total_actions",
+                            "order": "DESC",
+                            "resModel": "wms.worker.performance",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["user_id"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": true,
+                        "fieldMatching": {
+                            "gf_kpi_date": {
+                                "chain": "date",
+                                "type": "date"
+                            },
+                            "gf_kpi_worker": {
+                                "chain": "user_id",
+                                "type": "many2one"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "kpi-line-uph-trend",
+                    "x": 18, "y": 440,
+                    "width": 950, "height": 360,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "UPH Trend" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "top",
+                        "metaData": {
+                            "groupBy": ["date:day"],
+                            "measure": "uph",
+                            "order": null,
+                            "resModel": "wms.worker.performance",
+                            "mode": "line"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["date:day"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_line",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "cumulative": false,
+                        "fieldMatching": {
+                            "gf_kpi_date": {
+                                "chain": "date",
+                                "type": "date"
+                            },
+                            "gf_kpi_worker": {
+                                "chain": "user_id",
+                                "type": "many2one"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "kpi-bar-errors",
+                    "x": 18, "y": 820,
+                    "width": 475, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Errors by Worker" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "top",
+                        "metaData": {
+                            "groupBy": ["user_id"],
+                            "measure": "total_errors",
+                            "order": "DESC",
+                            "resModel": "wms.worker.performance",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["user_id"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": true,
+                        "fieldMatching": {
+                            "gf_kpi_date": {
+                                "chain": "date",
+                                "type": "date"
+                            },
+                            "gf_kpi_worker": {
+                                "chain": "user_id",
+                                "type": "many2one"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "kpi-bar-quality",
+                    "x": 503, "y": 820,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Quality % by Worker" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "none",
+                        "metaData": {
+                            "groupBy": ["user_id"],
+                            "measure": "quality_score",
+                            "order": "DESC",
+                            "resModel": "wms.worker.performance",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["user_id"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "fieldMatching": {
+                            "gf_kpi_date": {
+                                "chain": "date",
+                                "type": "date"
+                            },
+                            "gf_kpi_worker": {
+                                "chain": "user_id",
+                                "type": "many2one"
+                            }
+                        }
+                    }
+                }
+            ],
+            "tables": [],
+            "areGridLinesVisible": false,
+            "isVisible": true,
+            "headerGroups": { "ROW": [], "COL": [] },
+            "dataValidationRules": [],
+            "comments": {}
+        }
+    ],
+    "styles": {
+        "1": {
+            "bold": true,
+            "fontSize": 18,
+            "textColor": "#111827",
+            "fillColor": "#F9FAFB"
+        }
+    },
+    "formats": {},
+    "borders": {},
+    "revisionId": "START_REVISION",
+    "uniqueFigureIds": true,
+    "settings": {
+        "locale": {
+            "name": "English (US)",
+            "code": "en_US",
+            "thousandsSeparator": ",",
+            "decimalSeparator": ".",
+            "weekStart": 7,
+            "dateFormat": "m/d/yyyy",
+            "timeFormat": "hh:mm:ss a"
+        }
+    },
+    "pivots": {},
+    "pivotNextId": 1,
+    "lists": {},
+    "listNextId": 1,
+    "chartOdooMenusReferences": {},
+    "globalFilters": [
+        {
+            "id": "gf_kpi_date",
+            "type": "date",
+            "label": "Date Range",
+            "rangeType": "month",
+            "defaultValue": {}
+        },
+        {
+            "id": "gf_kpi_worker",
+            "type": "relation",
+            "label": "Worker",
+            "modelName": "res.users",
+            "defaultValue": [],
+            "defaultValueDisplayNames": []
+        }
+    ]
+}

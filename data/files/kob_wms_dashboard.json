@@ -1,0 +1,242 @@
+{
+    "version": 22,
+    "sheets": [
+        {
+            "id": "sh_wms_overview",
+            "name": "Overview",
+            "colNumber": 10,
+            "rowNumber": 60,
+            "rows": {
+                "0": { "size": 32 },
+                "1": { "size": 10 }
+            },
+            "cols": {
+                "0": { "size": 30 }
+            },
+            "merges": ["B1:I1"],
+            "cells": {
+                "B1": { "content": "KOB WMS — Overview" }
+            },
+            "styles": {
+                "B1": 1
+            },
+            "formats": {},
+            "borders": {},
+            "conditionalFormats": [],
+            "figures": [
+                {
+                    "id": "ov-chart-status",
+                    "x": 18, "y": 60,
+                    "width": 475, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Orders by Status" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "none",
+                        "metaData": {
+                            "groupBy": ["status"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.sales.order",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["status"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "fieldMatching": {
+                            "gf_ov_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "ov-chart-platform",
+                    "x": 503, "y": 60,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Orders by Platform" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "right",
+                        "metaData": {
+                            "groupBy": ["platform"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.sales.order",
+                            "mode": "pie"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["platform"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_pie",
+                        "fieldMatching": {
+                            "gf_ov_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "ov-chart-daily",
+                    "x": 18, "y": 420,
+                    "width": 950, "height": 360,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Daily Order Volume" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "top",
+                        "metaData": {
+                            "groupBy": ["create_date:day"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.sales.order",
+                            "mode": "line"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["create_date:day"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_line",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "cumulative": false,
+                        "fieldMatching": {
+                            "gf_ov_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "ov-chart-courier",
+                    "x": 18, "y": 800,
+                    "width": 475, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Orders by Courier" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "none",
+                        "metaData": {
+                            "groupBy": ["courier_id"],
+                            "measure": "__count",
+                            "order": "DESC",
+                            "resModel": "wms.sales.order",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["courier_id"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "fieldMatching": {
+                            "gf_ov_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "ov-chart-errors",
+                    "x": 503, "y": 800,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Pick/Pack Errors by Status" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "top",
+                        "metaData": {
+                            "groupBy": ["status"],
+                            "measure": "pick_errors",
+                            "order": null,
+                            "resModel": "wms.sales.order",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["status"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "fieldMatching": {
+                            "gf_ov_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                }
+            ],
+            "tables": [],
+            "areGridLinesVisible": false,
+            "isVisible": true,
+            "headerGroups": { "ROW": [], "COL": [] },
+            "dataValidationRules": [],
+            "comments": {}
+        }
+    ],
+    "styles": {
+        "1": {
+            "bold": true,
+            "fontSize": 18,
+            "textColor": "#111827",
+            "fillColor": "#F9FAFB"
+        }
+    },
+    "formats": {},
+    "borders": {},
+    "revisionId": "START_REVISION",
+    "uniqueFigureIds": true,
+    "settings": {
+        "locale": {
+            "name": "English (US)",
+            "code": "en_US",
+            "thousandsSeparator": ",",
+            "decimalSeparator": ".",
+            "weekStart": 7,
+            "dateFormat": "m/d/yyyy",
+            "timeFormat": "hh:mm:ss a"
+        }
+    },
+    "pivots": {},
+    "pivotNextId": 1,
+    "lists": {},
+    "listNextId": 1,
+    "chartOdooMenusReferences": {},
+    "globalFilters": [
+        {
+            "id": "gf_ov_date",
+            "type": "date",
+            "label": "Date Range",
+            "rangeType": "month",
+            "defaultValue": {}
+        }
+    ]
+}

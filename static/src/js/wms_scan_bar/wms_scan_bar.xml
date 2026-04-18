@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+    <!-- ── Scan Bar widget (embedded in form sheet) ─────────────────────── -->
+    <t t-name="kob_wms.WmsScanBar">
+        <div class="wms-scan-bar">
+            <span class="wms-scan-icon">
+                <i class="fa fa-barcode"/>
+            </span>
+            <input class="wms-scan-input"
+                   t-ref="scanInput"
+                   placeholder="Scan item barcode to pick / pack..."
+                   autocomplete="off"
+                   spellcheck="false"
+                   t-on-keydown="onKeydown"/>
+            <span class="wms-scan-status wms-scan-ready"
+                  t-ref="scanStatus">READY</span>
+        </div>
+    </t>
+
+    <!-- ── Close Box Dialog (auto-opens when packing is complete) ─────────── -->
+    <t t-name="kob_wms.WmsCloseBoxDialog">
+        <Dialog title="'📦 Close Box — ' + props.orderName" size="'md'">
+
+            <!-- Recommended box (highlighted) -->
+            <div class="alert alert-primary d-flex align-items-center gap-3 mb-3">
+                <i class="fa fa-cube fa-2x flex-shrink-0"/>
+                <div class="flex-grow-1">
+                    <div class="fw-bold fs-5" t-esc="props.suggestion and props.suggestion.box_label or '—'"/>
+                    <small class="text-muted"
+                           t-if="props.suggestion and props.suggestion.note"
+                           t-esc="props.suggestion.note"/>
+                </div>
+                <span class="badge bg-primary text-uppercase"
+                      t-if="props.suggestion"
+                      t-esc="props.suggestion.basis === 'item_count' ? 'by count' : 'by volume'"/>
+            </div>
+
+            <!-- Override dropdown (emergency cases) -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold text-muted">
+                    <i class="fa fa-exclamation-triangle me-1 text-warning"/>
+                    Override box (emergency only)
+                </label>
+                <select class="form-select" t-on-change="onBoxChange">
+                    <option value="">
+                        — Use recommended: <t t-esc="props.suggestion and props.suggestion.box_label or '—'"/> —
+                    </option>
+                    <t t-foreach="props.boxes" t-as="box" t-key="box.code">
+                        <option t-att-value="box.code" t-esc="box.label"/>
+                    </t>
+                </select>
+            </div>
+
+            <!-- Error message -->
+            <div t-if="state.error" class="alert alert-danger mb-0">
+                <i class="fa fa-times-circle me-2"/>
+                <t t-esc="state.error"/>
+            </div>
+
+            <!-- Footer buttons -->
+            <t t-set-slot="footer">
+                <button class="btn btn-primary"
+                        t-on-click="onCloseBox"
+                        t-att-disabled="state.loading">
+                    <i t-att-class="state.loading ? 'fa fa-spinner fa-spin me-1' : 'fa fa-check me-1'"/>
+                    Close Box &amp; Print AWB
+                </button>
+                <button class="btn btn-secondary"
+                        t-on-click="onCancel"
+                        t-att-disabled="state.loading">
+                    Cancel
+                </button>
+            </t>
+
+        </Dialog>
+    </t>
+
+</templates>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No noupdate — runs on every upgrade so new workers get default PIN 1234 -->
+<odoo>
+    <function model="kob.wms.user" name="_init_default_pins"/>
+</odoo>

@@ -1,0 +1,654 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+  <t t-name="kob_wms.WmsLoginScreen">
+    <style>
+      /* ═══════════════════════════════════════════════════════════
+         KOB WMS Pro — Login Screen
+         Design tokens: deep space + violet/indigo, luxury easing
+         ─────────────────────────────────────────────────────────
+         Easing reference (from CSS-Tricks / Context7):
+           --ease-out-expo  : cubic-bezier(0.16, 1, 0.3, 1)
+           --ease-inout-sig : cubic-bezier(0.65, 0, 0.35, 1)
+           --ease-out-back  : cubic-bezier(0.34, 1.4, 0.64, 1)
+         ═══════════════════════════════════════════════════════════ */
+
+      .wms-login-container {
+        --ease-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+        --ease-sig:   cubic-bezier(0.65, 0, 0.35, 1);
+        --ease-back:  cubic-bezier(0.34, 1.4, 0.64, 1);
+        --c-bg:       #07061a;
+        --c-surface:  rgba(255,255,255,0.035);
+        --c-border:   rgba(255,255,255,0.07);
+        --c-accent:   #7c6ff7;
+        --c-accent2:  #5b8aff;
+        --c-text:     rgba(255,255,255,0.88);
+        --c-muted:    rgba(255,255,255,0.38);
+        --c-dim:      rgba(255,255,255,0.14);
+
+        all: initial;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+        background: var(--c-bg);
+        color: var(--c-text);
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        position: relative;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wms-login-container *, .wms-login-container *::before, .wms-login-container *::after {
+        box-sizing: border-box;
+      }
+
+      /* ── Aurora background (CSS-only, no JS) ─────────────────── */
+      .wms-aurora {
+        position: absolute; inset: 0; pointer-events: none; z-index: 0;
+        overflow: hidden;
+      }
+      .wms-aurora::before,
+      .wms-aurora::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0;
+        animation: auroraDrift 18s var(--ease-sig) infinite alternate;
+      }
+      .wms-aurora::before {
+        width: 55vw; height: 55vw;
+        top: -15%; left: -10%;
+        background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
+        animation-delay: 0s;
+        animation-duration: 22s;
+      }
+      .wms-aurora::after {
+        width: 45vw; height: 45vw;
+        bottom: -10%; right: -5%;
+        background: radial-gradient(circle, rgba(124,111,247,0.14) 0%, transparent 70%);
+        animation-delay: -8s;
+        animation-duration: 28s;
+      }
+      @keyframes auroraDrift {
+        0%   { opacity: 0;    transform: translate(0, 0) scale(1); }
+        20%  { opacity: 1; }
+        80%  { opacity: 1; }
+        100% { opacity: 0.6; transform: translate(6%, 4%) scale(1.08); }
+      }
+
+      /* Fine dot grid — very subtle */
+      .wms-grid {
+        position: absolute; inset: 0; pointer-events: none; z-index: 0;
+        background-image: radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px);
+        background-size: 28px 28px;
+      }
+
+      /* ── Header ───────────────────────────────────────────────── */
+      .wms-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 32px;
+        border-bottom: 1px solid rgba(124,111,247,0.14);
+        background: rgba(7,6,26,0.7);
+        backdrop-filter: blur(20px) saturate(1.4);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4);
+        position: relative; z-index: 10;
+        animation: headerIn 0.8s var(--ease-expo) both;
+      }
+      @keyframes headerIn {
+        from { opacity: 0; transform: translateY(-16px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .wms-brand { display: flex; align-items: center; gap: 13px; }
+      .wms-brand-mark {
+        width: 38px; height: 38px; border-radius: 11px;
+        background: linear-gradient(145deg, #7c6ff7, #5b8aff);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 11px; font-weight: 800; color: #fff; letter-spacing: 0.5px;
+        box-shadow: 0 4px 20px rgba(124,111,247,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+        flex-shrink: 0;
+      }
+      .wms-brand-title { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
+      .wms-brand-sub { font-size: 11px; color: var(--c-muted); letter-spacing: 0.3px; margin-top: 1px; }
+      .wms-version-pill {
+        font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+        color: rgba(124,111,247,0.85);
+        border: 1px solid rgba(124,111,247,0.22);
+        background: rgba(124,111,247,0.08);
+        padding: 4px 12px; border-radius: 20px;
+      }
+
+      /* ── Body ─────────────────────────────────────────────────── */
+      .wms-body {
+        display: flex; flex: 1; overflow: hidden;
+        position: relative; z-index: 5;
+      }
+
+      /* ── LEFT panel ───────────────────────────────────────────── */
+      .wms-panel-left {
+        width: 52%;
+        display: flex; flex-direction: column;
+        padding: 26px 22px 20px 32px;
+        border-right: 1px solid var(--c-border);
+        overflow: hidden;
+        animation: panelLeftIn 0.7s var(--ease-expo) 0.1s both;
+      }
+      @keyframes panelLeftIn {
+        from { opacity: 0; transform: translateX(-24px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+      .wms-panel-label {
+        font-size: 10px; font-weight: 700;
+        letter-spacing: 1.8px; text-transform: uppercase;
+        color: var(--c-dim);
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 18px;
+      }
+      .wms-panel-label::after {
+        content: ''; flex: 1; height: 1px; background: var(--c-border);
+      }
+
+      /* Employee grid */
+      .wms-grid-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+        overflow-y: auto; padding-right: 6px; flex: 1;
+        will-change: scroll-position;
+      }
+      .wms-grid-cards::-webkit-scrollbar { width: 3px; }
+      .wms-grid-cards::-webkit-scrollbar-thumb {
+        background: rgba(124,111,247,0.25); border-radius: 2px;
+      }
+
+      /* ── Employee card ────────────────────────────────────────── */
+      /*  Context7 / css-tricks stagger pattern:
+          opacity:0 → translateY(30px), cubic-bezier(0.5, 0, 0, 1.5)    */
+      .wms-emp-card {
+        background: var(--c-surface);
+        border: 1px solid var(--c-border);
+        border-radius: 14px;
+        padding: 18px 12px 15px;
+        display: flex; flex-direction: column; align-items: center; gap: 9px;
+        cursor: pointer; text-align: center;
+        position: relative; overflow: hidden;
+        /* Entrance: expo-out per Context7 stagger pattern */
+        opacity: 0;
+        animation: cardIn 0.55s var(--ease-expo) forwards;
+        /* Hover/press: sigmoidal per Context7 */
+        transition:
+          background    0.35s var(--ease-sig),
+          border-color  0.35s var(--ease-sig),
+          transform     0.35s var(--ease-sig),
+          box-shadow    0.35s var(--ease-sig);
+        will-change: transform, opacity;
+      }
+      @keyframes cardIn {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .wms-emp-card:hover {
+        background: rgba(124,111,247,0.09);
+        border-color: rgba(124,111,247,0.28);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 28px rgba(124,111,247,0.14);
+      }
+      .wms-emp-card.wms-selected {
+        background: rgba(124,111,247,0.12);
+        border-color: rgba(124,111,247,0.45);
+        transform: translateY(-2px);
+        box-shadow:
+          0 0 0 1px rgba(124,111,247,0.2),
+          0 8px 32px rgba(124,111,247,0.2),
+          inset 0 1px 0 rgba(255,255,255,0.06);
+      }
+
+      /* Shimmer sweep on selected card */
+      .wms-emp-card.wms-selected::after {
+        content: '';
+        position: absolute; inset: 0;
+        background: linear-gradient(
+          105deg,
+          transparent 30%,
+          rgba(255,255,255,0.06) 50%,
+          transparent 70%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 3s var(--ease-sig) infinite 0.3s;
+        pointer-events: none;
+      }
+      @keyframes shimmer {
+        from { background-position: 200% 0; }
+        to   { background-position: -200% 0; }
+      }
+
+      /* Selected indicator dot (top-right corner) */
+      .wms-selected-dot {
+        position: absolute; top: 10px; right: 10px;
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #7c6ff7;
+        box-shadow: 0 0 10px rgba(124,111,247,0.7);
+        animation: dotPop 0.4s var(--ease-back) both;
+      }
+      @keyframes dotPop {
+        from { transform: scale(0); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+      }
+
+      /* Avatar */
+      .wms-avatar {
+        width: 48px; height: 48px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 15px; color: #fff; flex-shrink: 0;
+        transition: transform 0.4s var(--ease-expo), box-shadow 0.4s var(--ease-sig);
+        will-change: transform;
+      }
+      .wms-emp-card:hover .wms-avatar,
+      .wms-selected .wms-avatar {
+        transform: scale(1.08);
+      }
+
+      /* Avatar color per role */
+      .wms-av-admin       { background: linear-gradient(145deg,#f43f5e,#e11d48); box-shadow:0 4px 16px rgba(244,63,94,0.35); }
+      .wms-av-supervisor  { background: linear-gradient(145deg,#f59e0b,#d97706); box-shadow:0 4px 16px rgba(245,158,11,0.35); }
+      .wms-av-picker      { background: linear-gradient(145deg,#3b82f6,#1d4ed8); box-shadow:0 4px 16px rgba(59,130,246,0.35); }
+      .wms-av-packer      { background: linear-gradient(145deg,#10b981,#047857); box-shadow:0 4px 16px rgba(16,185,129,0.35); }
+      .wms-av-outbound    { background: linear-gradient(145deg,#06b6d4,#0e7490); box-shadow:0 4px 16px rgba(6,182,212,0.35); }
+      .wms-av-coordinator { background: linear-gradient(145deg,#8b5cf6,#6d28d9); box-shadow:0 4px 16px rgba(139,92,246,0.35); }
+      .wms-av-default     { background: linear-gradient(145deg,#64748b,#475569); box-shadow:0 4px 16px rgba(100,116,139,0.28); }
+
+      .wms-emp-name {
+        font-size: 12px; font-weight: 600; color: var(--c-text); line-height: 1.35;
+      }
+      .wms-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+
+      .wms-badge {
+        font-size: 9px; font-weight: 700; letter-spacing: 0.4px;
+        text-transform: uppercase; padding: 2px 7px; border-radius: 20px;
+      }
+      .wms-badge-admin       { background:rgba(244,63,94,0.14);  color:#fda4af; border:1px solid rgba(244,63,94,0.25); }
+      .wms-badge-supervisor  { background:rgba(245,158,11,0.14); color:#fcd34d; border:1px solid rgba(245,158,11,0.25); }
+      .wms-badge-picker      { background:rgba(59,130,246,0.14); color:#93c5fd; border:1px solid rgba(59,130,246,0.25); }
+      .wms-badge-packer      { background:rgba(16,185,129,0.14); color:#6ee7b7; border:1px solid rgba(16,185,129,0.25); }
+      .wms-badge-outbound    { background:rgba(6,182,212,0.14);  color:#67e8f9; border:1px solid rgba(6,182,212,0.25); }
+      .wms-badge-coordinator { background:rgba(139,92,246,0.14); color:#c4b5fd; border:1px solid rgba(139,92,246,0.25); }
+      .wms-badge-default     { background:rgba(100,116,139,0.14);color:#cbd5e1; border:1px solid rgba(100,116,139,0.25); }
+      .wms-badge-pin-ok { background:rgba(16,185,129,0.12); color:#6ee7b7; border:1px solid rgba(16,185,129,0.2); }
+      .wms-badge-pin-no { background:rgba(244,63,94,0.12);  color:#fda4af; border:1px solid rgba(244,63,94,0.2); }
+
+      /* Loading / empty */
+      .wms-loading, .wms-empty {
+        display: flex; flex-direction: column; align-items: center;
+        gap: 14px; color: var(--c-muted); padding: 52px 0; font-size: 13px;
+      }
+      .wms-loading { flex-direction: row; }
+
+      /* ── RIGHT panel ──────────────────────────────────────────── */
+      .wms-panel-right {
+        flex: 1;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        padding: 28px 36px;
+        position: relative;
+        animation: panelRightIn 0.7s var(--ease-expo) 0.15s both;
+      }
+      @keyframes panelRightIn {
+        from { opacity: 0; transform: translateX(20px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+
+      /* Placeholder */
+      .wms-placeholder {
+        display: flex; flex-direction: column;
+        align-items: center; gap: 16px;
+        animation: fadeUp 0.6s var(--ease-expo) both;
+      }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .wms-placeholder-icon {
+        font-size: 46px; color: var(--c-dim);
+        animation: gentleFloat 5s ease-in-out infinite;
+      }
+      /* gentleFloat: slow, barely-perceptible — luxury feel */
+      @keyframes gentleFloat {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-7px); }
+      }
+      .wms-placeholder-label {
+        font-size: 14px; font-weight: 500; color: var(--c-dim);
+      }
+      .wms-placeholder-hint {
+        font-size: 12px; color: rgba(255,255,255,0.1);
+      }
+
+      /* ── PIN panel ────────────────────────────────────────────── */
+      /*  Entrance: expo-out — feels instant but smooth, not bouncy  */
+      .wms-pin-panel {
+        width: 100%; max-width: 280px;
+        display: flex; flex-direction: column; align-items: center;
+        animation: pinPanelIn 0.6s var(--ease-expo) both;
+      }
+      @keyframes pinPanelIn {
+        from { opacity: 0; transform: translateY(28px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      /* Selected-worker card */
+      .wms-who-card {
+        display: flex; align-items: center; gap: 12px;
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(12px) saturate(1.3);
+        -webkit-backdrop-filter: blur(12px) saturate(1.3);
+        border: 1px solid rgba(255,255,255,0.09);
+        border-radius: 14px;
+        padding: 12px 14px; width: 100%;
+        margin-bottom: 28px;
+      }
+      .wms-who-avatar {
+        width: 40px; height: 40px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0;
+      }
+      .wms-who-info { flex: 1; min-width: 0; }
+      .wms-who-name {
+        font-size: 13px; font-weight: 600; color: var(--c-text);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .wms-who-pos {
+        font-size: 11px; color: var(--c-muted); margin: 2px 0 4px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .wms-back {
+        background: transparent; border: none;
+        color: var(--c-dim); cursor: pointer;
+        width: 30px; height: 30px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; font-size: 13px;
+        transition: background 0.25s var(--ease-sig), color 0.25s var(--ease-sig);
+      }
+      .wms-back:hover {
+        background: rgba(255,255,255,0.08); color: var(--c-muted);
+      }
+
+      /* PIN dots */
+      .wms-pin-label {
+        font-size: 10px; font-weight: 700; letter-spacing: 2px;
+        text-transform: uppercase; color: var(--c-dim); margin-bottom: 16px;
+      }
+      .wms-dots { display: flex; gap: 12px; margin-bottom: 8px; }
+      .wms-dot {
+        width: 11px; height: 11px; border-radius: 50%;
+        border: 1.5px solid var(--c-dim);
+        background: transparent;
+        /* sigmoidal — same as the expanding-box example from CSS-Tricks */
+        transition:
+          background   0.22s var(--ease-sig),
+          border-color 0.22s var(--ease-sig),
+          transform    0.22s var(--ease-sig),
+          box-shadow   0.22s var(--ease-sig);
+        will-change: transform;
+      }
+      .wms-dot-filled {
+        background: var(--c-accent);
+        border-color: var(--c-accent);
+        transform: scale(1.15);
+        box-shadow: 0 0 10px rgba(124,111,247,0.55);
+      }
+
+      /* Error */
+      .wms-error {
+        font-size: 12px; color: #fda4af;
+        background: rgba(244,63,94,0.09);
+        border: 1px solid rgba(244,63,94,0.2);
+        border-radius: 10px; padding: 9px 16px;
+        margin: 12px 0; width: 100%; text-align: center;
+        /* CSS-Tricks shake pattern */
+        animation: errorShake 0.5s var(--ease-sig) both;
+      }
+      @keyframes errorShake {
+        0%,100% { transform: translateX(0); }
+        20%     { transform: translateX(-8px); }
+        40%     { transform: translateX(8px); }
+        60%     { transform: translateX(-5px); }
+        80%     { transform: translateX(5px); }
+      }
+      .wms-error-gap { height: 46px; }
+
+      /* ── PIN pad ──────────────────────────────────────────────── */
+      .wms-pinpad {
+        display: grid; grid-template-columns: repeat(3,1fr);
+        gap: 9px; width: 100%; margin-top: 6px;
+      }
+      .wms-key {
+        background: rgba(255,255,255,0.055);
+        border: 1px solid rgba(255,255,255,0.09);
+        border-radius: 12px; height: 60px;
+        font-size: 20px; font-weight: 600; color: var(--c-text);
+        cursor: pointer; position: relative; overflow: hidden;
+        display: flex; align-items: center; justify-content: center;
+        /* sigmoidal from CSS-Tricks */
+        transition:
+          background   0.25s var(--ease-sig),
+          border-color 0.25s var(--ease-sig),
+          transform    0.18s var(--ease-sig),
+          box-shadow   0.25s var(--ease-sig);
+        will-change: transform;
+        user-select: none;
+      }
+      .wms-key:hover:not(:disabled) {
+        background: rgba(124,111,247,0.13);
+        border-color: rgba(124,111,247,0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(124,111,247,0.14);
+      }
+      .wms-key:active:not(:disabled) {
+        transform: scale(0.94) translateY(0);
+        background: rgba(124,111,247,0.2);
+        box-shadow: none;
+        transition-duration: 0.08s;
+      }
+      .wms-key:disabled { opacity: 0.28; cursor: not-allowed; }
+
+      .wms-key-ghost {
+        background: transparent; border-color: transparent;
+        color: var(--c-muted); font-size: 16px;
+      }
+      .wms-key-ghost:hover:not(:disabled) {
+        background: rgba(255,255,255,0.05);
+        border-color: rgba(255,255,255,0.09);
+        box-shadow: none;
+      }
+
+      /* Confirm button — gradient with inner light */
+      .wms-key-confirm {
+        background: linear-gradient(155deg, #7c6ff7 0%, #5b8aff 100%);
+        border: none;
+        box-shadow: 0 4px 22px rgba(124,111,247,0.38), inset 0 1px 0 rgba(255,255,255,0.15);
+        font-size: 17px; color: #fff;
+      }
+      .wms-key-confirm:hover:not(:disabled) {
+        background: linear-gradient(155deg, #6c5fe7 0%, #4b7aef 100%);
+        box-shadow: 0 6px 28px rgba(124,111,247,0.52), inset 0 1px 0 rgba(255,255,255,0.2);
+        transform: translateY(-2px);
+      }
+      .wms-key-confirm:active:not(:disabled) {
+        transform: scale(0.95);
+        box-shadow: 0 2px 12px rgba(124,111,247,0.35);
+        transition-duration: 0.08s;
+      }
+      .wms-key-confirm:disabled {
+        background: rgba(124,111,247,0.18); box-shadow: none;
+        opacity: 0.38;
+      }
+
+      /* Ripple — crisp, fast, premium */
+      .wms-ripple {
+        position: absolute; border-radius: 50%;
+        background: rgba(255,255,255,0.18);
+        transform: scale(0);
+        animation: ripple 0.45s var(--ease-sig) forwards;
+        pointer-events: none;
+      }
+      @keyframes ripple {
+        to { transform: scale(4); opacity: 0; }
+      }
+
+      /* ── Footer ───────────────────────────────────────────────── */
+      .wms-footer {
+        text-align: center; padding: 8px;
+        font-size: 10px; color: rgba(255,255,255,0.1);
+        letter-spacing: 0.5px;
+        position: relative; z-index: 5;
+      }
+    </style>
+
+    <div class="wms-login-container">
+      <div class="wms-aurora"/>
+      <div class="wms-grid"/>
+
+      <!-- ── Header ── -->
+      <div class="wms-header">
+        <div class="wms-brand">
+          <div class="wms-brand-mark">KOB</div>
+          <div>
+            <div class="wms-brand-title">WMS Pro</div>
+            <div class="wms-brand-sub">Warehouse Management</div>
+          </div>
+        </div>
+        <div class="wms-version-pill">v18.0</div>
+      </div>
+
+      <!-- ── Body ── -->
+      <div class="wms-body">
+
+        <!-- LEFT -->
+        <div class="wms-panel-left">
+          <div class="wms-panel-label">
+            <i class="fa fa-users"/>Select Profile
+          </div>
+
+          <t t-if="state.loading">
+            <div class="wms-loading">
+              <i class="fa fa-spinner fa-spin"/>
+              <span>Loading…</span>
+            </div>
+          </t>
+          <t t-elif="state.workers.length === 0">
+            <div class="wms-empty">
+              <i class="fa fa-user-times fa-2x"/>
+              <span>No active employees</span>
+            </div>
+          </t>
+          <t t-else="">
+            <div class="wms-grid-cards">
+              <button t-foreach="state.workers" t-as="worker"
+                      t-key="worker.id"
+                      t-att-class="'wms-emp-card' + (state.selected and state.selected.id === worker.id ? ' wms-selected' : '')"
+                      t-att-style="'animation-delay:' + (worker_index * 0.045) + 's'"
+                      t-on-click="(ev) => this.selectWorker(worker, ev)">
+
+                <!-- Selected dot indicator -->
+                <div t-if="state.selected and state.selected.id === worker.id"
+                     class="wms-selected-dot"/>
+
+                <div t-att-class="'wms-avatar ' + getAvatarClass(worker.role)">
+                  <t t-esc="getWorkerInitials(worker)"/>
+                </div>
+                <div class="wms-emp-name" t-esc="worker.name"/>
+                <div class="wms-badges">
+                  <span t-att-class="'wms-badge ' + getRoleBadgeClass(worker.role)"
+                        t-esc="worker.role"/>
+                  <span t-if="worker.has_pin" class="wms-badge wms-badge-pin-ok">PIN ✓</span>
+                  <span t-else="" class="wms-badge wms-badge-pin-no">No PIN</span>
+                </div>
+              </button>
+            </div>
+          </t>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="wms-panel-right">
+
+          <t t-if="!state.selected">
+            <div class="wms-placeholder">
+              <div class="wms-placeholder-icon"><i class="fa fa-hand-pointer-o"/></div>
+              <div class="wms-placeholder-label">Select your profile</div>
+              <div class="wms-placeholder-hint">Choose an employee card on the left</div>
+            </div>
+          </t>
+
+          <t t-else="">
+            <div class="wms-pin-panel">
+
+              <!-- Who is logging in -->
+              <div class="wms-who-card">
+                <div t-att-class="'wms-who-avatar ' + getAvatarClass(state.selected.role)"
+                     t-esc="initials"/>
+                <div class="wms-who-info">
+                  <div class="wms-who-name" t-esc="state.selected.name"/>
+                  <div t-if="state.selected.position"
+                       class="wms-who-pos" t-esc="state.selected.position"/>
+                  <span t-att-class="'wms-badge ' + getRoleBadgeClass(state.selected.role)"
+                        t-esc="state.selected.role"/>
+                </div>
+                <button class="wms-back" t-on-click="back" title="Change profile">
+                  <i class="fa fa-times"/>
+                </button>
+              </div>
+
+              <!-- PIN label + dots -->
+              <div class="wms-pin-label">Enter PIN</div>
+              <div class="wms-dots">
+                <div t-foreach="pinDots" t-as="filled" t-key="filled_index"
+                     t-att-class="'wms-dot' + (filled ? ' wms-dot-filled' : '')"/>
+              </div>
+
+              <!-- Error / spacer -->
+              <t t-if="state.error">
+                <div class="wms-error">
+                  <i class="fa fa-exclamation-triangle"/> <t t-esc="state.error"/>
+                </div>
+              </t>
+              <t t-else="">
+                <div class="wms-error-gap"/>
+              </t>
+
+              <!-- Keypad -->
+              <div class="wms-pinpad">
+                <t t-foreach="[1,2,3,4,5,6,7,8,9]" t-as="d" t-key="d">
+                  <button class="wms-key"
+                          t-att-disabled="state.authenticating"
+                          t-on-click="(ev) => this.pressDigitWithRipple(d, ev)">
+                    <t t-esc="d"/>
+                  </button>
+                </t>
+                <button class="wms-key wms-key-ghost"
+                        t-att-disabled="state.authenticating"
+                        t-on-click="(ev) => this.pressBackspaceWithRipple(ev)">
+                  <i class="fa fa-backspace"/>
+                </button>
+                <button class="wms-key"
+                        t-att-disabled="state.authenticating"
+                        t-on-click="(ev) => this.pressDigitWithRipple('0', ev)">0</button>
+                <button class="wms-key wms-key-confirm"
+                        t-att-disabled="state.authenticating or state.pin.length &lt; 4"
+                        t-on-click="(ev) => this.pressConfirmWithRipple(ev)">
+                  <t t-if="state.authenticating">
+                    <i class="fa fa-spinner fa-spin"/>
+                  </t>
+                  <t t-else="">
+                    <i class="fa fa-arrow-right"/>
+                  </t>
+                </button>
+              </div>
+
+            </div>
+          </t>
+        </div>
+
+      </div>
+
+      <div class="wms-footer">KOB WMS Pro — Kiss of Beauty © 2025</div>
+    </div>
+  </t>
+</templates>

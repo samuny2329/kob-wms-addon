@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+
+    <!-- ============================================================ -->
+    <!-- 8 Pillars                                                    -->
+    <!-- ============================================================ -->
+    <record id="pillar_develop_people" model="wms.kpi.pillar">
+        <field name="name">Develop Our People</field><field name="icon">P1</field><field name="sequence">10</field>
+    </record>
+    <record id="pillar_drive_value" model="wms.kpi.pillar">
+        <field name="name">Drive Value for Clients</field><field name="icon">P2</field><field name="sequence">20</field>
+    </record>
+    <record id="pillar_revenue" model="wms.kpi.pillar">
+        <field name="name">Make Revenue at Omnichannel &amp; Strategic Partnership</field><field name="icon">P3</field><field name="sequence">30</field>
+    </record>
+    <record id="pillar_digitization" model="wms.kpi.pillar">
+        <field name="name">Champion Progress &amp; Digitization</field><field name="icon">P4</field><field name="sequence">40</field>
+    </record>
+    <record id="pillar_financial" model="wms.kpi.pillar">
+        <field name="name">Deliver Financial Results</field><field name="icon">P5</field><field name="sequence">50</field>
+    </record>
+    <record id="pillar_compliance" model="wms.kpi.pillar">
+        <field name="name">Manage Corporate &amp; Compliance Risk</field><field name="icon">P6</field><field name="sequence">60</field>
+    </record>
+    <record id="pillar_values" model="wms.kpi.pillar">
+        <field name="name">Live Our Values</field><field name="icon">P7</field><field name="sequence">70</field>
+    </record>
+    <record id="pillar_operations" model="wms.kpi.pillar">
+        <field name="name">Operational Excellence</field><field name="icon">P8</field><field name="sequence">80</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- PICKER Template (45/10/0/10/10/10/10/5 = 100%)               -->
+    <!-- ============================================================ -->
+    <record id="tpl_picker" model="wms.kpi.template">
+        <field name="position">picker</field>
+    </record>
+    <record id="tpl_picker_p1" model="wms.kpi.template.line">
+        <field name="template_id" ref="tpl_picker"/>
+        <field name="pillar_id" ref="pillar_develop_people"/>
+        <field name="weight">45</field>
+    </record>
+    <record id="cr_picker_p1_1" model="wms.kpi.criterion">
+        <field name="template_line_id" ref="tpl_picker_p1"/>
+        <field name="name">Attendance &amp; Punctuality</field><field name="weight">30</field><field name="sequence">10</field>
+        <field name="score_1">Absent > 3 days, frequently late</field>
+        <field name="score_2">Absent 2-3 days, late > 3 times</field>
+        <field name="score_3">No absent, late ≤ 2 times/month</field>
+        <field name="score_4">No absent, no late</field>
+        <field name="score_5">Perfect attendance, covers for others</field>
+    </record>
+    <record id="cr_picker_p1_2" model="wms.kpi.criterion">
+        <field name="template_line_id" ref="tpl_picker_p1"/>
+        <field name="name">Picking Accuracy</field><field name="weight">40</field><field name="sequence">20</field>
+        <field name="score_1">Accuracy &lt; 95%</field>
+        <field name="score_2">Accuracy 95-97%</field>
+        <field name="score_3">Accuracy 97-99%</field>
+        <field name="score_4">Accuracy 99-99.5%</field>
+        <field name="score_5">Accuracy > 99.5%</field>
+    </record>
+    <record id="cr_picker_p1_3" model="wms.kpi.criterion">
+        <field name="template_line_id" ref="tpl_picker_p1"/>
+        <field name="name">Picking Speed (UPH)</field><field name="weight">30</field><field name="sequence">30</field>
+        <field name="score_1">UPH &lt; 10</field>
+        <field name="score_2">UPH 10-14</field>
+        <field name="score_3">UPH 15-18</field>
+        <field name="score_4">UPH 19-22</field>
+        <field name="score_5">UPH > 22</field>
+    </record>
+    <record id="tpl_picker_p2" model="wms.kpi.template.line"><field name="template_id" ref="tpl_picker"/><field name="pillar_id" ref="pillar_drive_value"/><field name="weight">10</field></record>
+    <record id="cr_picker_p2_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p2"/><field name="name">Customer Order Handling</field><field name="weight">50</field><field name="score_3">Picks correct items per order</field><field name="score_5">Zero complaint, proactive issue flagging</field></record>
+    <record id="cr_picker_p2_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p2"/><field name="name">Teamwork &amp; Communication</field><field name="weight">50</field><field name="score_3">Communicates issues to team</field><field name="score_5">Mentors new pickers, leads by example</field></record>
+    <record id="tpl_picker_p3" model="wms.kpi.template.line"><field name="template_id" ref="tpl_picker"/><field name="pillar_id" ref="pillar_revenue"/><field name="weight">0</field></record>
+    <record id="tpl_picker_p4" model="wms.kpi.template.line"><field name="template_id" ref="tpl_picker"/><field name="pillar_id" ref="pillar_digitization"/><field name="weight">10</field></record>
+    <record id="cr_picker_p4_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p4"/><field name="name">WMS System Usage</field><field name="weight">50</field><field name="score_3">Uses scanner/WMS correctly</field><field name="score_5">Power user, helps troubleshoot</field></record>
+    <record id="cr_picker_p4_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p4"/><field name="name">Process Improvement Ideas</field><field name="weight">50</field><field name="score_3">Open to new processes</field><field name="score_5">Proposes improvements adopted by team</field></record>
+    <record id="tpl_picker_p5" model="wms.kpi.template.line"><field name="template_id" ref="tpl_picker"/><field name="pillar_id" ref="pillar_financial"/><field name="weight">10</field></record>
+    <record id="cr_picker_p5_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p5"/><field name="name">Damage Prevention</field><field name="weight">50</field><field name="score_3">No damaged goods from picking</field><field name="score_5">Identifies packaging issues proactively</field></record>
+    <record id="cr_picker_p5_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p5"/><field name="name">Resource Efficiency</field><field name="weight">50</field><field name="score_3">Uses supplies efficiently</field><field name="score_5">Reduces waste, suggests cost savings</field></record>
+    <record id="tpl_picker_p6" model="wms.kpi.template.line"><field name="template_id" ref="tpl_picker"/><field name="pillar_id" ref="pillar_compliance"/><field name="weight">10</field></record>
+    <record id="cr_picker_p6_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p6"/><field name="name">Safety Compliance</field><field name="weight">50</field><field name="score_3">Follows safety rules</field><field name="score_5">Safety champion, reports hazards</field></record>
+    <record id="cr_picker_p6_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p6"/><field name="name">SOP Adherence</field><field name="weight">50</field><field name="score_3">Follows SOP consistently</field><field name="score_5">Improves SOP, trains others</field></record>
+    <record id="tpl_picker_p7" model="wms.kpi.template.line"><field name="template_id" ref="tpl_picker"/><field name="pillar_id" ref="pillar_values"/><field name="weight">10</field></record>
+    <record id="cr_picker_p7_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p7"/><field name="name">Integrity &amp; Honesty</field><field name="weight">50</field><field name="score_3">Honest, reports mistakes</field><field name="score_5">Role model for integrity</field></record>
+    <record id="cr_picker_p7_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p7"/><field name="name">Respect &amp; Collaboration</field><field name="weight">50</field><field name="score_3">Respectful to all colleagues</field><field name="score_5">Builds strong team culture</field></record>
+    <record id="tpl_picker_p8" model="wms.kpi.template.line"><field name="template_id" ref="tpl_picker"/><field name="pillar_id" ref="pillar_operations"/><field name="weight">5</field></record>
+    <record id="cr_picker_p8_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p8"/><field name="name">Equipment Care</field><field name="weight">50</field><field name="score_3">Maintains equipment properly</field><field name="score_5">Proactive maintenance, trains others</field></record>
+    <record id="cr_picker_p8_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_picker_p8"/><field name="name">Workspace Organization (5S)</field><field name="weight">50</field><field name="score_3">Keeps area clean and organized</field><field name="score_5">5S champion, inspires others</field></record>
+
+    <!-- ============================================================ -->
+    <!-- PACKER Template (40/15/0/10/10/10/10/5 = 100%)               -->
+    <!-- ============================================================ -->
+    <record id="tpl_packer" model="wms.kpi.template"><field name="position">packer</field></record>
+    <record id="tpl_packer_p1" model="wms.kpi.template.line"><field name="template_id" ref="tpl_packer"/><field name="pillar_id" ref="pillar_develop_people"/><field name="weight">40</field></record>
+    <record id="cr_packer_p1_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_packer_p1"/><field name="name">Attendance &amp; Punctuality</field><field name="weight">25</field><field name="score_3">No absent, late ≤ 2 times</field><field name="score_5">Perfect attendance</field></record>
+    <record id="cr_packer_p1_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_packer_p1"/><field name="name">Packing Accuracy</field><field name="weight">40</field><field name="score_3">Accuracy 97-99%, correct labeling</field><field name="score_5">Accuracy > 99.5%, zero mislabel</field></record>
+    <record id="cr_packer_p1_3" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_packer_p1"/><field name="name">Packing Speed</field><field name="weight">35</field><field name="score_3">Meets daily pack target</field><field name="score_5">Exceeds target by 20%+</field></record>
+    <record id="tpl_packer_p2" model="wms.kpi.template.line"><field name="template_id" ref="tpl_packer"/><field name="pillar_id" ref="pillar_drive_value"/><field name="weight">15</field></record>
+    <record id="cr_packer_p2_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_packer_p2"/><field name="name">Package Quality</field><field name="weight">60</field><field name="score_3">Packages arrive undamaged</field><field name="score_5">Zero damage complaints</field></record>
+    <record id="cr_packer_p2_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_packer_p2"/><field name="name">Customer Satisfaction</field><field name="weight">40</field><field name="score_3">No customer complaint about packing</field><field name="score_5">Positive feedback from customers</field></record>
+    <record id="tpl_packer_p3" model="wms.kpi.template.line"><field name="template_id" ref="tpl_packer"/><field name="pillar_id" ref="pillar_revenue"/><field name="weight">0</field></record>
+    <record id="tpl_packer_p4" model="wms.kpi.template.line"><field name="template_id" ref="tpl_packer"/><field name="pillar_id" ref="pillar_digitization"/><field name="weight">10</field></record>
+    <record id="cr_packer_p4_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_packer_p4"/><field name="name">WMS/Scanner Usage</field><field name="weight">100</field><field name="score_3">Correct scan workflow</field><field name="score_5">Power user, troubleshoots system</field></record>
+    <record id="tpl_packer_p5" model="wms.kpi.template.line"><field name="template_id" ref="tpl_packer"/><field name="pillar_id" ref="pillar_financial"/><field name="weight">10</field></record>
+    <record id="cr_packer_p5_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_packer_p5"/><field name="name">Material Waste Reduction</field><field name="weight">100</field><field name="score_3">Uses correct box size, minimal waste</field><field name="score_5">Reduces material cost measurably</field></record>
+    <record id="tpl_packer_p6" model="wms.kpi.template.line"><field name="template_id" ref="tpl_packer"/><field name="pillar_id" ref="pillar_compliance"/><field name="weight">10</field></record>
+    <record id="cr_packer_p6_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_packer_p6"/><field name="name">Safety &amp; SOP</field><field name="weight">100</field><field name="score_3">Follows packing SOP</field><field name="score_5">Zero safety incidents, improves SOP</field></record>
+    <record id="tpl_packer_p7" model="wms.kpi.template.line"><field name="template_id" ref="tpl_packer"/><field name="pillar_id" ref="pillar_values"/><field name="weight">10</field></record>
+    <record id="cr_packer_p7_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_packer_p7"/><field name="name">Integrity &amp; Teamwork</field><field name="weight">100</field><field name="score_3">Honest, collaborative</field><field name="score_5">Team leader, role model</field></record>
+    <record id="tpl_packer_p8" model="wms.kpi.template.line"><field name="template_id" ref="tpl_packer"/><field name="pillar_id" ref="pillar_operations"/><field name="weight">5</field></record>
+    <record id="cr_packer_p8_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_packer_p8"/><field name="name">Workspace &amp; Equipment</field><field name="weight">100</field><field name="score_3">Clean workspace, equipment maintained</field><field name="score_5">5S champion</field></record>
+
+    <!-- ============================================================ -->
+    <!-- SHIPPER Template (35/15/0/10/15/10/10/5 = 100%)              -->
+    <!-- ============================================================ -->
+    <record id="tpl_shipper" model="wms.kpi.template"><field name="position">shipper</field></record>
+    <record id="tpl_shipper_p1" model="wms.kpi.template.line"><field name="template_id" ref="tpl_shipper"/><field name="pillar_id" ref="pillar_develop_people"/><field name="weight">35</field></record>
+    <record id="cr_shipper_p1_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_shipper_p1"/><field name="name">Attendance</field><field name="weight">30</field><field name="score_3">No absent, late ≤ 2</field><field name="score_5">Perfect</field></record>
+    <record id="cr_shipper_p1_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_shipper_p1"/><field name="name">Shipping Accuracy (AWB/Label)</field><field name="weight">40</field><field name="score_3">Correct labels 97-99%</field><field name="score_5">> 99.5%</field></record>
+    <record id="cr_shipper_p1_3" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_shipper_p1"/><field name="name">Shipping Speed</field><field name="weight">30</field><field name="score_3">Meets daily ship target</field><field name="score_5">Exceeds by 20%+</field></record>
+    <record id="tpl_shipper_p2" model="wms.kpi.template.line"><field name="template_id" ref="tpl_shipper"/><field name="pillar_id" ref="pillar_drive_value"/><field name="weight">15</field></record>
+    <record id="cr_shipper_p2_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_shipper_p2"/><field name="name">Courier Coordination</field><field name="weight">50</field><field name="score_3">Timely handoff to courier</field><field name="score_5">Optimizes pickup schedule</field></record>
+    <record id="cr_shipper_p2_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_shipper_p2"/><field name="name">Delivery SLA Compliance</field><field name="weight">50</field><field name="score_3">Meets SLA deadlines</field><field name="score_5">Zero SLA breach</field></record>
+    <record id="tpl_shipper_p3" model="wms.kpi.template.line"><field name="template_id" ref="tpl_shipper"/><field name="pillar_id" ref="pillar_revenue"/><field name="weight">0</field></record>
+    <record id="tpl_shipper_p4" model="wms.kpi.template.line"><field name="template_id" ref="tpl_shipper"/><field name="pillar_id" ref="pillar_digitization"/><field name="weight">10</field></record>
+    <record id="cr_shipper_p4_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_shipper_p4"/><field name="name">System Usage &amp; Tracking</field><field name="weight">100</field><field name="score_3">Updates tracking correctly</field><field name="score_5">Automates tracking processes</field></record>
+    <record id="tpl_shipper_p5" model="wms.kpi.template.line"><field name="template_id" ref="tpl_shipper"/><field name="pillar_id" ref="pillar_financial"/><field name="weight">15</field></record>
+    <record id="cr_shipper_p5_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_shipper_p5"/><field name="name">Shipping Cost Optimization</field><field name="weight">100</field><field name="score_3">Uses correct box/courier rates</field><field name="score_5">Reduces shipping cost measurably</field></record>
+    <record id="tpl_shipper_p6" model="wms.kpi.template.line"><field name="template_id" ref="tpl_shipper"/><field name="pillar_id" ref="pillar_compliance"/><field name="weight">10</field></record>
+    <record id="cr_shipper_p6_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_shipper_p6"/><field name="name">Compliance &amp; Documentation</field><field name="weight">100</field><field name="score_3">Complete paperwork</field><field name="score_5">Zero compliance issue</field></record>
+    <record id="tpl_shipper_p7" model="wms.kpi.template.line"><field name="template_id" ref="tpl_shipper"/><field name="pillar_id" ref="pillar_values"/><field name="weight">10</field></record>
+    <record id="cr_shipper_p7_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_shipper_p7"/><field name="name">Integrity &amp; Teamwork</field><field name="weight">100</field><field name="score_3">Honest, collaborative</field><field name="score_5">Role model</field></record>
+    <record id="tpl_shipper_p8" model="wms.kpi.template.line"><field name="template_id" ref="tpl_shipper"/><field name="pillar_id" ref="pillar_operations"/><field name="weight">5</field></record>
+    <record id="cr_shipper_p8_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_shipper_p8"/><field name="name">Loading Area Organization</field><field name="weight">100</field><field name="score_3">Clean loading dock</field><field name="score_5">Optimizes dock layout</field></record>
+
+    <!-- ============================================================ -->
+    <!-- INVENTORY Template (30/10/0/15/10/20/10/5 = 100%)            -->
+    <!-- ============================================================ -->
+    <record id="tpl_inventory" model="wms.kpi.template"><field name="position">inventory</field></record>
+    <record id="tpl_inv_p1" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inventory"/><field name="pillar_id" ref="pillar_develop_people"/><field name="weight">30</field></record>
+    <record id="cr_inv_p1_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_inv_p1"/><field name="name">Attendance</field><field name="weight">30</field><field name="score_3">No absent, late ≤ 2</field><field name="score_5">Perfect attendance</field></record>
+    <record id="cr_inv_p1_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_inv_p1"/><field name="name">Count Accuracy</field><field name="weight">40</field><field name="score_3">Cycle count accuracy 97-99%</field><field name="score_5">> 99.5%</field></record>
+    <record id="cr_inv_p1_3" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_inv_p1"/><field name="name">Count Speed (areas/day)</field><field name="weight">30</field><field name="score_3">Meets daily area target</field><field name="score_5">Exceeds by 20%+</field></record>
+    <record id="tpl_inv_p2" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inventory"/><field name="pillar_id" ref="pillar_drive_value"/><field name="weight">10</field></record>
+    <record id="cr_inv_p2_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_inv_p2"/><field name="name">Discrepancy Resolution</field><field name="weight">100</field><field name="score_3">Reports discrepancies timely</field><field name="score_5">Root-cause analysis, prevents recurrence</field></record>
+    <record id="tpl_inv_p3" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inventory"/><field name="pillar_id" ref="pillar_revenue"/><field name="weight">0</field></record>
+    <record id="tpl_inv_p4" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inventory"/><field name="pillar_id" ref="pillar_digitization"/><field name="weight">15</field></record>
+    <record id="cr_inv_p4_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_inv_p4"/><field name="name">WMS Count Module Usage</field><field name="weight">100</field><field name="score_3">Uses system correctly</field><field name="score_5">Suggests system improvements</field></record>
+    <record id="tpl_inv_p5" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inventory"/><field name="pillar_id" ref="pillar_financial"/><field name="weight">10</field></record>
+    <record id="cr_inv_p5_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_inv_p5"/><field name="name">Shrinkage Reduction</field><field name="weight">100</field><field name="score_3">Identifies shrinkage causes</field><field name="score_5">Measurably reduces shrinkage</field></record>
+    <record id="tpl_inv_p6" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inventory"/><field name="pillar_id" ref="pillar_compliance"/><field name="weight">20</field></record>
+    <record id="cr_inv_p6_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_inv_p6"/><field name="name">Lot/Expiry Compliance</field><field name="weight">50</field><field name="score_3">Verifies lot/expiry during count</field><field name="score_5">Zero compliance miss</field></record>
+    <record id="cr_inv_p6_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_inv_p6"/><field name="name">Audit Trail Documentation</field><field name="weight">50</field><field name="score_3">Complete count documentation</field><field name="score_5">Audit-ready records</field></record>
+    <record id="tpl_inv_p7" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inventory"/><field name="pillar_id" ref="pillar_values"/><field name="weight">10</field></record>
+    <record id="cr_inv_p7_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_inv_p7"/><field name="name">Integrity in Counting</field><field name="weight">100</field><field name="score_3">Reports true counts, no manipulation</field><field name="score_5">Trusted auditor</field></record>
+    <record id="tpl_inv_p8" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inventory"/><field name="pillar_id" ref="pillar_operations"/><field name="weight">5</field></record>
+    <record id="cr_inv_p8_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_inv_p8"/><field name="name">Zone Organization</field><field name="weight">100</field><field name="score_3">Zones properly labeled</field><field name="score_5">Optimizes zone layout</field></record>
+
+    <!-- ============================================================ -->
+    <!-- INBOUND Template (30/15/0/10/15/15/10/5 = 100%)              -->
+    <!-- ============================================================ -->
+    <record id="tpl_inbound" model="wms.kpi.template"><field name="position">inbound</field></record>
+    <record id="tpl_in_p1" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inbound"/><field name="pillar_id" ref="pillar_develop_people"/><field name="weight">30</field></record>
+    <record id="cr_in_p1_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_in_p1"/><field name="name">Attendance</field><field name="weight">25</field><field name="score_3">No absent, late ≤ 2</field><field name="score_5">Perfect</field></record>
+    <record id="cr_in_p1_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_in_p1"/><field name="name">Receiving Accuracy</field><field name="weight">40</field><field name="score_3">Zero mistake in receiving</field><field name="score_5">Catches supplier errors</field></record>
+    <record id="cr_in_p1_3" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_in_p1"/><field name="name">Putaway Speed</field><field name="weight">35</field><field name="score_3">Completes putaway same day</field><field name="score_5">Within 2 hours of receipt</field></record>
+    <record id="tpl_in_p2" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inbound"/><field name="pillar_id" ref="pillar_drive_value"/><field name="weight">15</field></record>
+    <record id="cr_in_p2_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_in_p2"/><field name="name">Supplier Issue Handling</field><field name="weight">100</field><field name="score_3">Reports supplier issues</field><field name="score_5">Resolves issues proactively with supplier</field></record>
+    <record id="tpl_in_p3" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inbound"/><field name="pillar_id" ref="pillar_revenue"/><field name="weight">0</field></record>
+    <record id="tpl_in_p4" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inbound"/><field name="pillar_id" ref="pillar_digitization"/><field name="weight">10</field></record>
+    <record id="cr_in_p4_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_in_p4"/><field name="name">System Data Entry</field><field name="weight">100</field><field name="score_3">Accurate GRN entry</field><field name="score_5">Real-time data entry, zero backlog</field></record>
+    <record id="tpl_in_p5" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inbound"/><field name="pillar_id" ref="pillar_financial"/><field name="weight">15</field></record>
+    <record id="cr_in_p5_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_in_p5"/><field name="name">Quantity Verification</field><field name="weight">100</field><field name="score_3">Matches PO quantity 100%</field><field name="score_5">Catches over/under shipments</field></record>
+    <record id="tpl_in_p6" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inbound"/><field name="pillar_id" ref="pillar_compliance"/><field name="weight">15</field></record>
+    <record id="cr_in_p6_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_in_p6"/><field name="name">Lot/Expiry Recording</field><field name="weight">50</field><field name="score_3">Records all lot/expiry</field><field name="score_5">Catches near-expiry, flags recall items</field></record>
+    <record id="cr_in_p6_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_in_p6"/><field name="name">Quality Inspection</field><field name="weight">50</field><field name="score_3">Inspects per QC checklist</field><field name="score_5">Zero defective items accepted</field></record>
+    <record id="tpl_in_p7" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inbound"/><field name="pillar_id" ref="pillar_values"/><field name="weight">10</field></record>
+    <record id="cr_in_p7_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_in_p7"/><field name="name">Integrity &amp; Teamwork</field><field name="weight">100</field><field name="score_3">Honest, collaborative</field><field name="score_5">Role model</field></record>
+    <record id="tpl_in_p8" model="wms.kpi.template.line"><field name="template_id" ref="tpl_inbound"/><field name="pillar_id" ref="pillar_operations"/><field name="weight">5</field></record>
+    <record id="cr_in_p8_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_in_p8"/><field name="name">Receiving Dock Organization</field><field name="weight">100</field><field name="score_3">Clean dock, staged correctly</field><field name="score_5">Optimizes dock flow</field></record>
+
+    <!-- ============================================================ -->
+    <!-- DRIVER Template (20/20/0/5/20/20/10/5 = 100%)                -->
+    <!-- ============================================================ -->
+    <record id="tpl_driver" model="wms.kpi.template"><field name="position">driver</field></record>
+    <record id="tpl_dr_p1" model="wms.kpi.template.line"><field name="template_id" ref="tpl_driver"/><field name="pillar_id" ref="pillar_develop_people"/><field name="weight">20</field></record>
+    <record id="cr_dr_p1_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_dr_p1"/><field name="name">Attendance &amp; Punctuality</field><field name="weight">50</field><field name="score_3">On time, no absent</field><field name="score_5">Perfect, always available</field></record>
+    <record id="cr_dr_p1_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_dr_p1"/><field name="name">Delivery Accuracy</field><field name="weight">50</field><field name="score_3">Correct delivery 97-99%</field><field name="score_5">100% correct delivery</field></record>
+    <record id="tpl_dr_p2" model="wms.kpi.template.line"><field name="template_id" ref="tpl_driver"/><field name="pillar_id" ref="pillar_drive_value"/><field name="weight">20</field></record>
+    <record id="cr_dr_p2_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_dr_p2"/><field name="name">Customer Service at Delivery</field><field name="weight">100</field><field name="score_3">Professional delivery</field><field name="score_5">Excellent customer feedback</field></record>
+    <record id="tpl_dr_p3" model="wms.kpi.template.line"><field name="template_id" ref="tpl_driver"/><field name="pillar_id" ref="pillar_revenue"/><field name="weight">0</field></record>
+    <record id="tpl_dr_p4" model="wms.kpi.template.line"><field name="template_id" ref="tpl_driver"/><field name="pillar_id" ref="pillar_digitization"/><field name="weight">5</field></record>
+    <record id="cr_dr_p4_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_dr_p4"/><field name="name">GPS/Tracking Compliance</field><field name="weight">100</field><field name="score_3">Keeps tracking active</field><field name="score_5">Real-time status updates</field></record>
+    <record id="tpl_dr_p5" model="wms.kpi.template.line"><field name="template_id" ref="tpl_driver"/><field name="pillar_id" ref="pillar_financial"/><field name="weight">20</field></record>
+    <record id="cr_dr_p5_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_dr_p5"/><field name="name">Fuel &amp; Route Efficiency</field><field name="weight">50</field><field name="score_3">Follows planned route</field><field name="score_5">Optimizes routes, saves fuel</field></record>
+    <record id="cr_dr_p5_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_dr_p5"/><field name="name">Vehicle Maintenance</field><field name="weight">50</field><field name="score_3">Regular maintenance on schedule</field><field name="score_5">Zero breakdown, proactive care</field></record>
+    <record id="tpl_dr_p6" model="wms.kpi.template.line"><field name="template_id" ref="tpl_driver"/><field name="pillar_id" ref="pillar_compliance"/><field name="weight">20</field></record>
+    <record id="cr_dr_p6_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_dr_p6"/><field name="name">Traffic &amp; Safety Rules</field><field name="weight">50</field><field name="score_3">No violations</field><field name="score_5">Defensive driving champion</field></record>
+    <record id="cr_dr_p6_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_dr_p6"/><field name="name">Documentation (POD)</field><field name="weight">50</field><field name="score_3">Complete POD for all deliveries</field><field name="score_5">Immediate POD upload</field></record>
+    <record id="tpl_dr_p7" model="wms.kpi.template.line"><field name="template_id" ref="tpl_driver"/><field name="pillar_id" ref="pillar_values"/><field name="weight">10</field></record>
+    <record id="cr_dr_p7_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_dr_p7"/><field name="name">Integrity &amp; Professionalism</field><field name="weight">100</field><field name="score_3">Honest, professional</field><field name="score_5">Brand ambassador</field></record>
+    <record id="tpl_dr_p8" model="wms.kpi.template.line"><field name="template_id" ref="tpl_driver"/><field name="pillar_id" ref="pillar_operations"/><field name="weight">5</field></record>
+    <record id="cr_dr_p8_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_dr_p8"/><field name="name">Vehicle Cleanliness</field><field name="weight">100</field><field name="score_3">Clean vehicle</field><field name="score_5">Showroom condition</field></record>
+
+    <!-- ============================================================ -->
+    <!-- ADMIN ONLINE Template (10/20/15/15/15/10/10/5 = 100%)        -->
+    <!-- ============================================================ -->
+    <record id="tpl_admin" model="wms.kpi.template"><field name="position">admin_online</field></record>
+    <record id="tpl_ad_p1" model="wms.kpi.template.line"><field name="template_id" ref="tpl_admin"/><field name="pillar_id" ref="pillar_develop_people"/><field name="weight">10</field></record>
+    <record id="cr_ad_p1_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_ad_p1"/><field name="name">Attendance &amp; Responsiveness</field><field name="weight">100</field><field name="score_3">Available during hours, responds timely</field><field name="score_5">24/7 availability when needed</field></record>
+    <record id="tpl_ad_p2" model="wms.kpi.template.line"><field name="template_id" ref="tpl_admin"/><field name="pillar_id" ref="pillar_drive_value"/><field name="weight">20</field></record>
+    <record id="cr_ad_p2_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_ad_p2"/><field name="name">Order Processing Speed</field><field name="weight">50</field><field name="score_3">Processes orders within SLA</field><field name="score_5">Real-time processing, zero backlog</field></record>
+    <record id="cr_ad_p2_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_ad_p2"/><field name="name">Customer Complaint Resolution</field><field name="weight">50</field><field name="score_3">Resolves within 24h</field><field name="score_5">Same-hour resolution, prevents recurrence</field></record>
+    <record id="tpl_ad_p3" model="wms.kpi.template.line"><field name="template_id" ref="tpl_admin"/><field name="pillar_id" ref="pillar_revenue"/><field name="weight">15</field></record>
+    <record id="cr_ad_p3_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_ad_p3"/><field name="name">OOS (Out of Stock) Prevention</field><field name="weight">50</field><field name="score_3">OOS rate &lt; 0.1%</field><field name="score_5">Zero OOS incidents</field></record>
+    <record id="cr_ad_p3_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_ad_p3"/><field name="name">Return Rate Management</field><field name="weight">50</field><field name="score_3">Return rate within target</field><field name="score_5">Measurably reduces returns</field></record>
+    <record id="tpl_ad_p4" model="wms.kpi.template.line"><field name="template_id" ref="tpl_admin"/><field name="pillar_id" ref="pillar_digitization"/><field name="weight">15</field></record>
+    <record id="cr_ad_p4_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_ad_p4"/><field name="name">Platform Management (Shopee/Lazada/TikTok)</field><field name="weight">50</field><field name="score_3">Manages listings correctly</field><field name="score_5">Optimizes listings, drives traffic</field></record>
+    <record id="cr_ad_p4_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_ad_p4"/><field name="name">System &amp; Data Analytics</field><field name="weight">50</field><field name="score_3">Uses analytics for decisions</field><field name="score_5">Creates dashboards, automates reporting</field></record>
+    <record id="tpl_ad_p5" model="wms.kpi.template.line"><field name="template_id" ref="tpl_admin"/><field name="pillar_id" ref="pillar_financial"/><field name="weight">15</field></record>
+    <record id="cr_ad_p5_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_ad_p5"/><field name="name">Sales Target Achievement</field><field name="weight">100</field><field name="score_3">Meets monthly target</field><field name="score_5">Exceeds target by 20%+</field></record>
+    <record id="tpl_ad_p6" model="wms.kpi.template.line"><field name="template_id" ref="tpl_admin"/><field name="pillar_id" ref="pillar_compliance"/><field name="weight">10</field></record>
+    <record id="cr_ad_p6_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_ad_p6"/><field name="name">Platform Policy Compliance</field><field name="weight">100</field><field name="score_3">No policy violations</field><field name="score_5">Zero penalty from platforms</field></record>
+    <record id="tpl_ad_p7" model="wms.kpi.template.line"><field name="template_id" ref="tpl_admin"/><field name="pillar_id" ref="pillar_values"/><field name="weight">10</field></record>
+    <record id="cr_ad_p7_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_ad_p7"/><field name="name">Integrity &amp; Communication</field><field name="weight">100</field><field name="score_3">Transparent communication</field><field name="score_5">Cross-team leadership</field></record>
+    <record id="tpl_ad_p8" model="wms.kpi.template.line"><field name="template_id" ref="tpl_admin"/><field name="pillar_id" ref="pillar_operations"/><field name="weight">5</field></record>
+    <record id="cr_ad_p8_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_ad_p8"/><field name="name">Process Documentation</field><field name="weight">100</field><field name="score_3">Maintains process docs</field><field name="score_5">Creates training materials</field></record>
+
+    <!-- ============================================================ -->
+    <!-- SUPERVISOR Template (15/15/10/15/15/10/10/10 = 100%)         -->
+    <!-- ============================================================ -->
+    <record id="tpl_supervisor" model="wms.kpi.template"><field name="position">supervisor</field></record>
+    <record id="tpl_sv_p1" model="wms.kpi.template.line"><field name="template_id" ref="tpl_supervisor"/><field name="pillar_id" ref="pillar_develop_people"/><field name="weight">15</field></record>
+    <record id="cr_sv_p1_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_sv_p1"/><field name="name">Team Development &amp; Training</field><field name="weight">50</field><field name="score_3">Trains team per schedule</field><field name="score_5">Develops future supervisors</field></record>
+    <record id="cr_sv_p1_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_sv_p1"/><field name="name">Performance Management</field><field name="weight">50</field><field name="score_3">Regular feedback to team</field><field name="score_5">Measurable team improvement</field></record>
+    <record id="tpl_sv_p2" model="wms.kpi.template.line"><field name="template_id" ref="tpl_supervisor"/><field name="pillar_id" ref="pillar_drive_value"/><field name="weight">15</field></record>
+    <record id="cr_sv_p2_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_sv_p2"/><field name="name">SLA Achievement (team)</field><field name="weight">50</field><field name="score_3">Team meets SLA 95%+</field><field name="score_5">Team meets SLA 99%+</field></record>
+    <record id="cr_sv_p2_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_sv_p2"/><field name="name">Issue Escalation &amp; Resolution</field><field name="weight">50</field><field name="score_3">Resolves issues same shift</field><field name="score_5">Prevents issues proactively</field></record>
+    <record id="tpl_sv_p3" model="wms.kpi.template.line"><field name="template_id" ref="tpl_supervisor"/><field name="pillar_id" ref="pillar_revenue"/><field name="weight">10</field></record>
+    <record id="cr_sv_p3_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_sv_p3"/><field name="name">Throughput Optimization</field><field name="weight">100</field><field name="score_3">Maintains target throughput</field><field name="score_5">Increases throughput 10%+</field></record>
+    <record id="tpl_sv_p4" model="wms.kpi.template.line"><field name="template_id" ref="tpl_supervisor"/><field name="pillar_id" ref="pillar_digitization"/><field name="weight">15</field></record>
+    <record id="cr_sv_p4_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_sv_p4"/><field name="name">System Adoption Leadership</field><field name="weight">50</field><field name="score_3">Ensures team uses WMS properly</field><field name="score_5">Drives system improvements</field></record>
+    <record id="cr_sv_p4_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_sv_p4"/><field name="name">Data-Driven Decision Making</field><field name="weight">50</field><field name="score_3">Uses reports for decisions</field><field name="score_5">Creates actionable analytics</field></record>
+    <record id="tpl_sv_p5" model="wms.kpi.template.line"><field name="template_id" ref="tpl_supervisor"/><field name="pillar_id" ref="pillar_financial"/><field name="weight">15</field></record>
+    <record id="cr_sv_p5_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_sv_p5"/><field name="name">Cost Control (OT, supplies)</field><field name="weight">100</field><field name="score_3">Within budget</field><field name="score_5">Reduces cost measurably</field></record>
+    <record id="tpl_sv_p6" model="wms.kpi.template.line"><field name="template_id" ref="tpl_supervisor"/><field name="pillar_id" ref="pillar_compliance"/><field name="weight">10</field></record>
+    <record id="cr_sv_p6_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_sv_p6"/><field name="name">Team Compliance &amp; Safety</field><field name="weight">100</field><field name="score_3">Zero safety incidents in team</field><field name="score_5">Safety culture leader</field></record>
+    <record id="tpl_sv_p7" model="wms.kpi.template.line"><field name="template_id" ref="tpl_supervisor"/><field name="pillar_id" ref="pillar_values"/><field name="weight">10</field></record>
+    <record id="cr_sv_p7_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_sv_p7"/><field name="name">Leadership &amp; Culture</field><field name="weight">100</field><field name="score_3">Respected leader</field><field name="score_5">Inspires team, drives culture</field></record>
+    <record id="tpl_sv_p8" model="wms.kpi.template.line"><field name="template_id" ref="tpl_supervisor"/><field name="pillar_id" ref="pillar_operations"/><field name="weight">10</field></record>
+    <record id="cr_sv_p8_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_sv_p8"/><field name="name">Shift Planning &amp; Resource Allocation</field><field name="weight">100</field><field name="score_3">Adequate staffing per shift</field><field name="score_5">Optimizes labor, reduces OT</field></record>
+
+    <!-- ============================================================ -->
+    <!-- MANAGER Template (10/10/15/15/20/10/10/10 = 100%)            -->
+    <!-- ============================================================ -->
+    <record id="tpl_manager" model="wms.kpi.template"><field name="position">manager</field></record>
+    <record id="tpl_mg_p1" model="wms.kpi.template.line"><field name="template_id" ref="tpl_manager"/><field name="pillar_id" ref="pillar_develop_people"/><field name="weight">10</field></record>
+    <record id="cr_mg_p1_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p1"/><field name="name">Talent Development &amp; Retention</field><field name="weight">50</field><field name="score_3">Develops succession plan</field><field name="score_5">Zero unwanted turnover</field></record>
+    <record id="cr_mg_p1_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p1"/><field name="name">KPI Review Execution</field><field name="weight">50</field><field name="score_3">Completes all reviews on time</field><field name="score_5">Drives performance culture</field></record>
+    <record id="tpl_mg_p2" model="wms.kpi.template.line"><field name="template_id" ref="tpl_manager"/><field name="pillar_id" ref="pillar_drive_value"/><field name="weight">10</field></record>
+    <record id="cr_mg_p2_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p2"/><field name="name">Client/Stakeholder Satisfaction</field><field name="weight">100</field><field name="score_3">Meets stakeholder expectations</field><field name="score_5">Exceeds, creates strategic partnerships</field></record>
+    <record id="tpl_mg_p3" model="wms.kpi.template.line"><field name="template_id" ref="tpl_manager"/><field name="pillar_id" ref="pillar_revenue"/><field name="weight">15</field></record>
+    <record id="cr_mg_p3_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p3"/><field name="name">Revenue Growth</field><field name="weight">50</field><field name="score_3">Meets revenue target</field><field name="score_5">Exceeds by 15%+</field></record>
+    <record id="cr_mg_p3_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p3"/><field name="name">New Business Development</field><field name="weight">50</field><field name="score_3">Identifies opportunities</field><field name="score_5">Closes new partnerships</field></record>
+    <record id="tpl_mg_p4" model="wms.kpi.template.line"><field name="template_id" ref="tpl_manager"/><field name="pillar_id" ref="pillar_digitization"/><field name="weight">15</field></record>
+    <record id="cr_mg_p4_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p4"/><field name="name">Digital Transformation Leadership</field><field name="weight">50</field><field name="score_3">Supports system rollout</field><field name="score_5">Champions transformation, measurable ROI</field></record>
+    <record id="cr_mg_p4_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p4"/><field name="name">Innovation &amp; Automation</field><field name="weight">50</field><field name="score_3">Implements one automation project</field><field name="score_5">Multiple projects, saves significant labor</field></record>
+    <record id="tpl_mg_p5" model="wms.kpi.template.line"><field name="template_id" ref="tpl_manager"/><field name="pillar_id" ref="pillar_financial"/><field name="weight">20</field></record>
+    <record id="cr_mg_p5_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p5"/><field name="name">P&amp;L Management</field><field name="weight">50</field><field name="score_3">Within budget</field><field name="score_5">Exceeds profit target</field></record>
+    <record id="cr_mg_p5_2" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p5"/><field name="name">Cost Reduction Initiatives</field><field name="weight">50</field><field name="score_3">Identifies cost savings</field><field name="score_5">Delivers 10%+ cost reduction</field></record>
+    <record id="tpl_mg_p6" model="wms.kpi.template.line"><field name="template_id" ref="tpl_manager"/><field name="pillar_id" ref="pillar_compliance"/><field name="weight">10</field></record>
+    <record id="cr_mg_p6_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p6"/><field name="name">Regulatory &amp; Audit Compliance</field><field name="weight">100</field><field name="score_3">Passes all audits</field><field name="score_5">Zero findings, best practice</field></record>
+    <record id="tpl_mg_p7" model="wms.kpi.template.line"><field name="template_id" ref="tpl_manager"/><field name="pillar_id" ref="pillar_values"/><field name="weight">10</field></record>
+    <record id="cr_mg_p7_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p7"/><field name="name">Vision &amp; Culture Leadership</field><field name="weight">100</field><field name="score_3">Aligns team to company values</field><field name="score_5">Shapes organization culture</field></record>
+    <record id="tpl_mg_p8" model="wms.kpi.template.line"><field name="template_id" ref="tpl_manager"/><field name="pillar_id" ref="pillar_operations"/><field name="weight">10</field></record>
+    <record id="cr_mg_p8_1" model="wms.kpi.criterion"><field name="template_line_id" ref="tpl_mg_p8"/><field name="name">Strategic Planning &amp; Execution</field><field name="weight">100</field><field name="score_3">Delivers strategic plan</field><field name="score_5">Exceeds strategic goals</field></record>
+
+    <!-- ============================================================ -->
+    <!-- SOP Documents per Position                                   -->
+    <!-- ============================================================ -->
+
+    <!-- PICKER SOPs -->
+    <record id="sop_picker_01" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_picker"/>
+        <field name="name">SOP-PK-001: ขั้นตอนการ Pick สินค้า</field>
+        <field name="pillar_id" ref="pillar_develop_people"/>
+        <field name="version">2.0</field>
+        <field name="description"><![CDATA[
+<h3>ขั้นตอนการ Pick สินค้า (KOB WMS)</h3>
+<ol>
+<li><b>รับ Order:</b> เปิดหน้า Pick (F1) ใน WMS → สแกน Work Order barcode หรือเลือกจาก Queue</li>
+<li><b>ตรวจสอบ Order:</b> ดูรายการสินค้า SKU, จำนวน, ตำแหน่ง Rack/Pickface</li>
+<li><b>เดินไป Location:</b> ไปยัง Zone/Rack ที่ระบบแสดง (เรียงตาม optimal route)</li>
+<li><b>สแกน SKU:</b> สแกน barcode สินค้า — ระบบตรวจสอบว่าตรงกับ Order หรือไม่</li>
+<li><b>ตรวจสอบสภาพ:</b> ตรวจสินค้าไม่ชำรุด, Lot/Expiry ถูกต้อง, บรรจุภัณฑ์สมบูรณ์</li>
+<li><b>วางสินค้าลงถาด:</b> วางใน Pick Tote ตามหมายเลข Order</li>
+<li><b>ทำซ้ำ:</b> ดำเนินการจนครบทุก Line Item</li>
+<li><b>ส่งไป Pack:</b> เมื่อ Pick ครบ ระบบจะเปลี่ยนสถานะเป็น "Picked" → ส่งถาดไปสถานี Pack</li>
+</ol>
+<h4>ข้อควรระวัง</h4>
+<ul>
+<li>ห้ามหยิบสินค้าโดยไม่สแกน barcode</li>
+<li>สินค้า Lot tracking ต้องสแกน Lot Number ทุกครั้ง</li>
+<li>สินค้าเครื่องสำอาง (KOB/BTV/CMN) ต้องตรวจ Expiry Date ≥ 6 เดือน</li>
+<li>พบสินค้าชำรุด → แจ้ง Supervisor ทันที, ห้าม Pick</li>
+</ul>]]></field>
+    </record>
+    <record id="sop_picker_02" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_picker"/>
+        <field name="name">SOP-PK-002: การใช้ Scanner และ WMS</field>
+        <field name="pillar_id" ref="pillar_digitization"/>
+        <field name="version">1.0</field>
+        <field name="description"><![CDATA[
+<h3>การใช้ Scanner กับระบบ WMS</h3>
+<ol>
+<li>Login เข้า WMS ด้วย User/Password ของตัวเอง (ระบบบันทึก Activity Log)</li>
+<li>เลือก Mode: PICK (F1)</li>
+<li>สแกน Order barcode → ระบบแสดงรายการสินค้า</li>
+<li>สแกน SKU barcode แต่ละชิ้น → ระบบเช็ค match, อัพเดท picked_qty</li>
+<li>หากสแกนผิด SKU → ระบบแจ้ง Error "SKU ไม่ตรงกับ Order"</li>
+<li>เมื่อ Pick ครบ → กด Complete หรือระบบ auto-advance ไป Pack</li>
+</ol>
+<h4>การแก้ปัญหา</h4>
+<ul>
+<li>Scanner อ่าน barcode ไม่ได้ → ใช้ Manual input พิมพ์รหัส SKU</li>
+<li>สินค้าไม่มีใน Location → แจ้ง Supervisor เพื่อตรวจ Stock</li>
+</ul>]]></field>
+    </record>
+    <record id="sop_picker_03" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_picker"/>
+        <field name="name">SOP-PK-003: ความปลอดภัยในคลังสินค้า</field>
+        <field name="pillar_id" ref="pillar_compliance"/>
+        <field name="version">1.0</field>
+        <field name="description"><![CDATA[
+<h3>ข้อปฏิบัติด้านความปลอดภัย</h3>
+<ul>
+<li>สวมรองเท้าเซฟตี้ตลอดเวลาที่อยู่ในคลัง</li>
+<li>ห้ามวิ่งในคลังสินค้า</li>
+<li>ยกของหนักเกิน 15 kg ต้องใช้รถเข็น</li>
+<li>ชั้นวางสูง ≥ 1.8m ต้องใช้บันได ห้ามปีน Rack</li>
+<li>พบสิ่งผิดปกติ (พื้นเปียก, Rack เอียง, สินค้าหล่น) → แจ้ง Supervisor ทันที</li>
+<li>รู้ตำแหน่งถังดับเพลิงและทางออกฉุกเฉิน</li>
+</ul>]]></field>
+    </record>
+
+    <!-- PACKER SOPs -->
+    <record id="sop_packer_01" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_packer"/>
+        <field name="name">SOP-PA-001: ขั้นตอนการ Pack สินค้า</field>
+        <field name="pillar_id" ref="pillar_develop_people"/>
+        <field name="version">2.0</field>
+        <field name="description"><![CDATA[
+<h3>ขั้นตอนการ Pack สินค้า</h3>
+<ol>
+<li><b>รับถาด Pick:</b> รับ Pick Tote จากสถานี Pick → สแกน Order barcode</li>
+<li><b>เลือกกล่อง:</b> เลือกขนาดกล่องที่เหมาะสม (ประหยัดค่าส่ง, ปลอดภัยต่อสินค้า)</li>
+<li><b>ตรวจสอบ:</b> เทียบสินค้ากับ Packing List — ครบถ้วน, ถูก SKU, ถูกจำนวน</li>
+<li><b>ห่อสินค้า:</b> ห่อ Bubble wrap สินค้าแตกง่าย (ขวดแก้ว, กระจก, เครื่องสำอางแพง)</li>
+<li><b>ใส่เอกสาร:</b> ใส่ใบส่งสินค้า, ของแถม (ถ้ามี), Thank you card</li>
+<li><b>สแกน Pack:</b> สแกนแต่ละ SKU ใน Mode PACK (F2) → ระบบอัพเดท packed_qty</li>
+<li><b>ปิดกล่อง:</b> ปิดกล่อง, ติดเทปกาว, ติด Label (AWB/ที่อยู่)</li>
+<li><b>Close Box:</b> สแกน Box barcode ใน Mode BOX → ระบบเปลี่ยนสถานะเป็น Packed</li>
+</ol>
+<h4>มาตรฐานกล่อง</h4>
+<table border="1" cellpadding="4">
+<tr><th>ขนาด</th><th>ใช้กับ</th></tr>
+<tr><td>S (20x15x10)</td><td>1-2 ชิ้น เครื่องสำอางเล็ก</td></tr>
+<tr><td>M (30x25x15)</td><td>3-5 ชิ้น หรือสินค้าขนาดกลาง</td></tr>
+<tr><td>L (40x30x20)</td><td>6+ ชิ้น หรือสินค้าใหญ่</td></tr>
+</table>]]></field>
+    </record>
+    <record id="sop_packer_02" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_packer"/>
+        <field name="name">SOP-PA-002: มาตรฐาน QC ก่อนปิดกล่อง</field>
+        <field name="pillar_id" ref="pillar_drive_value"/>
+        <field name="version">1.0</field>
+        <field name="description"><![CDATA[
+<h3>Checklist QC ก่อนปิดกล่อง</h3>
+<ul>
+<li>☐ สินค้าครบตาม Packing List</li>
+<li>☐ SKU ถูกต้องทุกชิ้น (สแกนผ่านหมด)</li>
+<li>☐ สินค้าไม่ชำรุด, ไม่มีรอยขีดข่วน</li>
+<li>☐ Lot/Expiry ตรงตามที่ระบบบันทึก</li>
+<li>☐ Bubble wrap สินค้าแตกง่าย</li>
+<li>☐ ใบส่งสินค้าอยู่ในกล่อง</li>
+<li>☐ AWB Label ติดถูกต้อง, ไม่หลุด</li>
+<li>☐ ที่อยู่ผู้รับตรงกับ Order</li>
+</ul>]]></field>
+    </record>
+
+    <!-- SHIPPER SOPs -->
+    <record id="sop_shipper_01" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_shipper"/>
+        <field name="name">SOP-SH-001: ขั้นตอนการ Ship / Dispatch</field>
+        <field name="pillar_id" ref="pillar_develop_people"/>
+        <field name="version">2.0</field>
+        <field name="description"><![CDATA[
+<h3>ขั้นตอนการ Ship สินค้า</h3>
+<ol>
+<li><b>ตรวจสอบกล่อง:</b> กล่อง Packed แล้ว, มี AWB Label ครบ</li>
+<li><b>จัดกลุ่มตาม Courier:</b> แยกกล่องตาม Courier (Thailand Post, Flash, J&amp;T, Shopee Express)</li>
+<li><b>สร้าง Courier Batch:</b> ใน Dispatch (F4) → สร้าง Batch ใหม่ → เลือก Courier</li>
+<li><b>สแกนกล่องเข้า Batch:</b> สแกน AWB/Box barcode แต่ละกล่อง → ระบบเพิ่มเข้า Batch</li>
+<li><b>ตรวจจำนวน:</b> นับจำนวนกล่องใน Batch ตรงกับระบบ</li>
+<li><b>ส่งมอบ Courier:</b> Courier มารับ → ให้ Courier เซ็นรับ (Signature pad)</li>
+<li><b>ปิด Batch:</b> Confirm Batch → ระบบเปลี่ยนสถานะ Order เป็น Shipped</li>
+</ol>
+<h4>SLA ที่ต้องรักษา</h4>
+<ul>
+<li>Shopee: ส่ง Courier ภายใน 24 ชม. หลัง Order confirm</li>
+<li>Lazada: ส่ง Courier ภายใน 24 ชม.</li>
+<li>TikTok: ส่ง Courier ภายใน 48 ชม.</li>
+<li>POS/Walk-in: ส่งมอบทันที</li>
+</ul>]]></field>
+    </record>
+    <record id="sop_shipper_02" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_shipper"/>
+        <field name="name">SOP-SH-002: การติด AWB Label</field>
+        <field name="pillar_id" ref="pillar_compliance"/>
+        <field name="version">1.0</field>
+        <field name="description"><![CDATA[
+<h3>มาตรฐานการติด AWB Label</h3>
+<ul>
+<li>พิมพ์ AWB จากระบบ (Print AWB button ใน WMS)</li>
+<li>ติดบนฝากล่องด้านบน ตำแหน่งกลาง</li>
+<li>ห้ามติดบนรอยต่อกล่อง (หลุดง่าย)</li>
+<li>ตรวจ barcode สแกนได้ก่อนส่ง</li>
+<li>Shopee/Lazada/TikTok ใช้ AWB จาก Platform → ห้ามใช้ AWB ข้ามแพลตฟอร์ม</li>
+</ul>]]></field>
+    </record>
+
+    <!-- INVENTORY SOPs -->
+    <record id="sop_inv_01" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_inventory"/>
+        <field name="name">SOP-INV-001: Cycle Count ประจำวัน</field>
+        <field name="pillar_id" ref="pillar_develop_people"/>
+        <field name="version">1.0</field>
+        <field name="description"><![CDATA[
+<h3>ขั้นตอน Cycle Count</h3>
+<ol>
+<li><b>รับ Assignment:</b> ดู Count Task ที่ได้รับมอบหมาย (Inventory > Count Tasks)</li>
+<li><b>ไปยัง Zone/Rack:</b> ไปยังตำแหน่งที่ระบบกำหนด</li>
+<li><b>นับสินค้า:</b> นับจำนวน physical ทุก SKU ใน Location นั้น</li>
+<li><b>บันทึก:</b> กรอกจำนวนนับได้ใน Count Entry</li>
+<li><b>Variance:</b> ระบบคำนวณ variance (counted - expected) อัตโนมัติ</li>
+<li><b>Submit:</b> ส่ง Count Task → Supervisor ตรวจสอบและ Approve</li>
+</ol>
+<h4>กฎ Cycle Count</h4>
+<ul>
+<li>Pickface zones: นับทุกวัน</li>
+<li>Bulk storage: นับสัปดาห์ละครั้ง (หมุนเวียน Zone)</li>
+<li>Variance > 5% → นับซ้ำ (Recount)</li>
+<li>Variance > 10% → แจ้ง Manager ทันที</li>
+</ul>]]></field>
+    </record>
+    <record id="sop_inv_02" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_inventory"/>
+        <field name="name">SOP-INV-002: การตรวจ Lot/Expiry</field>
+        <field name="pillar_id" ref="pillar_compliance"/>
+        <field name="version">1.0</field>
+        <field name="description"><![CDATA[
+<h3>การตรวจ Lot/Expiry ระหว่าง Count</h3>
+<ul>
+<li>สินค้าเครื่องสำอาง KOB/BTV/CMN ต้องตรวจ Expiry ทุกครั้งที่นับ</li>
+<li>สินค้า Expiry ≤ 3 เดือน → ติด sticker "ใกล้หมดอายุ" สีแดง → แจ้ง Supervisor</li>
+<li>สินค้าหมดอายุแล้ว → แยกไว้ Zone "Not Available" → บันทึกใน Count Entry</li>
+<li>FIFO: สินค้า Lot เก่าต้องอยู่ด้านหน้า Rack/Pickface</li>
+</ul>]]></field>
+    </record>
+
+    <!-- INBOUND SOPs -->
+    <record id="sop_inbound_01" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_inbound"/>
+        <field name="name">SOP-IN-001: การรับสินค้าเข้าคลัง (Receiving)</field>
+        <field name="pillar_id" ref="pillar_develop_people"/>
+        <field name="version">2.0</field>
+        <field name="description"><![CDATA[
+<h3>ขั้นตอนรับสินค้าเข้าคลัง</h3>
+<ol>
+<li><b>ตรวจเอกสาร:</b> เทียบ Delivery Note / Invoice กับ Purchase Order ใน Odoo</li>
+<li><b>ตรวจสภาพ:</b> ตรวจกล่องภายนอกไม่ชำรุด, จำนวนกล่องตรง</li>
+<li><b>เปิดตรวจ:</b> สุ่มตรวจ 10% ของ shipment (หรือ 100% ถ้า Supplier ใหม่/มีประวัติปัญหา)</li>
+<li><b>บันทึก Lot:</b> สแกน/บันทึก Lot Number + Expiry Date ทุก SKU</li>
+<li><b>GRN:</b> Validate Receipt ใน Odoo (stock.picking) → สินค้าเข้า Input Location</li>
+<li><b>Putaway:</b> ย้ายสินค้าจาก Input → Stock/Rack/Pickface ตาม Putaway Rule</li>
+</ol>
+<h4>Rejection Criteria</h4>
+<ul>
+<li>สินค้าชำรุด/แตกหัก → Reject, ถ่ายรูปส่ง Supplier</li>
+<li>จำนวนไม่ตรง PO → รับเฉพาะจำนวนจริง, แจ้ง Purchasing</li>
+<li>Lot/Expiry ไม่ตรง Spec → Reject, แจ้ง QC</li>
+</ul>]]></field>
+    </record>
+    <record id="sop_inbound_02" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_inbound"/>
+        <field name="name">SOP-IN-002: Putaway &amp; Restock Pickface</field>
+        <field name="pillar_id" ref="pillar_operations"/>
+        <field name="version">1.0</field>
+        <field name="description"><![CDATA[
+<h3>Putaway &amp; Restock</h3>
+<ol>
+<li>สินค้า Received → ย้ายไป Bulk Storage (Rack) ตาม Zone ที่กำหนด</li>
+<li>ตรวจ Pickface Level: ถ้า qty ≤ min_level → Restock จาก Bulk</li>
+<li>สแกน Rack barcode → สแกน SKU → ยืนยัน Putaway ใน WMS</li>
+<li>FIFO: วาง Lot ใหม่ด้านหลัง, Lot เก่าด้านหน้า</li>
+</ol>]]></field>
+    </record>
+
+    <!-- DRIVER SOPs -->
+    <record id="sop_driver_01" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_driver"/>
+        <field name="name">SOP-DR-001: การส่งสินค้า Consignment</field>
+        <field name="pillar_id" ref="pillar_drive_value"/>
+        <field name="version">1.0</field>
+        <field name="description"><![CDATA[
+<h3>การส่งสินค้า Consignment (Watson/Beautrium/Boots/Eve&amp;Boy etc.)</h3>
+<ol>
+<li><b>รับ Picking List:</b> ตรวจรายการกล่อง + จุดหมาย (สาขาร้าน)</li>
+<li><b>ขึ้นรถ:</b> จัด FIFO — สาขาส่งก่อนอยู่ด้านท้ายรถ</li>
+<li><b>ส่งมอบ:</b> ส่งสินค้า, ให้พนักงานร้านเซ็น POD (Proof of Delivery)</li>
+<li><b>ถ่ายรูป:</b> ถ่ายรูป POD + สินค้าที่ส่ง</li>
+<li><b>อัพเดทระบบ:</b> อัพเดทสถานะ Delivered ใน WMS</li>
+</ol>
+<h4>ข้อห้าม</h4>
+<ul>
+<li>ห้ามส่งสินค้าโดยไม่มี POD</li>
+<li>ห้ามเปิดกล่องสินค้า</li>
+<li>ห้ามทิ้งสินค้าหน้าร้านโดยไม่มีคนรับ</li>
+</ul>]]></field>
+    </record>
+
+    <!-- ADMIN ONLINE SOPs -->
+    <record id="sop_admin_01" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_admin"/>
+        <field name="name">SOP-AO-001: การจัดการ Order จาก Marketplace</field>
+        <field name="pillar_id" ref="pillar_drive_value"/>
+        <field name="version">2.0</field>
+        <field name="description"><![CDATA[
+<h3>การจัดการ Order จาก Shopee/Lazada/TikTok</h3>
+<ol>
+<li><b>Sync Order:</b> ระบบ sync อัตโนมัติทุก 15 นาที → ตรวจ Order ใหม่ใน WMS</li>
+<li><b>ตรวจ OOS:</b> เช็ค Stock availability — ถ้า OOS แจ้ง Purchasing ทันที</li>
+<li><b>จัดคิว:</b> Order ที่ Stock พร้อม → เข้าคิว Pick อัตโนมัติ</li>
+<li><b>ติดตาม SLA:</b> ดู SLA Monitor (Reports > SLA Monitor) — แก้ไข Order at_risk/breached</li>
+<li><b>จัดการ Return:</b> Return order → ตรวจสินค้า → Restock หรือ Scrap</li>
+</ol>
+<h4>Platform SLA</h4>
+<table border="1" cellpadding="4">
+<tr><th>Platform</th><th>Ship by</th><th>Penalty</th></tr>
+<tr><td>Shopee</td><td>2 วัน</td><td>Late shipment rate → ลด visibility</td></tr>
+<tr><td>Lazada</td><td>2 วัน</td><td>Cancellation penalty</td></tr>
+<tr><td>TikTok</td><td>3 วัน</td><td>Shop score ลด</td></tr>
+</table>]]></field>
+    </record>
+    <record id="sop_admin_02" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_admin"/>
+        <field name="name">SOP-AO-002: การจัดการ OOS &amp; Return</field>
+        <field name="pillar_id" ref="pillar_revenue"/>
+        <field name="version">1.0</field>
+        <field name="description"><![CDATA[
+<h3>การจัดการ Out of Stock (OOS)</h3>
+<ul>
+<li>พบ OOS → แจ้ง Purchasing ทันทีผ่าน Line/Email</li>
+<li>อัพเดท Stock ใน Marketplace ภายใน 1 ชม.</li>
+<li>ปิด Listing ชั่วคราวถ้า OOS เกิน 3 วัน</li>
+</ul>
+<h3>การจัดการ Return</h3>
+<ul>
+<li>ตรวจสาเหตุ Return: สินค้าผิด/ชำรุด/ลูกค้าเปลี่ยนใจ</li>
+<li>สินค้า Restock ได้ → คืน Stock, อัพเดท WMS</li>
+<li>สินค้าชำรุด → Scrap, บันทึก Activity Log</li>
+</ul>]]></field>
+    </record>
+
+    <!-- SUPERVISOR SOPs -->
+    <record id="sop_supervisor_01" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_supervisor"/>
+        <field name="name">SOP-SV-001: การบริหารทีมประจำกะ</field>
+        <field name="pillar_id" ref="pillar_develop_people"/>
+        <field name="version">1.0</field>
+        <field name="description"><![CDATA[
+<h3>หน้าที่ Supervisor ประจำกะ</h3>
+<ol>
+<li><b>เช้า:</b> ตรวจ Attendance, แจก Assignment, Brief เป้ารายวัน</li>
+<li><b>ระหว่างวัน:</b> Monitor WMS Dashboard — ดู Queue, SLA status, Worker performance</li>
+<li><b>แก้ปัญหา:</b> จัดการ Escalation (สินค้าหาย, Scanner เสีย, Order ผิดพลาด)</li>
+<li><b>สิ้นกะ:</b> Review KPI ของทีม, บันทึก Issues, Handover กะถัดไป</li>
+</ol>
+<h4>KPI เป้าหมายรายวัน</h4>
+<ul>
+<li>Pick accuracy ≥ 99%</li>
+<li>SLA breach = 0</li>
+<li>ทุก Order ship ภายใน SLA deadline</li>
+</ul>]]></field>
+    </record>
+
+    <!-- MANAGER SOPs -->
+    <record id="sop_manager_01" model="wms.kpi.sop">
+        <field name="template_id" ref="tpl_manager"/>
+        <field name="name">SOP-MG-001: การบริหารคลังสินค้ารายเดือน</field>
+        <field name="pillar_id" ref="pillar_financial"/>
+        <field name="version">1.0</field>
+        <field name="description"><![CDATA[
+<h3>หน้าที่ Manager รายเดือน</h3>
+<ol>
+<li><b>Review KPI:</b> วิเคราะห์ Worker Performance, SLA compliance, Error rate</li>
+<li><b>Cost Review:</b> ตรวจค่าขนส่ง, ค่า OT, วัสดุแพ็ค</li>
+<li><b>Inventory Review:</b> ตรวจ Shrinkage report, Dead stock, Near-expiry</li>
+<li><b>Process Improvement:</b> วางแผนปรับปรุง SOP, ระบบ, Layout</li>
+<li><b>HR:</b> KPI Assessment, Training plan, จัดกำลังคน</li>
+</ol>]]></field>
+    </record>
+
+</odoo>

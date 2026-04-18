@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Couriers matching React WMS defaults -->
+        <record id="courier_thailand_post" model="wms.courier">
+            <field name="name">Thailand Post</field>
+            <field name="code">EMS</field>
+            <field name="color_hex">#e11d48</field>
+            <field name="tracking_url_template">https://track.thailandpost.co.th/?trackNumber={barcode}</field>
+        </record>
+
+        <record id="courier_flash" model="wms.courier">
+            <field name="name">Flash Express</field>
+            <field name="code">FLS</field>
+            <field name="color_hex">#f59e0b</field>
+            <field name="tracking_url_template">https://www.flashexpress.com/fle/tracking?se={barcode}</field>
+        </record>
+
+        <record id="courier_jt" model="wms.courier">
+            <field name="name">J&amp;T Express</field>
+            <field name="code">JT</field>
+            <field name="color_hex">#dc2626</field>
+            <field name="tracking_url_template">https://www.jtexpress.co.th/index/query/gzquery.html?bills={barcode}</field>
+        </record>
+
+        <record id="courier_shopee_express" model="wms.courier">
+            <field name="name">Shopee Express</field>
+            <field name="code">SPX</field>
+            <field name="color_hex">#f97316</field>
+        </record>
+
+        <record id="courier_kiss" model="wms.courier">
+            <field name="name">KISS Direct</field>
+            <field name="code">KISS</field>
+            <field name="color_hex">#3b82f6</field>
+        </record>
+
+        <!-- Default API platform entries -->
+        <record id="api_config_odoo" model="wms.api.config">
+            <field name="platform">odoo</field>
+            <field name="enabled" eval="True"/>
+        </record>
+
+        <record id="api_config_shopee" model="wms.api.config">
+            <field name="platform">shopee</field>
+            <field name="enabled" eval="False"/>
+        </record>
+
+        <record id="api_config_lazada" model="wms.api.config">
+            <field name="platform">lazada</field>
+            <field name="enabled" eval="False"/>
+        </record>
+
+        <record id="api_config_tiktok" model="wms.api.config">
+            <field name="platform">tiktok</field>
+            <field name="enabled" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

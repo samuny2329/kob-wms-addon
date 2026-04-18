@@ -1,0 +1,1217 @@
+// =====================================================================
+// KOB WMS — POSPack-style Pick / Pack / Ship scan screen
+// Matches the React POSPack.jsx design (Odoo purple theme, 2-column
+// layout, section cards with purple left border).
+// Reference: C:\Users\ADMIN\Desktop\WMS\src\components\POSPack.jsx
+// =====================================================================
+
+// Odoo color variables (mirrors src/index.css from the React project)
+$odoo-purple:         #714B67;
+$odoo-purple-dark:    #57344F;
+$odoo-purple-accent:  #79526F;
+$odoo-purple-light:   #E9B8D9;
+$odoo-purple-soft:    #f3edf7;
+$odoo-purple-border:  #c9a8bc;
+
+$odoo-surface:        #FFFFFF;
+$odoo-surface-low:    #F3F3F3;
+$odoo-surface-high:   #E8E8E8;
+$odoo-surface-dim:    #DADADA;
+
+$odoo-text:           #1A1C1C;
+$odoo-text-secondary: #4E444A;
+$odoo-text-muted:     #80747A;
+
+$odoo-border:         #D1C3CA;
+$odoo-border-ghost:   rgba(209, 195, 202, 0.15);
+
+$odoo-success:        #017E84;
+$odoo-success-light:  #f0faf4;
+$odoo-success-bg:     #d4edda;
+
+$odoo-warning:        #E8A940;
+$odoo-warning-light:  #fff8e1;
+$odoo-warning-dark:   #856404;
+
+$odoo-danger:         #E46F78;
+$odoo-danger-light:   #fff5f5;
+
+// Mixins (safe replacement for @extend — avoids Odoo SCSS cross-scope errors)
+@mixin section-card {
+    background: $odoo-surface;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+@mixin section-heading {
+    font-weight: 700;
+    font-size: 11px;
+    color: $odoo-purple;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+// =====================================================================
+.o_wms_scan_screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: $odoo-surface-low;
+    font-family: 'Inter', 'Sarabun', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: $odoo-text;
+    overflow: hidden;
+
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .tabular { font-variant-numeric: tabular-nums; }
+
+    // -----------------------------------------------------------------
+    // HEADER (mode tabs + brand)
+    // -----------------------------------------------------------------
+    .o_wms_header {
+        display: flex;
+        align-items: center;
+        padding: 14px 24px;
+        background: $odoo-surface;
+        color: $odoo-text;
+        gap: 24px;
+        border-bottom: 1px solid $odoo-border;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+        .o_wms_brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            .brand_icon {
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(135deg, $odoo-purple-dark, $odoo-purple);
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                color: #fff;
+                box-shadow: 0 2px 8px rgba(87, 52, 79, 0.2);
+            }
+
+            .brand_text {
+                .brand_title {
+                    font-size: 16px;
+                    font-weight: 800;
+                    color: $odoo-purple-dark;
+                    letter-spacing: 0.02em;
+                }
+                .brand_sub {
+                    font-size: 10px;
+                    color: $odoo-text-muted;
+                    font-weight: 600;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                }
+            }
+        }
+
+        .o_wms_mode_tabs {
+            flex: 1;
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+
+            .mode_btn {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 20px;
+                min-width: 128px;
+                background: $odoo-surface-low;
+                color: $odoo-text-secondary;
+                border: 1px solid transparent;
+                border-radius: 4px;
+                font-weight: 700;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                cursor: pointer;
+                transition: all 0.15s;
+                position: relative;
+
+                .mode_icon { font-size: 16px; }
+                .mode_hk {
+                    font-size: 9px;
+                    background: rgba($odoo-text-muted, 0.15);
+                    padding: 1px 5px;
+                    border-radius: 3px;
+                    margin-left: auto;
+                }
+
+                &.active {
+                    background: linear-gradient(135deg, $odoo-purple-dark, $odoo-purple);
+                    color: #fff;
+                    border-color: $odoo-purple-dark;
+                    box-shadow: 0 2px 8px rgba(87, 52, 79, 0.2);
+                    .mode_hk { background: rgba(255, 255, 255, 0.2); color: #fff; }
+                }
+
+                &:hover:not(.active) {
+                    background: $odoo-surface-high;
+                    color: $odoo-text;
+                    border-color: $odoo-border-ghost;
+                }
+            }
+        }
+
+        .o_wms_user {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba($odoo-success, 0.1);
+            border: 1px solid rgba($odoo-success, 0.3);
+            border-radius: 20px;
+            color: $odoo-success;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+
+            .dot {
+                width: 7px;
+                height: 7px;
+                background: $odoo-success;
+                border-radius: 50%;
+                animation: pulse 1.5s infinite;
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // MAIN — 2-column layout (LEFT flex-3 / RIGHT 320px)
+    // -----------------------------------------------------------------
+    .o_wms_main {
+        flex: 1;
+        display: flex;
+        gap: 24px;
+        padding: 24px;
+        overflow: hidden;
+
+        .o_wms_left_col {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .o_wms_right_col {
+            flex: 0 0 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+
+            &::-webkit-scrollbar { width: 4px; }
+            &::-webkit-scrollbar-thumb { background: $odoo-border-ghost; border-radius: 2px; }
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // Section card base style (matches POSPack.jsx sectionCard)
+    // Use mixins instead of @extend to avoid SCSS cross-scope errors
+    // -----------------------------------------------------------------
+
+    // -----------------------------------------------------------------
+    // LEFT ① — Order queue card
+    // -----------------------------------------------------------------
+    .queue_card {
+        @include section-card;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        max-height: 220px;
+        min-height: 120px;
+
+        .queue_header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid $odoo-border-ghost;
+
+            h4 {
+                @include section-heading;
+                margin: 0;
+
+                .count {
+                    display: inline-block;
+                    margin-left: 8px;
+                    padding: 2px 10px;
+                    background: $odoo-purple-soft;
+                    color: $odoo-purple-dark;
+                    border: 1px solid $odoo-purple-border;
+                    border-radius: 999px;
+                    font-size: 10px;
+                }
+            }
+
+            .refresh_btn {
+                width: 28px;
+                height: 28px;
+                border: 1px solid $odoo-border-ghost;
+                background: $odoo-surface-low;
+                border-radius: 4px;
+                font-size: 14px;
+                cursor: pointer;
+                color: $odoo-text-secondary;
+                &:hover { background: $odoo-surface-high; color: $odoo-purple; }
+            }
+        }
+
+        .queue_scroll {
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: none;
+            &::-webkit-scrollbar { display: none; }
+        }
+
+        .order_row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid $odoo-border-ghost;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            transition: background 0.15s;
+
+            &:hover { background: $odoo-surface-low; }
+            &.selected {
+                background: $odoo-purple-soft;
+                border-left-color: $odoo-purple;
+            }
+
+            .platform_avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 4px;
+                background: linear-gradient(135deg, $odoo-purple-dark, $odoo-purple);
+                color: #fff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 11px;
+                font-weight: 800;
+                flex-shrink: 0;
+            }
+
+            .order_body {
+                flex: 1;
+                min-width: 0;
+
+                .top_row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    .order_ref {
+                        font-weight: 700;
+                        font-size: 13px;
+                        color: $odoo-text;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+
+                    .count_badge {
+                        flex-shrink: 0;
+                        padding: 2px 10px;
+                        border-radius: 4px;
+                        font-size: 10px;
+                        font-weight: 800;
+                        background: $odoo-purple-soft;
+                        color: $odoo-purple-dark;
+                        border: 1px solid $odoo-purple-border;
+
+                        &.warning {
+                            background: $odoo-warning-light;
+                            color: $odoo-warning-dark;
+                            border-color: $odoo-warning;
+                        }
+                    }
+                }
+
+                .customer {
+                    font-size: 11px;
+                    color: $odoo-text-secondary;
+                    margin-top: 2px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+            }
+        }
+
+        .empty_queue {
+            padding: 40px 16px;
+            text-align: center;
+            color: $odoo-text-muted;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // LEFT ② — Customer Details card (purple left border 4px)
+    // -----------------------------------------------------------------
+    .customer_card {
+        @include section-card;
+        padding: 20px 24px;
+        border-left: 4px solid $odoo-purple;
+
+        .card_head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+
+            h3 { @include section-heading; margin: 0; }
+
+            .pill {
+                padding: 4px 12px;
+                background: $odoo-surface-high;
+                color: $odoo-text-secondary;
+                font-size: 10px;
+                font-weight: 700;
+                border-radius: 999px;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+            }
+        }
+
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+
+            label {
+                display: block;
+                font-size: 10px;
+                font-weight: 700;
+                color: $odoo-text-secondary;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                margin-bottom: 6px;
+            }
+
+            input {
+                width: 100%;
+                background: $odoo-surface-high;
+                border: none;
+                border-bottom: 2px solid transparent;
+                padding: 10px 14px;
+                font-size: 13px;
+                border-radius: 4px 4px 0 0;
+                color: $odoo-text;
+                outline: none;
+                transition: border-color 0.15s;
+
+                &:focus { border-bottom-color: $odoo-purple; }
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // LEFT ③ — Product Scan + Items Table card
+    // -----------------------------------------------------------------
+    .scan_card {
+        @include section-card;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        .scan_input_wrap {
+            padding: 20px 24px 4px;
+            position: relative;
+
+            .scan_icon {
+                position: absolute;
+                left: 40px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: $odoo-text-muted;
+                font-size: 18px;
+                pointer-events: none;
+                z-index: 1;
+            }
+
+            input {
+                width: 100%;
+                background: $odoo-surface-high;
+                border: none;
+                border-bottom: 2px solid transparent;
+                padding: 16px 16px 16px 48px;
+                font-family: ui-monospace, monospace;
+                font-size: 18px;
+                letter-spacing: 0.15em;
+                border-radius: 4px 4px 0 0;
+                color: $odoo-text;
+                outline: none;
+                text-transform: uppercase;
+                transition: border-color 0.15s;
+
+                &::placeholder { color: $odoo-text-muted; }
+                &:focus { border-bottom-color: $odoo-purple; }
+            }
+        }
+
+        .scan_feedback {
+            padding: 0 24px 8px;
+
+            .feedback_pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 8px 14px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: 700;
+                border: 1px solid;
+
+                &.ok {
+                    background: $odoo-success-bg;
+                    color: #155724;
+                    border-color: #b8e0c4;
+                }
+                &.err {
+                    background: $odoo-danger-light;
+                    color: #721c24;
+                    border-color: $odoo-danger;
+                }
+            }
+        }
+
+        .items_table {
+            flex: 1;
+            overflow: auto;
+            padding: 8px 24px 24px;
+            scrollbar-width: thin;
+
+            table {
+                width: 100%;
+                border-spacing: 0 6px;
+                border-collapse: separate;
+
+                thead {
+                    position: sticky;
+                    top: 0;
+                    background: $odoo-surface;
+                    z-index: 10;
+
+                    th {
+                        padding: 10px 8px;
+                        font-size: 10px;
+                        font-weight: 700;
+                        color: $odoo-text-secondary;
+                        text-transform: uppercase;
+                        letter-spacing: 0.1em;
+                        text-align: left;
+
+                        &.num { text-align: right; }
+                        &.center { text-align: center; }
+                    }
+                }
+
+                tbody tr {
+                    background: $odoo-surface;
+                    border-radius: 4px;
+                    transition: background 0.15s;
+
+                    td {
+                        padding: 12px 14px;
+                        font-size: 13px;
+                        border-top: 1px solid $odoo-border-ghost;
+                        border-bottom: 1px solid $odoo-border-ghost;
+
+                        &:first-child { border-left: 4px solid transparent; }
+                        &.num { text-align: right; }
+                        &.center { text-align: center; }
+                    }
+
+                    .sku {
+                        font-family: ui-monospace, monospace;
+                        font-weight: 700;
+                        font-size: 12px;
+                        color: $odoo-text;
+                    }
+
+                    .product {
+                        font-size: 13px;
+                        font-weight: 600;
+                        color: $odoo-text;
+                        line-height: 1.2;
+
+                        .variant {
+                            font-size: 10px;
+                            color: $odoo-text-secondary;
+                            font-weight: 500;
+                        }
+                    }
+
+                    .qty_big {
+                        font-size: 14px;
+                        font-weight: 700;
+                        font-variant-numeric: tabular-nums;
+                        color: $odoo-text;
+
+                        .sep { font-size: 11px; color: $odoo-text-muted; margin: 0 2px; }
+                        &.done { color: $odoo-success; }
+                    }
+
+                    .status_chip {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                        font-size: 10px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        letter-spacing: 0.04em;
+
+                        &.done { color: $odoo-success; }
+                        &.pending { color: $odoo-text-muted; }
+                    }
+
+                    &.row_done {
+                        background: $odoo-surface-low;
+                        td:first-child { border-left-color: $odoo-purple; }
+                    }
+
+                    &:hover { background: $odoo-surface-high; }
+                }
+            }
+        }
+
+        .empty_state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 16px;
+            color: $odoo-text-muted;
+            text-align: center;
+
+            .empty_icon { font-size: 56px; opacity: 0.2; margin-bottom: 16px; }
+            .empty_title { font-size: 13px; font-weight: 700; color: $odoo-text; margin-bottom: 4px; }
+            .empty_sub { font-size: 12px; }
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // LEFT ④ — Recent Orders footer
+    // -----------------------------------------------------------------
+    .recent_orders {
+        h5 {
+            font-size: 10px;
+            font-weight: 700;
+            color: $odoo-text-secondary;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 0 0 10px 0;
+        }
+
+        .recent_grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .recent_card {
+            background: $odoo-surface-low;
+            padding: 10px 12px;
+            border-radius: 4px;
+            border-top: 2px solid transparent;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+
+            &:first-child { border-top-color: $odoo-purple; }
+
+            &:hover { background: $odoo-surface-high; }
+
+            .ref {
+                font-size: 11px;
+                font-weight: 700;
+                font-family: ui-monospace, monospace;
+                color: $odoo-text;
+            }
+            .meta {
+                font-size: 9px;
+                color: $odoo-text-secondary;
+            }
+            &.placeholder {
+                opacity: 0.35;
+                cursor: default;
+                .ref, .meta { color: $odoo-text-muted; }
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // RIGHT ① — Order Summary
+    // -----------------------------------------------------------------
+    .summary_card {
+        @include section-card;
+        padding: 24px;
+        box-shadow: 0 12px 32px rgba(87, 52, 79, 0.06);
+
+        h3 { @include section-heading; margin: 0 0 24px 0; }
+
+        .summary_rows {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+
+            .row {
+                display: flex;
+                justify-content: space-between;
+                font-size: 13px;
+
+                .label { color: $odoo-text-secondary; }
+                .value { font-weight: 700; color: $odoo-text; }
+
+                &.ok .value { color: $odoo-success; }
+                &.warn .value { color: $odoo-warning-dark; }
+            }
+        }
+
+        .progress_bar {
+            width: 100%;
+            height: 6px;
+            background: $odoo-surface-high;
+            border-radius: 3px;
+            margin-bottom: 24px;
+            overflow: hidden;
+
+            .progress_fill {
+                height: 100%;
+                background: linear-gradient(90deg, $odoo-purple-dark, $odoo-purple);
+                border-radius: 3px;
+                transition: width 0.5s;
+
+                &.full { background: $odoo-success; }
+            }
+        }
+
+        .big_counter {
+            padding-top: 20px;
+            border-top: 1px solid $odoo-border-ghost;
+
+            .cnt_label {
+                font-size: 10px;
+                font-weight: 700;
+                color: $odoo-text-secondary;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 4px;
+            }
+            .cnt_value {
+                font-size: 28px;
+                font-weight: 900;
+                color: $odoo-purple-dark;
+                line-height: 1.1;
+                font-variant-numeric: tabular-nums;
+
+                .sep {
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: $odoo-text-muted;
+                }
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // RIGHT ② — Order Details
+    // -----------------------------------------------------------------
+    .details_card {
+        @include section-card;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        h3 { @include section-heading; margin: 0; }
+
+        .order_gradient {
+            padding: 16px;
+            background: linear-gradient(135deg, $odoo-purple-dark, $odoo-purple);
+            border-radius: 4px;
+            color: #fff;
+
+            .row1 {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .icon_box {
+                width: 40px;
+                height: 40px;
+                border-radius: 4px;
+                background: rgba(255, 255, 255, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+            }
+            .title {
+                font-weight: 700;
+                font-size: 14px;
+                line-height: 1.2;
+            }
+            .sub {
+                font-size: 10px;
+                opacity: 0.75;
+            }
+        }
+
+        .status_pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: $odoo-surface-low;
+            border-radius: 4px;
+
+            .dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: $odoo-warning;
+            }
+            &.ok .dot { background: $odoo-success; }
+            &.bad .dot { background: $odoo-danger; }
+
+            .label {
+                font-size: 12px;
+                font-weight: 600;
+                color: $odoo-text;
+            }
+            .count {
+                margin-left: auto;
+                font-size: 11px;
+                color: $odoo-text-muted;
+                font-family: ui-monospace, monospace;
+            }
+        }
+
+        .action_btns {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 12px 14px;
+            font-size: 12px;
+            font-weight: 800;
+            border-radius: 4px;
+            cursor: pointer;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: all 0.15s;
+
+            &.primary {
+                background: linear-gradient(135deg, $odoo-purple-dark, $odoo-purple);
+                color: #fff;
+                border: none;
+                box-shadow: 0 2px 8px rgba(87, 52, 79, 0.2);
+                &:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(87, 52, 79, 0.3); }
+                &:disabled {
+                    background: $odoo-surface-high;
+                    color: $odoo-text-muted;
+                    cursor: not-allowed;
+                    box-shadow: none;
+                }
+            }
+            &.outline {
+                background: transparent;
+                border: 1px solid $odoo-border;
+                color: $odoo-text-secondary;
+                &:hover:not(:disabled) { background: $odoo-surface-low; border-color: $odoo-purple; color: $odoo-purple; }
+                &:disabled { opacity: 0.4; cursor: not-allowed; }
+            }
+            &.small {
+                padding: 10px 12px;
+                font-size: 11px;
+            }
+        }
+
+        .btn_row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+    }
+}
+
+    // -----------------------------------------------------------------
+    // Odoo-style notebook tabs (inside the scan card)
+    // -----------------------------------------------------------------
+    .wms_notebook {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        .wms_notebook_headers {
+            list-style: none;
+            margin: 0;
+            padding: 0 24px;
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid $odoo-border-ghost;
+            flex-shrink: 0;
+
+            .nb_tab {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 18px;
+                font-size: 12px;
+                font-weight: 700;
+                color: $odoo-text-secondary;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+                transition: all 0.15s;
+                margin-bottom: -1px;
+
+                .tab_icon { font-size: 14px; }
+
+                .tab_badge {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 20px;
+                    height: 18px;
+                    padding: 0 6px;
+                    background: $odoo-surface-high;
+                    color: $odoo-text-secondary;
+                    border-radius: 9px;
+                    font-size: 10px;
+                    font-weight: 800;
+                }
+
+                &:hover {
+                    color: $odoo-purple;
+                    background: $odoo-surface-low;
+                }
+
+                &.active {
+                    color: $odoo-purple;
+                    border-bottom-color: $odoo-purple;
+                    background: $odoo-surface;
+                    .tab_badge {
+                        background: $odoo-purple-soft;
+                        color: $odoo-purple-dark;
+                        border: 1px solid $odoo-purple-border;
+                    }
+                }
+            }
+        }
+
+        .wms_notebook_content {
+            flex: 1;
+            overflow: auto;
+            scrollbar-width: thin;
+
+            &::-webkit-scrollbar { width: 6px; }
+            &::-webkit-scrollbar-thumb { background: $odoo-border-ghost; border-radius: 3px; }
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // Activity log tab
+    // -----------------------------------------------------------------
+    .activity_log {
+        padding: 16px 24px;
+
+        .log_entry {
+            display: flex;
+            gap: 12px;
+            padding: 12px 14px;
+            margin-bottom: 6px;
+            background: $odoo-surface-low;
+            border-radius: 4px;
+            border-left: 3px solid $odoo-purple;
+
+            &.err {
+                background: $odoo-danger-light;
+                border-left-color: $odoo-danger;
+            }
+
+            .log_icon {
+                width: 28px;
+                height: 28px;
+                border-radius: 4px;
+                background: $odoo-success;
+                color: #fff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 900;
+                font-size: 14px;
+                flex-shrink: 0;
+            }
+            &.err .log_icon { background: $odoo-danger; }
+
+            .log_body {
+                flex: 1;
+                min-width: 0;
+
+                .log_head {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    flex-wrap: wrap;
+
+                    .log_mode {
+                        padding: 2px 8px;
+                        background: $odoo-purple-soft;
+                        color: $odoo-purple-dark;
+                        border: 1px solid $odoo-purple-border;
+                        border-radius: 3px;
+                        font-size: 10px;
+                        font-weight: 800;
+                        text-transform: uppercase;
+                        letter-spacing: 0.04em;
+                    }
+                    .log_code {
+                        font-size: 13px;
+                        font-weight: 700;
+                        color: $odoo-text;
+                        flex: 1;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                    .log_time {
+                        font-size: 11px;
+                        color: $odoo-text-muted;
+                        font-family: ui-monospace, monospace;
+                    }
+                }
+                .log_error {
+                    margin-top: 4px;
+                    font-size: 11px;
+                    color: $odoo-danger;
+                    font-style: italic;
+                }
+            }
+        }
+
+        .log_empty {
+            padding: 60px 24px;
+            text-align: center;
+            color: $odoo-text-muted;
+
+            .empty_icon { font-size: 48px; opacity: 0.3; margin-bottom: 12px; }
+            .empty_title { font-size: 13px; font-weight: 700; color: $odoo-text-secondary; margin-bottom: 4px; }
+            .empty_sub { font-size: 12px; }
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // Flow / ERD tab
+    // -----------------------------------------------------------------
+    .flow_erd {
+        padding: 20px 24px;
+
+        .flow_section {
+            margin-bottom: 28px;
+
+            .flow_title {
+                font-size: 10px;
+                font-weight: 800;
+                color: $odoo-purple;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 14px;
+                padding-bottom: 6px;
+                border-bottom: 1px solid $odoo-border-ghost;
+            }
+        }
+
+        // --- Status flow (horizontal stepper) ---
+        .flow_steps {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            overflow-x: auto;
+            padding: 8px 0;
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar { display: none; }
+
+            .flow_step {
+                flex: 1;
+                min-width: 130px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 12px 14px;
+                background: $odoo-surface-low;
+                border: 1px solid $odoo-border-ghost;
+                border-radius: 4px;
+                transition: all 0.15s;
+
+                .step_icon {
+                    width: 32px;
+                    height: 32px;
+                    background: $odoo-surface-high;
+                    border-radius: 4px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 16px;
+                    flex-shrink: 0;
+                }
+                .step_body {
+                    min-width: 0;
+                    .step_label {
+                        font-size: 12px;
+                        font-weight: 800;
+                        color: $odoo-text;
+                    }
+                    .step_desc {
+                        font-size: 10px;
+                        color: $odoo-text-muted;
+                        margin-top: 2px;
+                    }
+                }
+
+                &.done {
+                    background: $odoo-success-light;
+                    border-color: $odoo-success;
+                    .step_icon { background: $odoo-success; color: #fff; }
+                    .step_label { color: $odoo-success; }
+                }
+                &.active {
+                    background: linear-gradient(135deg, $odoo-purple-dark, $odoo-purple);
+                    border-color: $odoo-purple-dark;
+                    box-shadow: 0 4px 12px rgba(87, 52, 79, 0.2);
+                    .step_icon { background: rgba(255, 255, 255, 0.2); color: #fff; }
+                    .step_label, .step_desc { color: #fff; }
+                }
+                &.pending { opacity: 0.5; }
+            }
+
+            .flow_arrow {
+                align-self: center;
+                padding: 0 8px;
+                color: $odoo-text-muted;
+                font-size: 18px;
+                font-weight: 800;
+                flex-shrink: 0;
+
+                &.done { color: $odoo-success; }
+            }
+        }
+
+        // --- ERD diagram ---
+        .erd_diagram {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 0;
+            flex-wrap: wrap;
+
+            .erd_entity {
+                flex: 1;
+                min-width: 180px;
+                background: $odoo-surface;
+                border: 2px solid $odoo-border;
+                border-radius: 4px;
+                overflow: hidden;
+
+                .entity_title {
+                    padding: 8px 14px;
+                    background: $odoo-surface-high;
+                    font-family: ui-monospace, monospace;
+                    font-weight: 800;
+                    font-size: 12px;
+                    color: $odoo-text;
+                    border-bottom: 1px solid $odoo-border-ghost;
+                }
+                .entity_fields {
+                    padding: 8px 14px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+
+                    .field {
+                        font-size: 11px;
+                        color: $odoo-text-secondary;
+                        font-family: ui-monospace, monospace;
+
+                        .fk {
+                            display: inline-block;
+                            padding: 0 4px;
+                            background: $odoo-warning-light;
+                            color: $odoo-warning-dark;
+                            border-radius: 2px;
+                            font-size: 9px;
+                            font-weight: 800;
+                            margin-right: 4px;
+                        }
+                    }
+                }
+
+                &.primary {
+                    border-color: $odoo-purple;
+                    .entity_title {
+                        background: linear-gradient(135deg, $odoo-purple-dark, $odoo-purple);
+                        color: #fff;
+                    }
+                }
+                &.odoo_core {
+                    border-color: $odoo-success;
+                    .entity_title {
+                        background: $odoo-success;
+                        color: #fff;
+                    }
+                }
+            }
+
+            .erd_arrow {
+                flex-shrink: 0;
+                padding: 6px 12px;
+                background: $odoo-purple-soft;
+                color: $odoo-purple-dark;
+                border: 1px dashed $odoo-purple-border;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: 800;
+                font-family: ui-monospace, monospace;
+                white-space: nowrap;
+            }
+        }
+    }
+}
+
+// Animations
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+@keyframes slide_up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up { animation: slide_up 0.3s cubic-bezier(0.16, 1, 0.3, 1); }

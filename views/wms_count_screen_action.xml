@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Count Screen — OWL fullscreen action ────────────────────────── -->
+    <record id="action_wms_count_screen" model="ir.actions.client">
+        <field name="name">🔢 Count Screen</field>
+        <field name="tag">kob_wms.action_wms_count_screen</field>
+        <field name="target">fullscreen</field>
+    </record>
+
+</odoo>

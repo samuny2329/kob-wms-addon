@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================= -->
+    <!-- Server actions that launch the Odoo POS UI for 3 dedicated    -->
+    <!-- WMS stations: Pick / Pack / Outbound.                         -->
+    <!-- The pos.config is auto-created on first click by copying the  -->
+    <!-- first existing POS configuration (so all required fields are  -->
+    <!-- inherited — payment methods, picking type, journal, etc.).    -->
+    <!-- ============================================================= -->
+
+    <record id="server_action_wms_pos_pick" model="ir.actions.server">
+        <field name="name">🛒 KOB WMS — Pick (F1)</field>
+        <field name="model_id" ref="point_of_sale.model_pos_config"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_kob_wms_pos('pick')</field>
+    </record>
+
+    <record id="server_action_wms_pos_pack" model="ir.actions.server">
+        <field name="name">🛒 KOB WMS — Pack (F2)</field>
+        <field name="model_id" ref="point_of_sale.model_pos_config"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_kob_wms_pos('pack')</field>
+    </record>
+
+    <record id="server_action_wms_pos_out" model="ir.actions.server">
+        <field name="name">🛒 KOB WMS — Out (F3)</field>
+        <field name="model_id" ref="point_of_sale.model_pos_config"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_kob_wms_pos('out')</field>
+    </record>
+
+</odoo>

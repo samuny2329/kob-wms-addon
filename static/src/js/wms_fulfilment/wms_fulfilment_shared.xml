@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         WmsTopNav  — persistent header with mode tabs
+         ═══════════════════════════════════════════════════════════ -->
+    <t t-name="kob_wms.WmsTopNav">
+        <div class="wms-topnav"
+             t-att-style="'background:' + (props.accentColor || '#714B67') + ';'">
+
+            <!-- Brand -->
+            <span class="wms-brand">
+                <i class="fa fa-cubes"/>
+                KOB WMS
+            </span>
+
+            <!-- Mode tabs -->
+            <button class="wms-modetab" t-att-class="props.activeMode === 'pick' ? 'active' : ''"
+                    t-on-click="() => props.onNavigate('pick')">
+                <i class="fa fa-hand-o-right"/> Pick<kbd>F1</kbd>
+            </button>
+            <button class="wms-modetab" t-att-class="props.activeMode === 'pack' ? 'active' : ''"
+                    t-on-click="() => props.onNavigate('pack')">
+                <i class="fa fa-archive"/> Pack<kbd>F2</kbd>
+            </button>
+            <button class="wms-modetab" t-att-class="props.activeMode === 'outbound' ? 'active' : ''"
+                    t-on-click="() => props.onNavigate('outbound')">
+                <i class="fa fa-truck"/> Outbound<kbd>F3</kbd>
+            </button>
+            <button class="wms-modetab" t-att-class="props.activeMode === 'dispatch' ? 'active' : ''"
+                    t-on-click="() => props.onNavigate('dispatch')">
+                <i class="fa fa-paper-plane-o"/> Dispatch<kbd>F4</kbd>
+            </button>
+
+            <!-- Right actions -->
+            <div class="wms-topnav-right">
+                <button class="btn btn-sm btn-outline-light opacity-85"
+                        t-on-click="props.onBack" title="Back to Dashboard">
+                    <i class="fa fa-th-large me-1"/>WMS
+                </button>
+            </div>
+        </div>
+    </t>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         WmsPickCard  — product card (shared by Pick and Pack)
+         ═══════════════════════════════════════════════════════════ -->
+    <t t-name="kob_wms.WmsPickCard">
+        <div t-att-class="'wms-product-card '
+            + (props.isDone ? 'wms-card-done ' : '')
+            + (props.isFlashing and props.flashType === 'success' ? 'wms-flash-success ' : '')
+            + (props.isFlashing and props.flashType === 'error'   ? 'wms-flash-error '   : '')">
+
+            <!-- Image -->
+            <div class="wms-card-img-wrap">
+                <img t-if="props.imageUrl" t-att-src="props.imageUrl" loading="lazy"/>
+                <i t-else="" class="fa fa-cube wms-no-img"/>
+
+                <!-- Done overlay -->
+                <div t-if="props.isDone" class="wms-done-overlay">
+                    <i class="fa fa-check-circle"/>
+                </div>
+
+                <!-- Partial qty badge -->
+                <div t-if="qty > 0 and !props.isDone" class="wms-qty-badge">
+                    <span class="badge rounded-pill text-bg-warning"
+                          style="font-size:12px; min-width:22px; padding:3px 6px;">
+                        <t t-esc="qty"/>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="wms-card-info">
+                <div class="wms-card-sku"
+                     t-att-style="props.accentColor ? 'color:' + props.accentColor + ';' : ''"
+                     t-esc="props.line.sku"/>
+                <div class="wms-card-name" t-esc="props.line.product_name"/>
+                <div class="wms-card-qty-display">
+                    <t t-esc="qty"/>
+                    <span class="wms-qty-sep"> / </span>
+                    <span class="wms-qty-total"><t t-esc="total"/></span>
+                </div>
+                <div t-if="props.line.product_barcode"
+                     class="wms-card-barcode" t-esc="props.line.product_barcode"/>
+            </div>
+        </div>
+    </t>
+
+</templates>

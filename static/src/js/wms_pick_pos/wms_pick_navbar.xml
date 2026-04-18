@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!-- Add Pick button to POS Navbar -->
+    <t t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('status-buttons')]" position="inside">
+            <button class="btn btn-sm btn-warning fw-bold ms-2"
+                    t-on-click="onClickPick">
+                <i class="fa fa-tasks"/> Pick (F1)
+            </button>
+        </xpath>
+    </t>
+
+</templates>

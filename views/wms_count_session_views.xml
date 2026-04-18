@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_wms_count_session_list" model="ir.ui.view">
+        <field name="name">wms.count.session.list</field>
+        <field name="model">wms.count.session</field>
+        <field name="arch" type="xml">
+            <list string="Count Sessions" decoration-info="state == 'in_progress'"
+                  decoration-warning="state == 'reconciling'"
+                  decoration-success="state == 'done'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="session_type"/>
+                <field name="warehouse_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="responsible_id"/>
+                <field name="task_count"/>
+                <field name="adjustment_count" string="Adj."/>
+                <field name="pending_adjustment_count" string="Pending"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'in_progress'"
+                       decoration-warning="state == 'reconciling'"
+                       decoration-success="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_count_session_form" model="ir.ui.view">
+        <field name="name">wms.count.session.form</field>
+        <field name="model">wms.count.session</field>
+        <field name="arch" type="xml">
+            <form string="Count Session">
+                <header>
+                    <button name="action_auto_cycle_count" type="object"
+                            string="🔄 Run Auto Cycle Count Now"
+                            class="btn-secondary"
+                            groups="kob_wms.group_wms_manager"
+                            confirm="Create a new cycle count session with ABC tasks and broadcast to workers?"
+                            invisible="state != 'draft'"/>
+                    <button name="action_generate_abc_tasks" type="object"
+                            string="Generate ABC Tasks"
+                            class="btn-warning"
+                            invisible="state != 'draft'"
+                            confirm="Generate count tasks based on ABC order volume analysis?"/>
+                    <button name="action_start" type="object" string="Start"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_reconcile" type="object"
+                            string="Reconcile" invisible="state != 'in_progress'"/>
+                    <!-- Bulk actions in reconciling state -->
+                    <button name="action_verify_all" type="object"
+                            string="Verify All Submitted"
+                            class="btn-info"
+                            invisible="state != 'reconciling'"
+                            groups="kob_wms.group_wms_supervisor"/>
+                    <button name="action_approve_all" type="object"
+                            string="Approve All Verified"
+                            class="oe_highlight"
+                            invisible="state != 'reconciling'"
+                            groups="kob_wms.group_wms_manager"/>
+                    <button name="action_apply_all" type="object"
+                            string="Apply All Approved"
+                            class="btn-success"
+                            invisible="state != 'reconciling'"
+                            groups="kob_wms.group_wms_manager"
+                            confirm="Apply all approved adjustments to stock?"/>
+                    <button name="action_done" type="object" string="Done"
+                            class="oe_highlight" invisible="state != 'reconciling'"/>
+                    <button name="action_draft" type="object" string="Reset to Draft"
+                            invisible="state not in ('cancelled',)"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state in ('done', 'cancelled')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,in_progress,reconciling,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+
+                        <!-- Live: currently counting -->
+                        <button type="object" name="action_open_counting_tasks"
+                                class="oe_stat_button" icon="fa-spinner"
+                                invisible="counting_count == 0">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value" style="color:#ba1a1a">
+                                    <field name="counting_count"/>
+                                </span>
+                                <span class="o_stat_text">Counting</span>
+                            </div>
+                        </button>
+
+                        <!-- Submitted: waiting for verification -->
+                        <button type="object" name="action_open_submitted_tasks"
+                                class="oe_stat_button" icon="fa-inbox"
+                                invisible="submitted_count == 0">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value" style="color:#b45309">
+                                    <field name="submitted_count"/>
+                                </span>
+                                <span class="o_stat_text">Submitted</span>
+                            </div>
+                        </button>
+
+                        <!-- Done: verified or approved -->
+                        <button type="object" name="action_open_done_tasks"
+                                class="oe_stat_button" icon="fa-check-circle"
+                                invisible="done_count == 0">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value" style="color:#065f46">
+                                    <field name="done_count"/>
+                                </span>
+                                <span class="o_stat_text">Done</span>
+                            </div>
+                        </button>
+
+                        <!-- Adjustments -->
+                        <button name="%(action_wms_count_adjustment_all)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-exchange"
+                                invisible="adjustment_count == 0">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="adjustment_count"/>
+                                </span>
+                                <span class="o_stat_text">Adjustments</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="session_type"/>
+                            <field name="warehouse_id"/>
+                            <field name="responsible_id"/>
+                            <field name="variance_threshold_pct"
+                                   string="Variance Threshold %"/>
+                        </group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="task_count"/>
+                            <field name="progress_pct" string="Progress %"
+                                   widget="progressbar"/>
+                            <field name="pending_adjustment_count"
+                                   string="Pending Adjustments"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Tasks" name="tasks">
+                            <field name="task_ids">
+                                <list decoration-info="state == 'counting'"
+                                      decoration-warning="state == 'submitted'"
+                                      decoration-success="state in ('verified', 'approved')">
+                                    <field name="name"/>
+                                    <field name="rack_id"/>
+                                    <field name="zone_id"/>
+                                    <field name="location_id"/>
+                                    <field name="assigned_user_id"/>
+                                    <field name="expected_qty"/>
+                                    <field name="counted_qty"/>
+                                    <field name="variance"/>
+                                    <field name="adjustment_count" string="Adj."/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'counting'"
+                                           decoration-warning="state == 'submitted'"
+                                           decoration-success="state in ('verified', 'approved')"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Adjustments" name="adjustments"
+                              invisible="adjustment_count == 0">
+                            <field name="adjustment_ids" readonly="1">
+                                <list decoration-danger="variance_pct &gt; 5 or variance_pct &lt; -5"
+                                      decoration-warning="variance_pct != 0 and variance_pct &lt;= 5 and variance_pct &gt;= -5"
+                                      decoration-success="variance_qty == 0"
+                                      decoration-muted="state == 'rejected'">
+                                    <field name="name"/>
+                                    <field name="task_id"/>
+                                    <field name="product_id"/>
+                                    <field name="location_id"/>
+                                    <field name="lot_id"/>
+                                    <field name="system_qty" string="System"/>
+                                    <field name="counted_qty" string="Counted"/>
+                                    <field name="variance_qty" string="Variance"/>
+                                    <field name="variance_pct" string="Var %"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'pending'"
+                                           decoration-warning="state == 'approved'"
+                                           decoration-success="state == 'applied'"
+                                           decoration-danger="state == 'rejected'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_wms_count_session_search" model="ir.ui.view">
+        <field name="name">wms.count.session.search</field>
+        <field name="model">wms.count.session</field>
+        <field name="arch" type="xml">
+            <search string="Count Sessions">
+                <field name="name"/>
+                <field name="responsible_id"/>
+                <filter string="Full Count" name="full"
+                        domain="[('session_type','=','full')]"/>
+                <filter string="Cycle Count" name="cycle"
+                        domain="[('session_type','=','cycle')]"/>
+                <separator/>
+                <filter string="In Progress" name="in_progress"
+                        domain="[('state','=','in_progress')]"/>
+                <filter string="Reconciling" name="reconciling"
+                        domain="[('state','=','reconciling')]"/>
+                <filter string="Has Pending" name="has_pending"
+                        domain="[('pending_adjustment_count','&gt;',0)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_count_session" model="ir.actions.act_window">
+        <field name="name">Count Sessions</field>
+        <field name="res_model">wms.count.session</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_wms_count_session_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first count session</p>
+            <p>Full Count: count every product at a location.<br/>
+               Cycle Count: count selected products based on ABC classification.</p>
+        </field>
+    </record>
+
+</odoo>

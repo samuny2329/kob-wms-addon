@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+<!-- ═══════════════════════════════════════════════════════════
+     WmsOutboundScreen — F3 Outbound / Ship
+     Fields: wms.sales.order (status=packed)
+     ═══════════════════════════════════════════════════════════ -->
+<t t-name="kob_wms.WmsOutboundScreen">
+<div class="wms-screen">
+
+    <WmsTopNav activeMode="activeMode" accentColor="accentColor"
+               onNavigate="(m) => this.goToMode(m)" onBack="() => this.onClickBack()"/>
+
+    <main class="wms-main">
+        <div class="wms-page">
+
+            <div class="wms-page-header">
+                <div>
+                    <div class="wms-page-title">Outbound Staging</div>
+                    <div class="wms-page-subtitle">Scan packed orders to confirm AWB and ship</div>
+                </div>
+                <div class="wms-page-actions">
+                    <button class="wms-btn-secondary" t-on-click="loadOrders">
+                        <i class="fa fa-refresh me-1"/>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hero scan panel + stats -->
+            <div class="wms-scan-panel" style="border-left-color: var(--wms-primary-container);">
+                <label class="wms-scan-panel-label">
+                    <t t-if="state.currentOrder">Step 2 — Scan AWB / Tracking Barcode</t>
+                    <t t-else="">Main Terminal Input — Scan Order or Box Barcode</t>
+                </label>
+                <div class="d-flex align-items-center gap-4">
+                    <div class="wms-scan-field-wrap flex-grow-1">
+                        <i class="fa fa-barcode wms-scan-field-icon"/>
+                        <input class="wms-scan-field" t-ref="scanInput"
+                               t-att-placeholder="state.currentOrder
+                                   ? 'Scan AWB / tracking barcode to ship…'
+                                   : 'Scan order barcode or box label…'"
+                               t-on-keydown="onScanKeydown"
+                               autocomplete="off" inputmode="none"/>
+                        <span t-if="state.processing" class="wms-scan-badge wms-scan-badge-scanning">
+                            <span class="wms-dot me-1"/>Shipping…
+                        </span>
+                        <span t-elif="state.currentOrder" class="wms-scan-badge"
+                              style="background:#FFF7ED; color:#9A3412; border:1.5px solid #FDBA74;">
+                            Step 2 — Scan AWB
+                        </span>
+                        <span t-else="" class="wms-scan-badge wms-scan-badge-ready">
+                            Ready for Scan
+                        </span>
+                    </div>
+                    <!-- Stats -->
+                    <div class="wms-stats-row flex-shrink-0">
+                        <div class="wms-stat-box">
+                            <div class="stat-num"><t t-esc="state.orders.length"/></div>
+                            <div class="stat-lbl">Packed</div>
+                        </div>
+                        <div class="wms-stat-box wms-stat-box-accent">
+                            <div class="stat-num">
+                                <t t-esc="state.orders.filter(o => !o.awb).length"/>
+                            </div>
+                            <div class="stat-lbl">To Ship</div>
+                        </div>
+                    </div>
+                </div>
+                <div t-if="state.lastScan" class="wms-scan-feedback-row">
+                    <span t-if="state.lastScanOk === true"  class="badge text-bg-success"><i class="fa fa-check"/> <t t-esc="state.lastScan"/></span>
+                    <span t-elif="state.lastScanOk === false" class="badge text-bg-danger"><i class="fa fa-times"/> <t t-esc="state.lastScan"/></span>
+                </div>
+            </div>
+
+            <!-- Bento: carriers sidebar + staged list -->
+            <div class="wms-bento-grid">
+
+                <!-- LEFT: couriers + selected order detail -->
+                <div class="wms-bento-left">
+
+                    <!-- Order detail card (when selected) -->
+                    <div t-if="state.currentOrder"
+                         class="wms-summary-card"
+                         style="border-left-color: var(--wms-primary-container);">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <div style="font-family:'Manrope',sans-serif; font-size:1.1rem; font-weight:800; color:var(--wms-primary-container);"
+                                     t-esc="state.currentOrder.ref || state.currentOrder.name"/>
+                                <div style="font-size:12px; color:var(--wms-on-surface-variant);"
+                                     t-esc="state.currentOrder.customer"/>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary" t-on-click="deselectOrder">
+                                <i class="fa fa-times"/>
+                            </button>
+                        </div>
+                        <div class="wms-summary-row">
+                            <span class="label">Platform</span>
+                            <span t-att-class="getPlatformBadge(state.currentOrder)" style="font-size:11px;" t-esc="state.currentOrder.platform"/>
+                        </div>
+                        <div class="wms-summary-row">
+                            <span class="label">Items</span>
+                            <span class="value" t-esc="state.currentOrder.expected_total"/>
+                        </div>
+                        <div class="wms-summary-row">
+                            <span class="label">Box</span>
+                            <span t-if="state.currentOrder.box_barcode" class="badge text-bg-dark"
+                                  style="font-family:monospace; font-size:11px;"
+                                  t-esc="state.currentOrder.box_barcode"/>
+                            <span t-else="" class="text-muted">—</span>
+                        </div>
+                        <div class="wms-summary-row">
+                            <span class="label">Courier</span>
+                            <span class="value" t-esc="state.currentOrder.courier_id ? state.currentOrder.courier_id[1] : '—'"/>
+                        </div>
+                        <div class="wms-summary-row">
+                            <span class="label">AWB</span>
+                            <span t-if="state.currentOrder.awb" class="badge text-bg-success"
+                                  t-esc="state.currentOrder.awb"/>
+                            <em t-else="" class="text-muted" style="font-size:11px;">— scan below —</em>
+                        </div>
+                        <div class="mt-3 p-3 text-center rounded"
+                             style="background:var(--wms-surface-container-low); font-size:12px; color:var(--wms-on-surface-variant);">
+                            <i class="fa fa-barcode fa-lg me-2"/>
+                            Scan AWB / tracking barcode above to ship
+                        </div>
+                    </div>
+
+                    <!-- Staged parcels table (main list) -->
+                    <div class="wms-ledger-card">
+                        <div class="wms-ledger-card-header">
+                            <span>Staged Parcels — Live Queue</span>
+                            <span class="wms-chip wms-chip-pending"><t t-esc="state.orders.length"/></span>
+                        </div>
+                        <t t-if="state.loading">
+                            <div class="text-center py-5"><i class="fa fa-spinner fa-spin fa-2x text-muted"/></div>
+                        </t>
+                        <t t-elif="state.orders.length === 0">
+                            <div class="text-center py-5 text-muted">
+                                <i class="fa fa-check-circle fa-2x mb-2 d-block"/>No packed orders waiting
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <table class="wms-ledger-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order Ref</th>
+                                        <th>Customer</th>
+                                        <th>Courier</th>
+                                        <th>SLA</th>
+                                        <th class="align-right">AWB</th>
+                                        <th class="align-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="state.orders" t-as="order" t-key="order.id"
+                                        t-on-click="() => this.selectOrder(order)"
+                                        t-att-class="state.selectedOrderId === order.id ? 'wms-row-done' : ''"
+                                        style="cursor:pointer;">
+                                        <td>
+                                            <div style="font-weight:700; font-family:monospace; font-size:13px;"
+                                                 t-esc="order.ref || order.name"/>
+                                            <div style="font-size:10px; color:var(--wms-on-surface-variant);"
+                                                 t-esc="order.name"/>
+                                        </td>
+                                        <td style="font-size:12px;" t-esc="order.customer"/>
+                                        <td style="font-size:12px;" t-esc="order.courier_id ? order.courier_id[1] : '—'"/>
+                                        <td>
+                                            <span t-att-class="getSlaClass(order)"
+                                                  style="font-size:10px; padding:2px 8px; border-radius:999px;"
+                                                  t-esc="order.sla_status"/>
+                                        </td>
+                                        <td class="align-right">
+                                            <span t-if="order.awb" class="wms-chip wms-chip-ready"
+                                                  style="font-family:monospace;"
+                                                  t-esc="order.awb"/>
+                                            <span t-else="" class="wms-chip wms-chip-pending">—</span>
+                                        </td>
+                                        <td class="align-right">
+                                            <span t-if="order.awb" class="wms-chip wms-chip-ready">Shipped</span>
+                                            <span t-else="" class="wms-chip wms-chip-staged">Staged</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="wms-ledger-footer">
+                                <span>Showing <t t-esc="state.orders.length"/> packed orders</span>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- RIGHT: pending carriers info -->
+                <div class="wms-bento-right">
+                    <div style="background:var(--wms-surface-container-low); border-radius:12px; padding:20px;">
+                        <h3 style="font-family:'Manrope',sans-serif; font-weight:700; font-size:14px; color:var(--wms-primary-container); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+                            <i class="fa fa-truck"/>Pending Carriers
+                        </h3>
+                        <div t-if="state.orders.length === 0"
+                             class="text-center py-3 text-muted" style="font-size:12px;">
+                            No carriers scheduled
+                        </div>
+                        <div t-foreach="courierGroups" t-as="cg" t-key="cg.name"
+                             class="wms-carrier-item">
+                            <div>
+                                <div class="wms-carrier-name" t-esc="cg.name"/>
+                                <div class="wms-carrier-sub">Pending dispatch</div>
+                            </div>
+                            <div>
+                                <div class="wms-carrier-count" t-esc="cg.count"/>
+                                <div class="wms-carrier-count-lbl">Parcels</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Outbound steps guide -->
+                    <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 1px 4px rgba(25,28,29,0.05);">
+                        <h3 style="font-family:'Manrope',sans-serif; font-weight:700; font-size:14px; margin-bottom:14px;">
+                            How to Ship
+                        </h3>
+                        <div class="d-flex flex-column gap-3">
+                            <div class="d-flex align-items-start gap-3">
+                                <span style="width:24px; height:24px; border-radius:50%; background:var(--wms-primary-container); color:white; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</span>
+                                <span style="font-size:12px; color:var(--wms-on-surface-variant);">Scan order barcode or select from queue</span>
+                            </div>
+                            <div class="d-flex align-items-start gap-3">
+                                <span style="width:24px; height:24px; border-radius:50%; background:var(--wms-primary-container); color:white; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</span>
+                                <span style="font-size:12px; color:var(--wms-on-surface-variant);">Verify order details and courier assignment</span>
+                            </div>
+                            <div class="d-flex align-items-start gap-3">
+                                <span style="width:24px; height:24px; border-radius:50%; background:var(--wms-primary-container); color:white; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</span>
+                                <span style="font-size:12px; color:var(--wms-on-surface-variant);">Scan AWB barcode → marks as Shipped</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+</div>
+</t>
+
+</templates>

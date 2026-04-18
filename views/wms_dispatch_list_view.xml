@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dispatch Queue list view is defined in views/wms_sales_order_views.xml (view_wms_dispatch_list)
+     Action is defined in views/wms_scan_screen_action.xml (action_wms_dispatch_screen) -->
+<odoo/>

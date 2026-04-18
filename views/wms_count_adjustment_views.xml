@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         wms.count.adjustment — Pending Inventory Adjustments
+         Bridge between WMS count verification and Odoo stock.quant
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- ── List View ─────────────────────────────────────────────── -->
+    <record id="view_wms_count_adjustment_list" model="ir.ui.view">
+        <field name="name">wms.count.adjustment.list</field>
+        <field name="model">wms.count.adjustment</field>
+        <field name="arch" type="xml">
+            <list string="Inventory Adjustments"
+                  decoration-danger="variance_pct &gt; 5 or variance_pct &lt; -5"
+                  decoration-warning="variance_pct != 0 and variance_pct &lt;= 5 and variance_pct &gt;= -5"
+                  decoration-success="variance_qty == 0"
+                  decoration-muted="state == 'rejected'">
+                <field name="name"/>
+                <field name="session_id" optional="show"/>
+                <field name="task_id" optional="hide"/>
+                <field name="product_id"/>
+                <field name="location_id"/>
+                <field name="lot_id" optional="show"/>
+                <field name="system_qty" string="System"/>
+                <field name="counted_qty" string="Counted"/>
+                <field name="variance_qty" string="Variance"/>
+                <field name="variance_pct" string="Var %"/>
+                <field name="verified_by" optional="show"/>
+                <field name="approved_by" optional="hide"/>
+                <field name="move_id" optional="hide" string="Stock Move"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'pending'"
+                       decoration-warning="state == 'approved'"
+                       decoration-success="state == 'applied'"
+                       decoration-danger="state == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Form View ─────────────────────────────────────────────── -->
+    <record id="view_wms_count_adjustment_form" model="ir.ui.view">
+        <field name="name">wms.count.adjustment.form</field>
+        <field name="model">wms.count.adjustment</field>
+        <field name="arch" type="xml">
+            <form string="Inventory Adjustment">
+                <header>
+                    <button name="action_approve" type="object"
+                            string="Approve" class="oe_highlight"
+                            invisible="state != 'pending'"
+                            groups="kob_wms.group_wms_manager"/>
+                    <button name="action_mark_applied" type="object"
+                            string="Mark as Applied" class="btn-secondary"
+                            invisible="state != 'approved'"
+                            groups="kob_wms.group_wms_manager"
+                            confirm="Mark as applied? Use this AFTER clicking Apply All in Odoo Inventory Adjustments."/>
+                    <button name="action_reject" type="object"
+                            string="Reject" class="btn-danger"
+                            invisible="state not in ('pending', 'approved')"
+                            groups="kob_wms.group_wms_manager"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="pending,approved,applied"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Count Reference">
+                            <field name="session_id"/>
+                            <field name="task_id"/>
+                            <field name="product_id"/>
+                            <field name="location_id"/>
+                            <field name="lot_id"/>
+                        </group>
+                        <group string="Quantities">
+                            <field name="system_qty"/>
+                            <field name="counted_qty"/>
+                            <field name="variance_qty"/>
+                            <field name="variance_pct" widget="percentage"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Audit Trail">
+                            <field name="verified_by"/>
+                            <field name="verified_date"/>
+                            <field name="approved_by"/>
+                            <field name="approved_date"/>
+                            <field name="applied_date"/>
+                        </group>
+                        <group string="Odoo Integration">
+                            <field name="quant_id"/>
+                            <field name="move_id"/>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Notes..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Search View ───────────────────────────────────────────── -->
+    <record id="view_wms_count_adjustment_search" model="ir.ui.view">
+        <field name="name">wms.count.adjustment.search</field>
+        <field name="model">wms.count.adjustment</field>
+        <field name="arch" type="xml">
+            <search string="Adjustments">
+                <field name="product_id"/>
+                <field name="location_id"/>
+                <field name="session_id"/>
+                <field name="task_id"/>
+                <filter string="Pending" name="pending"
+                        domain="[('state','=','pending')]"/>
+                <filter string="Approved" name="approved"
+                        domain="[('state','=','approved')]"/>
+                <filter string="Applied" name="applied"
+                        domain="[('state','=','applied')]"/>
+                <filter string="Rejected" name="rejected"
+                        domain="[('state','=','rejected')]"/>
+                <separator/>
+                <filter string="Has Variance" name="has_variance"
+                        domain="[('variance_qty','!=',0)]"/>
+                <filter string="High Variance (&gt;5%)" name="high_variance"
+                        domain="['|',('variance_pct','&gt;',5),('variance_pct','&lt;',-5)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Session" name="g_session"
+                            context="{'group_by':'session_id'}"/>
+                    <filter string="Product" name="g_product"
+                            context="{'group_by':'product_id'}"/>
+                    <filter string="Location" name="g_location"
+                            context="{'group_by':'location_id'}"/>
+                    <filter string="State" name="g_state"
+                            context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Actions ───────────────────────────────────────────────── -->
+    <record id="action_wms_count_adjustment" model="ir.actions.act_window">
+        <field name="name">Pending Adjustments</field>
+        <field name="res_model">wms.count.adjustment</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_wms_count_adjustment_search"/>
+        <field name="context">{'search_default_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No pending inventory adjustments.
+            </p>
+            <p>Adjustments are created when a Supervisor verifies a count task.
+               A Manager must approve before applying to stock.</p>
+        </field>
+    </record>
+
+    <record id="action_wms_count_adjustment_all" model="ir.actions.act_window">
+        <field name="name">All Adjustments</field>
+        <field name="res_model">wms.count.adjustment</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_wms_count_adjustment_search"/>
+    </record>
+
+</odoo>

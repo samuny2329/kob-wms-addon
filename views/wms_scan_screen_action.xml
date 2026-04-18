@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_wms_scan_screen_pick" model="ir.actions.client">
+        <field name="name">🎯 Scan Screen — Pick</field>
+        <field name="tag">kob_wms.scan_screen</field>
+        <field name="target">current</field>
+        <field name="context">{'default_mode': 'pick'}</field>
+    </record>
+
+    <record id="action_wms_scan_screen_pack" model="ir.actions.client">
+        <field name="name">🎯 Scan Screen — Pack</field>
+        <field name="tag">kob_wms.scan_screen</field>
+        <field name="target">current</field>
+        <field name="context">{'default_mode': 'pack'}</field>
+    </record>
+
+    <record id="action_wms_scan_screen_ship" model="ir.actions.client">
+        <field name="name">🎯 Scan Screen — Ship</field>
+        <field name="tag">kob_wms.scan_screen</field>
+        <field name="target">current</field>
+        <field name="context">{'default_mode': 'ship'}</field>
+    </record>
+
+    <!-- Remove old ir.actions.client registrations so Odoo can re-create them
+         as ir.actions.act_window with the same XML IDs (model-type change). -->
+    <delete model="ir.model.data"
+            search="[('module','=','kob_wms'),('name','in',[
+                'action_wms_pick_screen',
+                'action_wms_pack_screen',
+                'action_wms_outbound_screen',
+                'action_wms_dispatch_screen'])]"/>
+
+    <!-- Pick Queue (F1) — standard list view with scan bar -->
+    <record id="action_wms_pick_screen" model="ir.actions.act_window">
+        <field name="name">Pick Queue (F1)</field>
+        <field name="res_model">wms.sales.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('status', 'in', ['pending', 'picking'])]</field>
+        <field name="view_ids" eval="[(5,0,0),
+            (0,0,{'view_mode':'list','view_id':ref('view_wms_pick_list')}),
+            (0,0,{'view_mode':'form','view_id':ref('view_wms_sales_order_form')})]"/>
+        <field name="search_view_id" ref="view_wms_queue_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No orders to pick</p>
+            <p>Orders appear here once confirmed. Scan a barcode or click to start.</p>
+        </field>
+    </record>
+
+    <!-- Pack Queue (F2) — standard list view with scan bar -->
+    <record id="action_wms_pack_screen" model="ir.actions.act_window">
+        <field name="name">Pack Queue (F2)</field>
+        <field name="res_model">wms.sales.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('status', 'in', ['picked', 'packing'])]</field>
+        <field name="view_ids" eval="[(5,0,0),
+            (0,0,{'view_mode':'list','view_id':ref('view_wms_pack_list')}),
+            (0,0,{'view_mode':'form','view_id':ref('view_wms_sales_order_form')})]"/>
+        <field name="search_view_id" ref="view_wms_queue_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No orders to pack</p>
+            <p>Complete picking first. Scan a barcode or click to pack.</p>
+        </field>
+    </record>
+
+    <!-- Outbound Queue (F3) — standard list view with scan bar -->
+    <record id="action_wms_outbound_screen" model="ir.actions.act_window">
+        <field name="name">Outbound (F3)</field>
+        <field name="res_model">wms.sales.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('status', 'in', ['packed', 'shipped'])]</field>
+        <field name="view_ids" eval="[(5,0,0),
+            (0,0,{'view_mode':'list','view_id':ref('view_wms_outbound_list')}),
+            (0,0,{'view_mode':'form','view_id':ref('view_wms_sales_order_form')})]"/>
+        <field name="search_view_id" ref="view_wms_queue_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No orders ready for outbound</p>
+            <p>Packed orders appear here for shipment confirmation.</p>
+        </field>
+    </record>
+
+    <!-- Dispatch Queue (F4) — standard list view with scan bar, grouped by courier -->
+    <record id="action_wms_dispatch_screen" model="ir.actions.act_window">
+        <field name="name">Dispatch (F4)</field>
+        <field name="res_model">wms.sales.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('status', '=', 'shipped')]</field>
+        <field name="view_ids" eval="[(5,0,0),
+            (0,0,{'view_mode':'list','view_id':ref('view_wms_dispatch_list')}),
+            (0,0,{'view_mode':'form','view_id':ref('view_wms_sales_order_form')})]"/>
+        <field name="search_view_id" ref="view_wms_queue_search"/>
+        <field name="context">{'search_default_by_courier': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No orders pending dispatch</p>
+            <p>Shipped orders appear here for courier handover.</p>
+        </field>
+    </record>
+
+    <!-- Worker Login Screen -->
+    <record id="action_wms_login_screen" model="ir.actions.client">
+        <field name="name">WMS Login</field>
+        <field name="tag">kob_wms.wms_login_screen</field>
+        <field name="target">fullscreen</field>
+    </record>
+
+    <!-- Menu moved to wms_menus.xml (loads after menu_wms_inventory is defined) -->
+
+</odoo>

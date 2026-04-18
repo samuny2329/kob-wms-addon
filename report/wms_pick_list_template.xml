@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_wms_pick_list">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        <div class="row mb-3">
+                            <div class="col-8">
+                                <h2 class="mb-1">
+                                    Pick List
+                                    <small class="text-muted"> — <span t-field="o.name"/></small>
+                                </h2>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div style="border: 2px solid #714B67; border-radius: 6px; padding: 8px; display: inline-block;">
+                                    <div style="font-size: 9px; font-weight: 800; color: #714B67; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
+                                        Scan to Pick
+                                    </div>
+                                    <img t-if="o.ref"
+                                         t-attf-src="/report/barcode/Code128/{{o.ref}}?width=260&amp;height=50"
+                                         style="max-width: 100%;"/>
+                                    <img t-if="not o.ref"
+                                         t-attf-src="/report/barcode/Code128/{{o.name}}?width=260&amp;height=50"
+                                         style="max-width: 100%;"/>
+                                    <div style="font-family: monospace; font-size: 11px; font-weight: 700; margin-top: 4px; color: #57344F;">
+                                        <span t-esc="o.ref or o.name"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-4">
+                                <strong>Customer:</strong>
+                                <span t-field="o.customer"/><br/>
+                                <strong>Platform:</strong>
+                                <span t-field="o.platform"/><br/>
+                                <strong>Ref:</strong>
+                                <span t-field="o.ref"/>
+                            </div>
+                            <div class="col-4">
+                                <strong>Courier:</strong>
+                                <span t-field="o.courier_id.name"/><br/>
+                                <strong>AWB:</strong>
+                                <span t-field="o.awb"/><br/>
+                                <strong>Status:</strong>
+                                <span t-field="o.status"/>
+                            </div>
+                            <div class="col-4 text-end">
+                                <t t-if="o.picking_id">
+                                    <strong>Delivery:</strong>
+                                    <span t-field="o.picking_id.name"/><br/>
+                                    <strong>Source:</strong>
+                                    <span t-field="o.picking_id.location_id.complete_name"/><br/>
+                                    <strong>Warehouse:</strong>
+                                    <span t-esc="o.picking_id.picking_type_id.warehouse_id.name or ''"/>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Pick items from Delivery move_lines (source of truth) -->
+                        <t t-if="o.picking_id and o.picking_id.move_line_ids">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 12%;">SKU</th>
+                                        <th style="width: 16%;">Barcode</th>
+                                        <th>Product</th>
+                                        <th style="width: 14%;">Location</th>
+                                        <th style="width: 10%;">Lot</th>
+                                        <th style="width: 8%;">Expiry</th>
+                                        <th class="text-end" style="width: 8%;">Demand</th>
+                                        <th class="text-end" style="width: 8%;">Done</th>
+                                        <th style="width: 5%;">✓</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.picking_id.move_line_ids" t-as="ml">
+                                        <td>
+                                            <strong t-esc="ml.product_id.default_code or ''"/>
+                                        </td>
+                                        <td style="font-family: monospace; font-size: 10px;">
+                                            <t t-if="ml.product_id.barcode">
+                                                <img t-attf-src="/report/barcode/Code128/{{ml.product_id.barcode}}?width=160&amp;height=35"
+                                                     style="max-width: 100%;"/>
+                                                <br/>
+                                                <span t-esc="ml.product_id.barcode"
+                                                      style="font-size: 9px;"/>
+                                            </t>
+                                            <t t-elif="ml.product_id.default_code">
+                                                <img t-attf-src="/report/barcode/Code128/{{ml.product_id.default_code}}?width=160&amp;height=35"
+                                                     style="max-width: 100%;"/>
+                                                <br/>
+                                                <span t-esc="ml.product_id.default_code"
+                                                      style="font-size: 9px;"/>
+                                            </t>
+                                        </td>
+                                        <td>
+                                            <span t-field="ml.product_id.name"/>
+                                        </td>
+                                        <td style="font-size: 10px;">
+                                            <span t-field="ml.location_id.complete_name"/>
+                                        </td>
+                                        <td style="font-size: 10px;">
+                                            <t t-if="ml.lot_id">
+                                                <strong t-field="ml.lot_id.name"/>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="text-muted">-</span>
+                                            </t>
+                                        </td>
+                                        <td style="font-size: 10px;">
+                                            <t t-if="ml.lot_id and ml.lot_id.expiration_date">
+                                                <span t-field="ml.lot_id.expiration_date"
+                                                      t-options="{'widget': 'date'}"/>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="text-muted">-</span>
+                                            </t>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-esc="'%.0f' % (ml.reserved_uom_qty or ml.move_id.product_uom_qty or 0)"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-esc="'%.0f' % (ml.quantity or 0)"/>
+                                        </td>
+                                        <td>☐</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Fallback: WMS lines if no picking linked -->
+                        <t t-if="not o.picking_id or not o.picking_id.move_line_ids">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 15%;">SKU</th>
+                                        <th style="width: 18%;">Barcode</th>
+                                        <th>Product</th>
+                                        <th class="text-end" style="width: 10%;">Expected</th>
+                                        <th class="text-end" style="width: 10%;">Picked</th>
+                                        <th style="width: 5%;">✓</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.line_ids" t-as="l">
+                                        <td><strong t-field="l.sku"/></td>
+                                        <td style="font-family: monospace; font-size: 11px;">
+                                            <t t-if="l.product_id and l.product_id.barcode">
+                                                <img t-attf-src="/report/barcode/Code128/{{l.product_id.barcode}}?width=180&amp;height=40"
+                                                     style="max-width: 100%;"/>
+                                                <br/>
+                                                <span t-field="l.product_id.barcode"/>
+                                            </t>
+                                        </td>
+                                        <td><span t-field="l.product_name"/></td>
+                                        <td class="text-end"><span t-field="l.expected_qty"/></td>
+                                        <td class="text-end"><span t-field="l.picked_qty"/></td>
+                                        <td>☐</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <p class="mb-0">
+                                    <strong>Picker:</strong>
+                                    <span t-field="o.picker_id.name"/>
+                                </p>
+                                <p class="mt-3">Signature: ______________________</p>
+                            </div>
+                            <div class="col-6 text-end">
+                                <p class="mb-0">
+                                    <strong>Date:</strong>
+                                    <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

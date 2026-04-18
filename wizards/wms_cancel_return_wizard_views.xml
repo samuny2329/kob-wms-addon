@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_wms_cancel_return_wizard_form" model="ir.ui.view">
+        <field name="name">wms.cancel.return.wizard.form</field>
+        <field name="model">wms.cancel.return.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Return Items">
+                <field name="order_id" invisible="1"/>
+                <field name="confirmed" invisible="1"/>
+
+                <!-- ── Before confirming — enter reason ── -->
+                <group invisible="confirmed">
+                    <group string="Order">
+                        <field name="order_name"   readonly="1" string="Reference"/>
+                    </group>
+                    <group string="Reason">
+                        <field name="reason" nolabel="1" widget="text"
+                               placeholder="e.g. Customer cancelled, Wrong item, Damaged goods..."/>
+                    </group>
+                </group>
+
+                <!-- ── After confirming — show result ── -->
+                <group invisible="not confirmed">
+                    <group string="✓ Return Created">
+                        <field name="order_name" readonly="1" string="Reference"/>
+                        <field name="return_ref"  readonly="1" string="Return Delivery"/>
+                    </group>
+                    <div class="alert alert-info mt8" invisible="not return_ref">
+                        <i class="fa fa-info-circle"/> A stock return has been created.
+                        Items will be returned from the customer to the original warehouse location.
+                    </div>
+                    <div class="alert alert-warning mt8" invisible="return_ref">
+                        <i class="fa fa-warning"/> No return delivery was created
+                        (delivery was not yet validated).
+                    </div>
+                </group>
+
+                <footer>
+                    <button name="action_confirm" type="object"
+                            string="Create Return"
+                            class="btn-danger"
+                            invisible="confirmed"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

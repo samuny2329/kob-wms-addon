@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_wms_api_config_list" model="ir.ui.view">
+        <field name="name">wms.api.config.list</field>
+        <field name="model">wms.api.config</field>
+        <field name="arch" type="xml">
+            <list string="API Configurations">
+                <field name="platform"/>
+                <field name="endpoint_url"/>
+                <field name="shop_id"/>
+                <field name="enabled" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_api_config_form" model="ir.ui.view">
+        <field name="name">wms.api.config.form</field>
+        <field name="model">wms.api.config</field>
+        <field name="arch" type="xml">
+            <form string="API Configuration">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="platform"/>
+                            <field name="enabled"/>
+                            <field name="endpoint_url"/>
+                            <field name="shop_id"/>
+                        </group>
+                        <group>
+                            <field name="api_key" password="True"/>
+                            <field name="api_secret" password="True"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Notes..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wms_api_config" model="ir.actions.act_window">
+        <field name="name">API Configurations</field>
+        <field name="res_model">wms.api.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

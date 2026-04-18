@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================= -->
+    <!-- pos.config: add WMS fulfillment mode selector                 -->
+    <!-- Odoo 18 pos.config uses <setting> tiles inside <sheet>, not   -->
+    <!-- a <notebook>/<page> layout.                                   -->
+    <!-- ============================================================= -->
+    <record id="view_pos_config_form_wms" model="ir.ui.view">
+        <field name="name">pos.config.form.wms</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <h2 class="mt-4">KOB WMS Integration</h2>
+                <div class="row mt8 o_settings_container">
+                    <setting string="Fulfillment Mode"
+                             help="Controls how POS orders flow into the KOB WMS pick/pack/ship pipeline.">
+                        <field name="wms_fulfillment_mode"/>
+                        <div class="text-muted mt-2">
+                            <strong>Immediate</strong>: auto-packed, warehouse only dispatches.<br/>
+                            <strong>Pick / Pack / Ship</strong>: order enters the pick queue — workers pick from the warehouse, pack into a box, then dispatch via courier.<br/>
+                            <strong>Disabled</strong>: no WMS sync at all.
+                        </div>
+                    </setting>
+                    <setting string="Default WMS Courier"
+                             help="Courier auto-assigned to WMS orders from this POS."
+                             invisible="wms_fulfillment_mode == 'disabled'">
+                        <field name="wms_default_courier_id"/>
+                    </setting>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============================================================= -->
+    <!-- pos.order: smart button + action buttons                      -->
+    <!-- ============================================================= -->
+    <record id="view_pos_order_form_wms" model="ir.ui.view">
+        <field name="name">pos.order.form.wms</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_wms_orders" type="object"
+                        class="oe_stat_button" icon="fa-truck"
+                        invisible="wms_sales_order_count == 0">
+                    <field name="wms_sales_order_count" widget="statinfo"
+                           string="WMS Orders"/>
+                </button>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button name="action_open_wms_scanner" type="object"
+                        string="📦 Scan Pick (WMS)"
+                        invisible="state not in ('paid', 'done', 'invoiced')"/>
+                <button name="action_force_create_wms_order" type="object"
+                        string="Push to WMS Pick Queue"
+                        invisible="state not in ('paid', 'done', 'invoiced') or wms_sales_order_count &gt; 0"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

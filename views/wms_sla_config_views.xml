@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Access rules for SLA config -->
+    <record id="access_wms_sla_config_worker" model="ir.model.access">
+        <field name="name">wms.sla.config.worker</field>
+        <field name="model_id" ref="model_wms_sla_config"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+    </record>
+    <record id="access_wms_sla_config_supervisor" model="ir.model.access">
+        <field name="name">wms.sla.config.supervisor</field>
+        <field name="model_id" ref="model_wms_sla_config"/>
+        <field name="group_id" ref="group_wms_supervisor"/>
+        <field name="perm_read" eval="True"/>
+    </record>
+    <record id="access_wms_sla_config_manager" model="ir.model.access">
+        <field name="name">wms.sla.config.manager</field>
+        <field name="model_id" ref="model_wms_sla_config"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Default rows -->
+    <record id="sla_default" model="wms.sla.config">
+        <field name="platform">default</field>
+        <field name="pick_sla_minutes">120</field>
+        <field name="pack_sla_minutes">60</field>
+        <field name="ship_sla_minutes">240</field>
+    </record>
+    <record id="sla_shopee" model="wms.sla.config">
+        <field name="platform">shopee</field>
+        <field name="pick_sla_minutes">60</field>
+        <field name="pack_sla_minutes">30</field>
+        <field name="ship_sla_minutes">180</field>
+    </record>
+    <record id="sla_lazada" model="wms.sla.config">
+        <field name="platform">lazada</field>
+        <field name="pick_sla_minutes">60</field>
+        <field name="pack_sla_minutes">30</field>
+        <field name="ship_sla_minutes">180</field>
+    </record>
+    <record id="sla_tiktok" model="wms.sla.config">
+        <field name="platform">tiktok</field>
+        <field name="pick_sla_minutes">45</field>
+        <field name="pack_sla_minutes">30</field>
+        <field name="ship_sla_minutes">120</field>
+    </record>
+    <record id="sla_pos" model="wms.sla.config">
+        <field name="platform">pos</field>
+        <field name="pick_sla_minutes">15</field>
+        <field name="pack_sla_minutes">10</field>
+        <field name="ship_sla_minutes">60</field>
+    </record>
+
+    <!-- ── List view ── -->
+    <record id="view_wms_sla_config_list" model="ir.ui.view">
+        <field name="name">wms.sla.config.list</field>
+        <field name="model">wms.sla.config</field>
+        <field name="arch" type="xml">
+            <list string="SLA Configuration">
+                <field name="platform"/>
+                <field name="soft_sla_enabled" widget="boolean_toggle"/>
+                <field name="soft_sla_avg_oct_min" string="Avg OCT Target (min)"/>
+                <field name="hard_sla_enabled" widget="boolean_toggle"/>
+                <field name="pick_sla_minutes" optional="show"/>
+                <field name="pack_sla_minutes" optional="show"/>
+                <field name="ship_sla_minutes" optional="show"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Form view ── -->
+    <record id="view_wms_sla_config_form" model="ir.ui.view">
+        <field name="name">wms.sla.config.form</field>
+        <field name="model">wms.sla.config</field>
+        <field name="arch" type="xml">
+            <form string="SLA Configuration">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="platform"/>
+                        <h1><field name="platform"/></h1>
+                    </div>
+
+                    <!-- Soft SLA -->
+                    <group string="Soft SLA — Daily Average Target">
+                        <group>
+                            <field name="soft_sla_enabled" widget="boolean_toggle"/>
+                            <field name="soft_sla_avg_oct_min"
+                                   invisible="not soft_sla_enabled"
+                                   string="Avg OCT must be under (min)"/>
+                        </group>
+                        <group>
+                            <div class="text-muted" style="font-size:12px; padding:8px 0;">
+                                Order Cycle Time = from Picklist Printed → Shipped<br/>
+                                คำนวณโดยหักเวลาพักพนักงานออก
+                            </div>
+                        </group>
+                    </group>
+
+                    <!-- Hard SLA -->
+                    <group string="Hard SLA — Per Order Limit">
+                        <group>
+                            <field name="hard_sla_enabled" widget="boolean_toggle"/>
+                        </group>
+                        <group invisible="not hard_sla_enabled">
+                            <field name="pick_sla_minutes" string="Pick must finish in (min)"/>
+                            <field name="pack_sla_minutes" string="Pack must finish in (min)"/>
+                            <field name="ship_sla_minutes" string="Ship must finish in (min)"/>
+                        </group>
+                    </group>
+
+                    <!-- Working Hours -->
+                    <group string="Working Hours">
+                        <group>
+                            <field name="working_start" widget="float_time" string="Start"/>
+                            <field name="working_end"   widget="float_time" string="End"/>
+                        </group>
+                    </group>
+
+                    <!-- Break Times -->
+                    <group string="Break Times (หักออกจากการคำนวณ SLA)">
+                        <group string="Morning Break">
+                            <field name="break_am_enabled" widget="boolean_toggle" string="Enable"/>
+                            <field name="break_am_start" widget="float_time" string="Start"
+                                   invisible="not break_am_enabled"/>
+                            <field name="break_am_end"   widget="float_time" string="End"
+                                   invisible="not break_am_enabled"/>
+                        </group>
+                        <group string="Lunch Break">
+                            <field name="break_lunch_enabled" widget="boolean_toggle" string="Enable"/>
+                            <field name="break_lunch_start" widget="float_time" string="Start"
+                                   invisible="not break_lunch_enabled"/>
+                            <field name="break_lunch_end"   widget="float_time" string="End"
+                                   invisible="not break_lunch_enabled"/>
+                        </group>
+                        <group string="Afternoon Break">
+                            <field name="break_pm_enabled" widget="boolean_toggle" string="Enable"/>
+                            <field name="break_pm_start" widget="float_time" string="Start"
+                                   invisible="not break_pm_enabled"/>
+                            <field name="break_pm_end"   widget="float_time" string="End"
+                                   invisible="not break_pm_enabled"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <field name="active" widget="boolean_toggle"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wms_sla_config" model="ir.actions.act_window">
+        <field name="name">SLA Configuration</field>
+        <field name="res_model">wms.sla.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- SLA Monitor: wms.sales.order grouped by sla_status -->
+    <record id="view_wms_sla_monitor_kanban" model="ir.ui.view">
+        <field name="name">wms.sales.order.sla.kanban</field>
+        <field name="model">wms.sales.order</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="sla_status" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="ref"/>
+                <field name="customer"/>
+                <field name="platform"/>
+                <field name="sla_status"/>
+                <field name="sla_pick_deadline"/>
+                <field name="sla_pack_deadline"/>
+                <field name="sla_ship_deadline"/>
+                <field name="status"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <strong><field name="name"/></strong>
+                            <div><field name="customer"/></div>
+                            <div>
+                                <span class="badge text-bg-info"><field name="platform"/></span>
+                                <span class="ms-2"><field name="status"/></span>
+                            </div>
+                            <div class="mt-1">
+                                <small>
+                                    Pick by: <field name="sla_pick_deadline"/><br/>
+                                    Pack by: <field name="sla_pack_deadline"/><br/>
+                                    Ship by: <field name="sla_ship_deadline"/>
+                                </small>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="action_wms_sla_monitor" model="ir.actions.act_window">
+        <field name="name">SLA Monitor</field>
+        <field name="res_model">wms.sales.order</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="view_id" ref="view_wms_sla_monitor_kanban"/>
+        <field name="domain">[('status', 'not in', ['shipped', 'cancelled'])]</field>
+        <field name="context">{'search_default_sla_breached': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No orders at risk</p>
+            <p>Orders are grouped by SLA status: on track / at risk / breached.</p>
+        </field>
+    </record>
+
+</odoo>

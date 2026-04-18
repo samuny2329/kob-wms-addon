@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         wms.box.analytics  — 360° Box Usage Analytics
+         SQL view: wms_box_analytics (read-only)
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- ── List View ─────────────────────────────────────────────── -->
+    <record id="view_wms_box_analytics_list" model="ir.ui.view">
+        <field name="name">wms.box.analytics.list</field>
+        <field name="model">wms.box.analytics</field>
+        <field name="arch" type="xml">
+            <list string="Box Analytics" default_order="date desc"
+                  decoration-danger="avg_fill_pct &lt; 40"
+                  decoration-warning="avg_fill_pct &gt;= 40 and avg_fill_pct &lt; 60"
+                  decoration-success="avg_fill_pct &gt;= 60">
+                <field name="date"/>
+                <field name="month"           optional="show"/>
+                <field name="actual_box_id"/>
+                <field name="suggested_box_id" optional="hide"/>
+                <field name="courier_id"       optional="show"/>
+                <field name="platform"         optional="show"/>
+                <field name="order_count"/>
+                <field name="total_vol_m3"    optional="hide" digits="[12,6]"/>
+                <field name="avg_vol_m3"      optional="hide" digits="[10,6]"/>
+                <field name="total_weight"    optional="hide" digits="[10,3]"/>
+                <field name="avg_fill_pct"    widget="progressbar" options="{'max_value': 100}"/>
+                <field name="min_fill_pct"    optional="hide"/>
+                <field name="max_fill_pct"    optional="hide"/>
+                <field name="suggestion_hits" optional="hide"/>
+                <field name="hit_rate"        optional="show" string="AI Hit %"/>
+                <!-- Cost breakdown -->
+                <field name="total_box_cost"    optional="show"  string="Box (฿)"/>
+                <field name="avg_box_cost"      optional="hide"  string="Box/Order (฿)"/>
+                <field name="total_tape_cost"   optional="show"  string="Tape (฿)"/>
+                <field name="avg_tape_cost"     optional="hide"  string="Tape/Order (฿)"/>
+                <field name="total_bubble_cost" optional="show"  string="Bubble (฿)"/>
+                <field name="avg_bubble_cost"   optional="hide"  string="Bubble/Order (฿)"/>
+                <field name="total_pack_cost"   optional="show"  string="Total Mat. (฿)"/>
+                <field name="avg_pack_cost"     optional="show"  string="Mat./Order (฿)"/>
+                <field name="avg_pack_min"      optional="show"  string="Pack Time (min)"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Pivot View ────────────────────────────────────────────── -->
+    <record id="view_wms_box_analytics_pivot" model="ir.ui.view">
+        <field name="name">wms.box.analytics.pivot</field>
+        <field name="model">wms.box.analytics</field>
+        <field name="arch" type="xml">
+            <pivot string="Box Usage Pivot" disable_linking="True">
+                <field name="month"           type="row"/>
+                <field name="actual_box_id"   type="col"/>
+                <field name="order_count"     type="measure"/>
+                <field name="avg_fill_pct"    type="measure"/>
+                <field name="total_box_cost"  type="measure"/>
+                <field name="total_tape_cost" type="measure"/>
+                <field name="total_pack_cost" type="measure"/>
+                <field name="hit_rate"        type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ── Graph View ────────────────────────────────────────────── -->
+    <record id="view_wms_box_analytics_graph" model="ir.ui.view">
+        <field name="name">wms.box.analytics.graph</field>
+        <field name="model">wms.box.analytics</field>
+        <field name="arch" type="xml">
+            <graph string="Box Usage" type="bar" stacked="True">
+                <field name="actual_box_id" type="row"/>
+                <field name="order_count"   type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ── Search View ───────────────────────────────────────────── -->
+    <record id="view_wms_box_analytics_search" model="ir.ui.view">
+        <field name="name">wms.box.analytics.search</field>
+        <field name="model">wms.box.analytics</field>
+        <field name="arch" type="xml">
+            <search string="Box Analytics">
+                <field name="actual_box_id"    string="Box"/>
+                <field name="suggested_box_id" string="AI Suggested"/>
+                <field name="courier_id"       string="Courier"/>
+                <field name="platform"/>
+                <field name="month"            string="Month (YYYY-MM)"/>
+
+                <!-- Filters -->
+                <filter string="This Month" name="this_month"
+                        domain="[('date','&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
+                                 ('date','&lt;=', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Last 30 Days" name="last_30d"
+                        domain="[('date','&gt;=',(context_today()-relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <filter string="AI Hit" name="ai_hit"
+                        domain="[('suggestion_hits','>',0)]"/>
+                <filter string="Under-filled (&lt;50%)" name="under_filled"
+                        domain="[('avg_fill_pct','&lt;',50)]"/>
+                <separator/>
+
+                <!-- Group By -->
+                <group expand="0" string="Group By">
+                    <filter string="Box Size"  name="g_box"     context="{'group_by':'actual_box_id'}"/>
+                    <filter string="Month"     name="g_month"   context="{'group_by':'month'}"/>
+                    <filter string="Platform"  name="g_platform" context="{'group_by':'platform'}"/>
+                    <filter string="Courier"   name="g_courier" context="{'group_by':'courier_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ────────────────────────────────────────────────── -->
+    <record id="action_wms_box_analytics" model="ir.actions.act_window">
+        <field name="name">360° Box Analytics</field>
+        <field name="res_model">wms.box.analytics</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_wms_box_analytics_search"/>
+        <field name="context">{'search_default_last_30d': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No packed orders yet with box analytics data.
+            </p>
+            <p>Analytics appear once orders reach <strong>Packed</strong> or
+               <strong>Shipped</strong> status with an actual box selected.</p>
+        </field>
+    </record>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         wms.box.size  — Box Catalogue (extended views)
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Box Size List ─────────────────────────────────────────── -->
+    <record id="view_wms_box_size_list" model="ir.ui.view">
+        <field name="name">wms.box.size.list</field>
+        <field name="model">wms.box.size</field>
+        <field name="arch" type="xml">
+            <list string="Box Catalogue"
+                  decoration-danger="restock_alert == True"
+                  editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="image" widget="image"
+                       options="{'size': [32,32]}" optional="show"/>
+                <field name="code"/>
+                <field name="label"/>
+                <field name="length"      string="L (cm)" optional="show"/>
+                <field name="width"       string="W (cm)" optional="show"/>
+                <field name="height"      string="H (cm)" optional="show"/>
+                <field name="volume_cm3"  string="Vol (cm³)" optional="hide"/>
+                <field name="weight_limit" string="Max kg"   optional="show"/>
+                <!-- Cost -->
+                <field name="unit_cost"          string="Box (฿)"/>
+                <field name="tape_rounds"        string="Tape Rds"   optional="show"/>
+                <field name="tape_length_m"      string="Tape (m)"   optional="show"/>
+                <field name="tape_cost_est"      string="Tape (฿)"   optional="show"/>
+                <field name="bubble_cost_est"    string="Bubble (฿)" optional="show"/>
+                <field name="total_material_cost" string="Total Mat. (฿)" optional="show"/>
+                <!-- Stock -->
+                <field name="current_stock"     string="Stock"/>
+                <field name="restock_qty"       string="Min Stock"/>
+                <field name="restock_lead_days" string="Lead (d)" optional="show"/>
+                <!-- Analytics -->
+                <field name="usage_30d"     string="Used/30d"/>
+                <field name="cost_30d"      string="Mat.Cost/30d (฿)" optional="show"/>
+                <field name="restock_alert" string="Restock!" widget="boolean_toggle" optional="show"/>
+                <field name="active"        optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Box Size Form ─────────────────────────────────────────── -->
+    <record id="view_wms_box_size_form" model="ir.ui.view">
+        <field name="name">wms.box.size.form</field>
+        <field name="model">wms.box.size</field>
+        <field name="arch" type="xml">
+            <form string="Box Size">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_wms_box_analytics)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-bar-chart">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="usage_30d"/>
+                                </span>
+                                <span class="o_stat_text">Orders/30d</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <field name="image" widget="image"
+                           class="oe_avatar"
+                           options="{'size': [96,96],'preview_image': 'image'}"/>
+                    <div class="oe_title">
+                        <label for="code"/>
+                        <h1><field name="code" placeholder="e.g. B"/></h1>
+                        <label for="label"/>
+                        <h2><field name="label" placeholder="e.g. B 17×25×9 cm"/></h2>
+                    </div>
+
+                    <group>
+                        <group string="Dimensions">
+                            <field name="length" string="Length (cm)"/>
+                            <field name="width"  string="Width (cm)"/>
+                            <field name="height" string="Height (cm)"/>
+                            <field name="volume_cm3" string="Volume (cm³)" readonly="1"/>
+                            <field name="volume"     string="Volume (m³)"  readonly="1"/>
+                            <field name="weight_limit" string="Max Weight (kg)"/>
+                        </group>
+                        <group string="Box Cost &amp; Stock">
+                            <field name="unit_cost"         string="Box Cost (฿)"/>
+                            <field name="current_stock"     string="Current Stock (units)"/>
+                            <field name="restock_qty"       string="Min Stock Level"/>
+                            <field name="restock_lead_days" string="Lead Time (days)"/>
+                            <field name="restock_alert"     string="Needs Restock?" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- ── Tape Calculation ──────────────────────── -->
+                    <group string="🧷 Tape Sealing Cost" colspan="2">
+                        <group string="Configuration">
+                            <field name="tape_rounds"      string="Rounds (min)"/>
+                            <field name="tape_overlap_cm"  string="Overlap Allowance (cm)"/>
+                            <field name="tape_cost_per_m"  string="Tape Price / m (฿)"/>
+                        </group>
+                        <group string="Computed">
+                            <field name="tape_length_m"   string="Tape / Box (m)"   readonly="1"/>
+                            <field name="tape_cost_est"   string="Tape Cost / Box (฿)" readonly="1"/>
+                        </group>
+                        <div class="o_td_label" colspan="2" style="color:#888;font-size:0.85em;padding-top:2px">
+                            Formula: [(Width + Height) × 2] × rounds + overlap (cm) ÷ 100 = metres
+                        </div>
+                    </group>
+
+                    <!-- ── Bubble Wrap ───────────────────────────── -->
+                    <group string="🫧 Bubble Wrap" colspan="2">
+                        <group>
+                            <field name="bubble_cost_est" string="Bubble Wrap Cost / Box (฿)"
+                                   help="Set based on typical fragility of products shipped in this size box"/>
+                        </group>
+                        <group>
+                            <field name="total_material_cost" string="Total Material Cost / Box (฿)"
+                                   readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="30-Day Analytics" colspan="2">
+                        <group>
+                            <field name="usage_30d"  string="Orders (30d)" readonly="1"/>
+                            <field name="cost_30d"   string="Total Material Cost (30d ฿)" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="sequence" string="Sort Sequence"/>
+                            <field name="active"   string="Active"/>
+                        </group>
+                    </group>
+
+                    <field name="note" placeholder="Optional note…"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Box Size Search ───────────────────────────────────────── -->
+    <record id="view_wms_box_size_search" model="ir.ui.view">
+        <field name="name">wms.box.size.search</field>
+        <field name="model">wms.box.size</field>
+        <field name="arch" type="xml">
+            <search string="Box Sizes">
+                <field name="code"  string="Code"/>
+                <field name="label" string="Label"/>
+                <filter string="Out of Stock" name="out_of_stock"
+                        domain="[('current_stock','=',0),('restock_qty','&gt;',0)]"/>
+                <filter string="Has Min Stock Set" name="has_restock"
+                        domain="[('restock_qty','&gt;',0)]"/>
+                <filter string="Archived" name="archived"
+                        domain="[('active','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Box Size Action ───────────────────────────────────────── -->
+    <record id="action_wms_box_size" model="ir.actions.act_window">
+        <field name="name">Box Catalogue</field>
+        <field name="res_model">wms.box.size</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_wms_box_size_search"/>
+        <field name="context">{'active_test': False}</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="wms_portal_admin" model="kob.wms.user">
+        <field name="name">Admin KOB</field>
+        <field name="username">admin</field>
+        <field name="role">admin</field>
+        <field name="is_active" eval="True"/>
+    </record>
+
+    <record id="wms_portal_senior" model="kob.wms.user">
+        <field name="name">Senior KOB</field>
+        <field name="username">senior01</field>
+        <field name="role">supervisor</field>
+        <field name="is_active" eval="True"/>
+    </record>
+
+    <record id="wms_portal_picker" model="kob.wms.user">
+        <field name="name">Picker 01</field>
+        <field name="username">picker01</field>
+        <field name="role">picker</field>
+        <field name="is_active" eval="True"/>
+    </record>
+
+    <record id="wms_portal_packer" model="kob.wms.user">
+        <field name="name">Packer 01</field>
+        <field name="username">packer01</field>
+        <field name="role">packer</field>
+        <field name="is_active" eval="True"/>
+    </record>
+
+    <record id="wms_portal_outbound" model="kob.wms.user">
+        <field name="name">Outbound 01</field>
+        <field name="username">outbound01</field>
+        <field name="role">outbound</field>
+        <field name="is_active" eval="True"/>
+    </record>
+
+    <record id="wms_portal_coordinator" model="kob.wms.user">
+        <field name="name">Coordinator KOB</field>
+        <field name="username">coord01</field>
+        <field name="role">coordinator</field>
+        <field name="is_active" eval="True"/>
+    </record>
+
+    <!-- Set default password "123456" for all portal users -->
+    <function model="kob.wms.user" name="_init_default_passwords"/>
+    <!-- Set default PIN "1234" for all portal users (change after first login) -->
+    <function model="kob.wms.user" name="_init_default_pins"/>
+
+</odoo>

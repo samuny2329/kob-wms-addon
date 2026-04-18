@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="access_wms_scan_wizard_worker" model="ir.model.access">
+        <field name="name">wms.scan.wizard.worker</field>
+        <field name="model_id" ref="model_wms_scan_wizard"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Action to open the wizard in "gateway" mode (no order pre-selected).
+         User scans a work order barcode → wizard finds the order → enters scan mode. -->
+    <record id="action_wms_scan_gateway_pick" model="ir.actions.act_window">
+        <field name="name">📦 Scan Pick</field>
+        <field name="res_model">wms.scan.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_mode': 'pick'}</field>
+    </record>
+
+    <record id="action_wms_scan_gateway_pack" model="ir.actions.act_window">
+        <field name="name">🗂 Scan Pack</field>
+        <field name="res_model">wms.scan.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_mode': 'pack'}</field>
+    </record>
+
+    <record id="action_wms_scan_gateway_box" model="ir.actions.act_window">
+        <field name="name">📮 Close Box</field>
+        <field name="res_model">wms.scan.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_mode': 'box'}</field>
+    </record>
+
+    <record id="view_wms_scan_wizard_form" model="ir.ui.view">
+        <field name="name">wms.scan.wizard.form</field>
+        <field name="model">wms.scan.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Scan">
+                <sheet>
+                    <!-- Gateway mode: no order yet -->
+                    <div invisible="order_id">
+                        <div class="oe_title mb-3">
+                            <h1>
+                                <field name="mode" widget="radio" options="{'horizontal': true}"/>
+                            </h1>
+                        </div>
+                        <div class="alert alert-info" role="alert">
+                            <strong>Scan a work order barcode to begin</strong><br/>
+                            Scan or type the order reference (SO/YYYY/NNNNN or platform ref) then press Enter.
+                        </div>
+                        <group>
+                            <field name="scan_input"
+                                   string="Scan / Barcode"
+                                   placeholder="Scan work order barcode…"
+                                   widget="char"/>
+                        </group>
+                    </div>
+
+                    <!-- Item scan mode: order selected -->
+                    <div invisible="not order_id">
+                        <div class="oe_title">
+                            <h1>
+                                <field name="mode" widget="radio" options="{'horizontal': true}"/>
+                            </h1>
+                            <div>
+                                <strong>Order: </strong><field name="order_name" readonly="1"/>
+                                <span class="ms-3"><strong>Ref: </strong><field name="order_ref" readonly="1"/></span>
+                                <span class="ms-3"><strong>Customer: </strong><field name="order_customer" readonly="1"/></span>
+                                <span class="ms-3"><strong>Status: </strong><field name="order_status" widget="badge" readonly="1"/></span>
+                            </div>
+                        </div>
+
+                        <group>
+                            <group>
+                                <field name="expected_total" readonly="1"/>
+                                <field name="picked_total" readonly="1"/>
+                                <field name="packed_total" readonly="1"/>
+                            </group>
+                            <group invisible="mode == 'box'">
+                                <field name="scan_input"
+                                       string="Scan / Barcode"
+                                       placeholder="Scan SKU or barcode then press Enter…"
+                                       widget="char"/>
+                            </group>
+                        </group>
+
+                        <!-- ── Close Box section (only when mode = box) ── -->
+                        <div invisible="mode != 'box'" class="mt-2 mb-3">
+                            <!-- Recommended box -->
+                            <div class="alert alert-primary d-flex align-items-center gap-3">
+                                <i class="fa fa-cube fa-2x flex-shrink-0"/>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold fs-5">
+                                        <field name="box_suggestion_label" readonly="1" nolabel="1"/>
+                                    </div>
+                                    <small class="text-muted">
+                                        <field name="box_suggestion_note" readonly="1" nolabel="1"/>
+                                    </small>
+                                </div>
+                                <span class="badge bg-primary">Recommended</span>
+                            </div>
+                            <!-- Override dropdown -->
+                            <group string="Override box (emergency only)">
+                                <field name="box_size_id"
+                                       placeholder="Leave empty → use recommended box"/>
+                            </group>
+                            <field name="box_suggestion_code" invisible="1"/>
+                        </div>
+
+                        <field name="line_preview" readonly="1" nolabel="1"
+                               invisible="mode == 'box'"/>
+
+                        <separator string="Recent scans" invisible="mode == 'box'"/>
+                        <field name="history" readonly="1" nolabel="1" widget="text"
+                               invisible="mode == 'box'"/>
+                    </div>
+
+                    <field name="order_id" invisible="1"/>
+                </sheet>
+                <footer>
+                    <!-- Pick / Pack mode -->
+                    <button name="action_scan" type="object" string="Scan"
+                            class="btn-primary" data-hotkey="q"
+                            invisible="mode == 'box'"/>
+                    <!-- Close Box mode -->
+                    <button name="action_close_box" type="object"
+                            string="Close Box &amp; Print AWB"
+                            class="btn-primary" data-hotkey="q"
+                            invisible="mode != 'box'"/>
+                    <button name="action_done" type="object" string="Done"
+                            class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

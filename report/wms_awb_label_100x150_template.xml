@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <report
+        id="report_wms_awb_label_100x150"
+        string="AWB Label 100x150"
+        model="wms.sales.order"
+        report_type="qweb-pdf"
+        name="kob_wms.report_wms_awb_label_100x150"
+        file="kob_wms.report_wms_awb_label_100x150"
+        attachment_use="True"
+        attachment="(object.name.replace('/', '_') + '_AWB_100x150.pdf')"
+    />
+
+    <template id="report_wms_awb_label_100x150">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page" style="width:100mm; height:150mm; margin:0; padding:10mm;">
+                    <div class="text-center" style="border: 2px solid black; height: 130px; width: 80px; margin: 0 auto;">
+                        <div style="font-size: 14pt; font-weight: bold; margin-bottom: 5px;">
+                            AWB Label
+                        </div>
+                        <div style="font-size: 12pt; margin-bottom: 3px;">
+                            <span t-esc="o.name"/>
+                        </div>
+                        <div style="font-size: 10pt; margin-bottom: 3px;">
+                            <span t-esc="o.partner_id.name" t-if="o.partner_id"/>
+                        </div>
+                        <div style="font-size: 10pt; margin-bottom: 3px;">
+                            <span t-esc="o.platform_id.name" t-if="o.platform_id"/>
+                        </div>
+                        <div style="font-size: 24pt; font-weight: bold; margin-bottom: 10px;">
+                            <span t-esc="o.awb_number" t-if="o.awb_number" t-esc="o.name" t-else=""/>
+                        </div>
+                        <div style="font-size: 8pt;">
+                            <span>Printed on: <span t-esc="o.write_date"/></span>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

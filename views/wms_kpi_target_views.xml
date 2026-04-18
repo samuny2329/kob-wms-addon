@@ -1,0 +1,865 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- Access Rules (XML so they load after model registration)     -->
+    <!-- ============================================================ -->
+    <record id="access_wms_kpi_pillar_worker" model="ir.model.access">
+        <field name="name">wms.kpi.pillar.worker</field>
+        <field name="model_id" ref="model_wms_kpi_pillar"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_pillar_manager" model="ir.model.access">
+        <field name="name">wms.kpi.pillar.manager</field>
+        <field name="model_id" ref="model_wms_kpi_pillar"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="access_wms_kpi_template_worker" model="ir.model.access">
+        <field name="name">wms.kpi.template.worker</field>
+        <field name="model_id" ref="model_wms_kpi_template"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_template_manager" model="ir.model.access">
+        <field name="name">wms.kpi.template.manager</field>
+        <field name="model_id" ref="model_wms_kpi_template"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="access_wms_kpi_template_line_worker" model="ir.model.access">
+        <field name="name">wms.kpi.template.line.worker</field>
+        <field name="model_id" ref="model_wms_kpi_template_line"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_template_line_manager" model="ir.model.access">
+        <field name="name">wms.kpi.template.line.manager</field>
+        <field name="model_id" ref="model_wms_kpi_template_line"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="access_wms_kpi_season_worker" model="ir.model.access">
+        <field name="name">wms.kpi.season.worker</field>
+        <field name="model_id" ref="model_wms_kpi_season"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_season_manager" model="ir.model.access">
+        <field name="name">wms.kpi.season.manager</field>
+        <field name="model_id" ref="model_wms_kpi_season"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="access_wms_kpi_assessment_worker" model="ir.model.access">
+        <field name="name">wms.kpi.assessment.worker</field>
+        <field name="model_id" ref="model_wms_kpi_assessment"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_assessment_supervisor" model="ir.model.access">
+        <field name="name">wms.kpi.assessment.supervisor</field>
+        <field name="model_id" ref="model_wms_kpi_assessment"/>
+        <field name="group_id" ref="group_wms_supervisor"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_assessment_manager" model="ir.model.access">
+        <field name="name">wms.kpi.assessment.manager</field>
+        <field name="model_id" ref="model_wms_kpi_assessment"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="access_wms_kpi_assessment_line_worker" model="ir.model.access">
+        <field name="name">wms.kpi.assessment.line.worker</field>
+        <field name="model_id" ref="model_wms_kpi_assessment_line"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_assessment_line_manager" model="ir.model.access">
+        <field name="name">wms.kpi.assessment.line.manager</field>
+        <field name="model_id" ref="model_wms_kpi_assessment_line"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Criterion access -->
+    <record id="access_wms_kpi_criterion_worker" model="ir.model.access">
+        <field name="name">wms.kpi.criterion.worker</field>
+        <field name="model_id" ref="model_wms_kpi_criterion"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_criterion_manager" model="ir.model.access">
+        <field name="name">wms.kpi.criterion.manager</field>
+        <field name="model_id" ref="model_wms_kpi_criterion"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Assessment Score access -->
+    <record id="access_wms_kpi_assessment_score_worker" model="ir.model.access">
+        <field name="name">wms.kpi.assessment.score.worker</field>
+        <field name="model_id" ref="model_wms_kpi_assessment_score"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_assessment_score_manager" model="ir.model.access">
+        <field name="name">wms.kpi.assessment.score.manager</field>
+        <field name="model_id" ref="model_wms_kpi_assessment_score"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Goal access -->
+    <record id="access_wms_kpi_goal_worker" model="ir.model.access">
+        <field name="name">wms.kpi.goal.worker</field>
+        <field name="model_id" ref="model_wms_kpi_goal"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_goal_manager" model="ir.model.access">
+        <field name="name">wms.kpi.goal.manager</field>
+        <field name="model_id" ref="model_wms_kpi_goal"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Pillar Views                                                 -->
+    <!-- ============================================================ -->
+    <record id="view_wms_kpi_pillar_list" model="ir.ui.view">
+        <field name="name">wms.kpi.pillar.list</field>
+        <field name="model">wms.kpi.pillar</field>
+        <field name="arch" type="xml">
+            <list string="KPI Pillars" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="icon" optional="hide"/>
+                <field name="description" optional="hide"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_wms_kpi_pillar" model="ir.actions.act_window">
+        <field name="name">KPI Pillars</field>
+        <field name="res_model">wms.kpi.pillar</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Template Views                                               -->
+    <!-- ============================================================ -->
+    <record id="view_wms_kpi_template_list" model="ir.ui.view">
+        <field name="name">wms.kpi.template.list</field>
+        <field name="model">wms.kpi.template</field>
+        <field name="arch" type="xml">
+            <list string="KPI Templates">
+                <field name="position"/>
+                <field name="total_weight"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_kpi_template_form" model="ir.ui.view">
+        <field name="name">wms.kpi.template.form</field>
+        <field name="model">wms.kpi.template</field>
+        <field name="arch" type="xml">
+            <form string="KPI Template">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="position"/></h1>
+                    </div>
+                    <div class="oe_button_box" name="button_box"/>
+                    <group>
+                        <field name="total_weight"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                    </group>
+                    <notebook>
+                        <page string="Pillar Weights">
+                            <field name="line_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="pillar_id"/>
+                                    <field name="weight"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <field name="pillar_id"/>
+                                        <field name="weight"/>
+                                    </group>
+                                    <separator string="Criteria (sub-items)"/>
+                                    <field name="criterion_ids">
+                                        <list editable="bottom">
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="name"/>
+                                            <field name="weight" string="Weight %"/>
+                                            <field name="description" optional="hide"/>
+                                            <field name="score_0" optional="hide"/>
+                                            <field name="score_1" optional="hide"/>
+                                            <field name="score_2" optional="hide"/>
+                                            <field name="score_3" optional="show"/>
+                                            <field name="score_4" optional="hide"/>
+                                            <field name="score_5" optional="hide"/>
+                                        </list>
+                                    </field>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="SOP Documents">
+                            <field name="sop_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="version"/>
+                                    <field name="effective_date"/>
+                                    <field name="pillar_id"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="name"/>
+                                            <field name="version"/>
+                                            <field name="effective_date"/>
+                                        </group>
+                                        <group>
+                                            <field name="pillar_id"/>
+                                            <field name="active" widget="boolean_toggle"/>
+                                        </group>
+                                    </group>
+                                    <field name="description"
+                                           placeholder="SOP content, checklist, procedures..."/>
+                                    <field name="attachment_ids" widget="many2many_binary"/>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wms_kpi_template" model="ir.actions.act_window">
+        <field name="name">KPI Templates</field>
+        <field name="res_model">wms.kpi.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create KPI templates</p>
+            <p>Set pillar weights per position. Total weight should equal 100%.</p>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Season Views                                                 -->
+    <!-- ============================================================ -->
+    <record id="view_wms_kpi_season_list" model="ir.ui.view">
+        <field name="name">wms.kpi.season.list</field>
+        <field name="model">wms.kpi.season</field>
+        <field name="arch" type="xml">
+            <list string="KPI Seasons">
+                <field name="name"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-success="state == 'open'"
+                       decoration-muted="state == 'closed'"/>
+                <field name="assessment_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_kpi_season_form" model="ir.ui.view">
+        <field name="name">wms.kpi.season.form</field>
+        <field name="model">wms.kpi.season</field>
+        <field name="arch" type="xml">
+            <form string="KPI Season">
+                <header>
+                    <button name="action_open" string="Open"
+                            type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_bulk_create_assessments"
+                            string="Create All Assessments"
+                            type="object" class="btn-secondary"
+                            invisible="state != 'open'"
+                            confirm="Create assessments for all active employees?"/>
+                    <button name="action_close" string="Close"
+                            type="object" class="btn-warning"
+                            invisible="state != 'open'"
+                            confirm="Close this season?"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,open,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. H1 2026"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="season_type"/>
+                        </group>
+                        <group>
+                            <field name="assessment_count"/>
+                            <field name="self_weight_pct"/>
+                            <field name="reviewer_weight_pct"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wms_kpi_season" model="ir.actions.act_window">
+        <field name="name">KPI Seasons</field>
+        <field name="res_model">wms.kpi.season</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Assessment Views                                             -->
+    <!-- ============================================================ -->
+    <record id="view_wms_kpi_assessment_list" model="ir.ui.view">
+        <field name="name">wms.kpi.assessment.list</field>
+        <field name="model">wms.kpi.assessment</field>
+        <field name="arch" type="xml">
+            <list string="KPI Assessments">
+                <field name="kob_user_id" string="Employee" optional="show"/>
+                <field name="user_id" string="Odoo Account" optional="hide"/>
+                <field name="season_id"/>
+                <field name="position"/>
+                <field name="self_score"/>
+                <field name="supervisor_score"/>
+                <field name="final_score" decoration-success="final_score >= 4"
+                       decoration-warning="final_score >= 2.5 and final_score &lt; 4"
+                       decoration-danger="final_score &lt; 2.5"/>
+                <field name="grade" widget="badge"
+                       decoration-success="grade in ('A','B')"
+                       decoration-warning="grade == 'C'"
+                       decoration-danger="grade in ('D','E')"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state == 'self_review'"
+                       decoration-primary="state in ('supervisor','asst_manager','manager','director')"
+                       decoration-success="state == 'done'"
+                       decoration-danger="state == 'rejected'"/>
+                <field name="supervisor_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_kpi_assessment_form" model="ir.ui.view">
+        <field name="name">wms.kpi.assessment.form</field>
+        <field name="model">wms.kpi.assessment</field>
+        <field name="arch" type="xml">
+            <form string="KPI Assessment">
+                <header>
+                    <!-- Step 1: Worker starts self assessment -->
+                    <button name="action_start_self_review"
+                            string="Start Self Assessment" type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <!-- Step 2: Worker submits to supervisor -->
+                    <button name="action_submit_to_supervisor"
+                            string="Submit to Supervisor" type="object"
+                            class="btn-primary"
+                            invisible="state != 'self_review'"/>
+                    <!-- Step 3: Supervisor approves/rejects -->
+                    <button name="action_supervisor_approve"
+                            string="Approve (Supervisor)" type="object"
+                            class="btn-success"
+                            invisible="state != 'supervisor'"
+                            groups="kob_wms.group_wms_supervisor"/>
+                    <button name="action_supervisor_reject"
+                            string="Reject" type="object"
+                            class="btn-danger"
+                            invisible="state != 'supervisor'"
+                            groups="kob_wms.group_wms_supervisor"/>
+                    <!-- Step 4: Asst. Manager approves/rejects -->
+                    <button name="action_asst_manager_approve"
+                            string="Approve (Asst. Manager)" type="object"
+                            class="btn-success"
+                            invisible="state != 'asst_manager'"
+                            groups="kob_wms.group_wms_manager"/>
+                    <button name="action_asst_manager_reject"
+                            string="Reject" type="object"
+                            class="btn-danger"
+                            invisible="state != 'asst_manager'"
+                            groups="kob_wms.group_wms_manager"/>
+                    <!-- Step 5: Manager approves/rejects -->
+                    <button name="action_manager_approve"
+                            string="Approve (Manager)" type="object"
+                            class="btn-success"
+                            invisible="state != 'manager'"
+                            groups="kob_wms.group_wms_manager"/>
+                    <button name="action_manager_reject"
+                            string="Reject" type="object"
+                            class="btn-danger"
+                            invisible="state != 'manager'"
+                            groups="kob_wms.group_wms_manager"/>
+                    <!-- Step 6: Director final approval -->
+                    <button name="action_director_approve"
+                            string="Final Approve (Director)" type="object"
+                            class="btn-success"
+                            invisible="state != 'director'"
+                            groups="kob_wms.group_wms_director"/>
+                    <button name="action_director_reject"
+                            string="Reject" type="object"
+                            class="btn-danger"
+                            invisible="state != 'director'"
+                            groups="kob_wms.group_wms_director"/>
+                    <!-- Reset -->
+                    <button name="action_reset_draft"
+                            string="Reset to Draft" type="object"
+                            invisible="state in ('draft', 'done')"
+                            groups="kob_wms.group_wms_manager"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,self_review,supervisor,asst_manager,manager,director,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <div class="alert alert-danger" role="alert"
+                         invisible="state != 'rejected'">
+                        <strong>Rejected:</strong> <field name="reject_reason" nolabel="1"/>
+                    </div>
+                    <group>
+                        <group string="Employee">
+                            <field name="kob_user_id" string="Employee"/>
+                            <field name="template_id"/>
+                            <field name="position"/>
+                            <field name="user_id" string="Odoo Account" optional="hide"/>
+                        </group>
+                        <group string="Season &amp; Approvers">
+                            <field name="season_id"/>
+                            <field name="supervisor_id"/>
+                            <field name="asst_manager_id"/>
+                            <field name="manager_id"/>
+                            <field name="director_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Scores">
+                            <field name="self_score"/>
+                            <field name="supervisor_score"/>
+                            <field name="final_score"/>
+                            <field name="grade" widget="badge"
+                                   decoration-success="grade in ('A','B')"
+                                   decoration-warning="grade == 'C'"
+                                   decoration-danger="grade in ('D','E')"/>
+                            <field name="grade_label"/>
+                        </group>
+                        <group string="Approval &amp; Comparison">
+                            <field name="supervisor_approved" widget="boolean_toggle" readonly="True"/>
+                            <field name="asst_manager_approved" widget="boolean_toggle" readonly="True"/>
+                            <field name="manager_approved" widget="boolean_toggle" readonly="True"/>
+                            <field name="director_approved" widget="boolean_toggle" readonly="True"/>
+                            <field name="prev_final_score"/>
+                            <field name="score_change" decoration-success="score_change > 0"
+                                   decoration-danger="score_change &lt; 0"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Pillar Scores" name="pillars">
+                            <field name="line_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="pillar_id"/>
+                                    <field name="weight"/>
+                                    <field name="self_score"/>
+                                    <field name="reviewer_score"/>
+                                    <field name="weighted_self"/>
+                                    <field name="weighted_reviewer"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="pillar_id" readonly="True"/>
+                                            <field name="weight" readonly="True"/>
+                                        </group>
+                                        <group>
+                                            <field name="self_score"/>
+                                            <field name="reviewer_score"/>
+                                            <field name="weighted_self"/>
+                                            <field name="weighted_reviewer"/>
+                                        </group>
+                                    </group>
+                                    <separator string="Criterion Scores"/>
+                                    <field name="score_ids" nolabel="1">
+                                        <list>
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="name" string="Criterion"/>
+                                            <field name="weight" string="Wt%" optional="hide"/>
+                                            <field name="self_score_sel" string="Self" widget="radio"
+                                                   options="{'horizontal': true}"/>
+                                            <field name="reviewer_score_sel" string="Reviewer" widget="radio"
+                                                   options="{'horizontal': true}"/>
+                                            <field name="self_score" optional="hide"/>
+                                            <field name="reviewer_score" optional="hide"/>
+                                        </list>
+                                        <form>
+                                            <group>
+                                                <field name="name" readonly="True"/>
+                                                <field name="description" readonly="True"/>
+                                            </group>
+                                            <group string="Rubric">
+                                                <field name="score_1"/>
+                                                <field name="score_2"/>
+                                                <field name="score_3"/>
+                                                <field name="score_4"/>
+                                                <field name="score_5"/>
+                                            </group>
+                                            <group string="Score">
+                                                <field name="self_score_sel" widget="radio"
+                                                       options="{'horizontal': true}"/>
+                                                <field name="reviewer_score_sel" widget="radio"
+                                                       options="{'horizontal': true}"/>
+                                            </group>
+                                            <group>
+                                                <field name="self_comment"/>
+                                                <field name="reviewer_comment"/>
+                                            </group>
+                                        </form>
+                                    </field>
+                                    <group>
+                                        <field name="self_comment"
+                                               placeholder="Self comment for this pillar..."/>
+                                        <field name="reviewer_comment"
+                                               placeholder="Reviewer comment..."/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Comments" name="comments">
+                            <group>
+                                <group string="Employee">
+                                    <field name="self_comment"
+                                           readonly="state != 'self_review'"
+                                           placeholder="Employee's overall comments..."/>
+                                </group>
+                                <group string="Supervisor">
+                                    <field name="supervisor_comment"
+                                           readonly="state != 'supervisor'"
+                                           placeholder="Supervisor's comments..."/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Asst. Manager">
+                                    <field name="asst_manager_comment"
+                                           readonly="state != 'asst_manager'"
+                                           placeholder="Asst. Manager's comments..."/>
+                                </group>
+                                <group string="Manager">
+                                    <field name="manager_comment"
+                                           readonly="state != 'manager'"
+                                           placeholder="Manager's comments..."/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Director">
+                                    <field name="director_comment"
+                                           readonly="state != 'director'"
+                                           placeholder="Director's final comments..."/>
+                                </group>
+                                <group string="Rejection" invisible="state != 'rejected'">
+                                    <field name="reject_reason"
+                                           placeholder="Reason for rejection..."/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="SOP Reference" name="sop_ref">
+                            <field name="sop_ids" readonly="True">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="version"/>
+                                    <field name="effective_date"/>
+                                    <field name="pillar_id"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="version"/>
+                                        <field name="effective_date"/>
+                                        <field name="pillar_id"/>
+                                    </group>
+                                    <field name="description" readonly="True"/>
+                                    <field name="attachment_ids" readonly="True"/>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Goals &amp; Action Items" name="goals">
+                            <field name="goal_ids"
+                                   readonly="state not in ('draft', 'self_review')">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="pillar_id"/>
+                                    <field name="deadline"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'todo'"
+                                           decoration-warning="state == 'in_progress'"
+                                           decoration-success="state == 'done'"
+                                           decoration-muted="state == 'cancelled'"/>
+                                    <field name="progress_note" optional="hide"/>
+                                    <field name="completed_date" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Feature 8: Calibration View (pivot + graph) -->
+    <record id="view_wms_kpi_assessment_pivot" model="ir.ui.view">
+        <field name="name">wms.kpi.assessment.pivot</field>
+        <field name="model">wms.kpi.assessment</field>
+        <field name="arch" type="xml">
+            <pivot string="KPI Calibration">
+                <field name="position" type="row"/>
+                <field name="kob_user_id" type="row"/>
+                <field name="season_id" type="col"/>
+                <field name="final_score" type="measure"/>
+                <field name="self_score" type="measure"/>
+                <field name="supervisor_score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_wms_kpi_assessment_graph" model="ir.ui.view">
+        <field name="name">wms.kpi.assessment.graph</field>
+        <field name="model">wms.kpi.assessment</field>
+        <field name="arch" type="xml">
+            <graph string="KPI Score Distribution" type="bar">
+                <field name="kob_user_id"/>
+                <field name="final_score" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_wms_kpi_assessment_search" model="ir.ui.view">
+        <field name="name">wms.kpi.assessment.search</field>
+        <field name="model">wms.kpi.assessment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="kob_user_id" string="Employee"/>
+                <field name="season_id"/>
+                <field name="position"/>
+                <filter string="My Assessment" name="my_assessment"
+                        domain="['|', ('user_id', '=', uid), ('kob_user_id.res_user_id', '=', uid)]"/>
+                <filter string="Pending Reviews" name="pending_reviews"
+                        domain="[('state', 'in', ['supervisor','asst_manager','manager','director']), '|', '|', '|', ('supervisor_id', '=', uid), ('asst_manager_id', '=', uid), ('manager_id', '=', uid), ('director_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Completed" name="done" domain="[('state', '=', 'done')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Season" name="group_season"
+                            context="{'group_by': 'season_id'}"/>
+                    <filter string="Position" name="group_position"
+                            context="{'group_by': 'position'}"/>
+                    <filter string="Status" name="group_state"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <!-- "My Assessment" — hard domain restricts to own record; managers can use
+         "All Assessments" (action_wms_kpi_assessment_all) to see everyone. -->
+    <record id="action_wms_kpi_assessment" model="ir.actions.act_window">
+        <field name="name">My Assessment</field>
+        <field name="res_model">wms.kpi.assessment</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">['|', ('user_id', '=', uid), ('kob_user_id.res_user_id', '=', uid)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No assessment yet for this season</p>
+            <p>Your supervisor will create your assessment once the season is opened.</p>
+        </field>
+    </record>
+
+    <!-- All Assessments — for supervisors/managers (no domain = sees everyone) -->
+    <record id="action_wms_kpi_assessment_all" model="ir.actions.act_window">
+        <field name="name">All Assessments</field>
+        <field name="res_model">wms.kpi.assessment</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No assessments yet</p>
+            <p>Create assessments for the current evaluation season.</p>
+        </field>
+    </record>
+
+    <record id="action_wms_kpi_assessment_pending" model="ir.actions.act_window">
+        <field name="name">Pending Reviews</field>
+        <field name="res_model">wms.kpi.assessment</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', 'in', ['supervisor','asst_manager','manager','director'])]</field>
+        <field name="context">{'search_default_pending_reviews': 1}</field>
+    </record>
+
+    <record id="action_wms_kpi_assessment_history" model="ir.actions.act_window">
+        <field name="name">Assessment History</field>
+        <field name="res_model">wms.kpi.assessment</field>
+        <field name="view_mode">list,form,graph,pivot</field>
+        <field name="domain">[('state', '=', 'done')]</field>
+    </record>
+
+    <!-- Feature 8: Calibration View -->
+    <record id="action_wms_kpi_calibration" model="ir.actions.act_window">
+        <field name="name">KPI Calibration</field>
+        <field name="res_model">wms.kpi.assessment</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="domain">[('state', '=', 'done')]</field>
+        <field name="help" type="html">
+            <p>Compare all workers' scores for bell curve calibration.</p>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- SOP Access + Views                                           -->
+    <!-- ============================================================ -->
+    <record id="access_wms_kpi_sop_worker" model="ir.model.access">
+        <field name="name">wms.kpi.sop.worker</field>
+        <field name="model_id" ref="model_wms_kpi_sop"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_sop_manager" model="ir.model.access">
+        <field name="name">wms.kpi.sop.manager</field>
+        <field name="model_id" ref="model_wms_kpi_sop"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Approver Config Access + Views                               -->
+    <!-- ============================================================ -->
+    <record id="access_wms_kpi_approver_config_manager" model="ir.model.access">
+        <field name="name">wms.kpi.approver.config.manager</field>
+        <field name="model_id" ref="model_wms_kpi_approver_config"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="access_wms_kpi_approver_config_line_manager" model="ir.model.access">
+        <field name="name">wms.kpi.approver.config.line.manager</field>
+        <field name="model_id" ref="model_wms_kpi_approver_config_line"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="view_wms_kpi_approver_config_list" model="ir.ui.view">
+        <field name="name">wms.kpi.approver.config.list</field>
+        <field name="model">wms.kpi.approver.config</field>
+        <field name="arch" type="xml">
+            <list string="Approver Config" editable="bottom">
+                <field name="position"/>
+                <field name="supervisor_id"/>
+                <field name="asst_manager_id"/>
+                <field name="manager_id"/>
+                <field name="director_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_kpi_approver_config_form" model="ir.ui.view">
+        <field name="name">wms.kpi.approver.config.form</field>
+        <field name="model">wms.kpi.approver.config</field>
+        <field name="arch" type="xml">
+            <form string="Approver Configuration">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="position"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Default Approvers">
+                            <field name="supervisor_id"/>
+                            <field name="asst_manager_id"/>
+                            <field name="manager_id"/>
+                            <field name="director_id"/>
+                        </group>
+                    </group>
+                    <separator string="Per-User Overrides"/>
+                    <field name="user_override_ids">
+                        <list editable="bottom">
+                            <field name="user_id"/>
+                            <field name="supervisor_id"/>
+                            <field name="asst_manager_id"/>
+                            <field name="manager_id"/>
+                            <field name="director_id"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wms_kpi_approver_config" model="ir.actions.act_window">
+        <field name="name">Approver Config</field>
+        <field name="res_model">wms.kpi.approver.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Set up approver chains</p>
+            <p>Configure default Supervisor, Asst. Manager, Manager, and Director
+               for each position. Add per-user overrides when needed.</p>
+        </field>
+    </record>
+
+</odoo>

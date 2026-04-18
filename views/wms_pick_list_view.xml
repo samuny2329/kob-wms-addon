@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pick Queue list view is defined in views/wms_sales_order_views.xml (view_wms_pick_list)
+     Action is defined in views/wms_scan_screen_action.xml (action_wms_pick_screen) -->
+<odoo/>

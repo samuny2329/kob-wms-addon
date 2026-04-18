@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         wms.product.box.analytics — Product vs Box view
+         Shows which product ships in which box + bubble wrap + fill %
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Export Server Action (appears in ⚙ Action menu) ────── -->
+    <record id="action_server_export_product_box_xlsx" model="ir.actions.server">
+        <field name="name">📥 Export Excel</field>
+        <field name="model_id" ref="model_wms_product_box_analytics"/>
+        <field name="binding_model_id" ref="model_wms_product_box_analytics"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_export_xlsx()</field>
+    </record>
+
+    <!-- ── List View ─────────────────────────────────────────────── -->
+    <record id="view_wms_product_box_analytics_list" model="ir.ui.view">
+        <field name="name">wms.product.box.analytics.list</field>
+        <field name="model">wms.product.box.analytics</field>
+        <field name="arch" type="xml">
+            <list string="Product vs Box"
+                  default_order="order_count desc"
+                  decoration-danger="avg_fill_pct &lt; 40 and avg_fill_pct &gt; 0"
+                  decoration-warning="avg_fill_pct &gt;= 40 and avg_fill_pct &lt; 60"
+                  decoration-success="avg_fill_pct &gt;= 60">
+                <field name="product_id"/>
+                <field name="actual_box_id"   string="Box Used"/>
+                <field name="order_count"     string="Orders"/>
+                <field name="total_qty"       string="Total Qty" optional="show"/>
+                <field name="avg_qty"         string="Avg Qty/Order" optional="hide"/>
+                <!-- Volume comparison -->
+                <field name="product_vol_m3"  string="Product Vol (m³)" digits="[12,6]" optional="show"/>
+                <field name="box_vol_m3"      string="Box Vol (m³)"     digits="[12,6]" optional="show"/>
+                <field name="avg_fill_pct"    string="Avg Fill %"
+                       widget="progressbar" options="{'max_value': 100}"/>
+                <!-- Cost breakdown -->
+                <field name="avg_box_cost"    string="Box/Order (฿)"    optional="show"/>
+                <field name="avg_tape_cost"   string="Tape/Order (฿)"   optional="show"/>
+                <field name="avg_bubble_cost" string="Bubble/Order (฿)" optional="show"/>
+                <field name="avg_pack_cost"   string="Total Mat/Order (฿)"/>
+                <field name="total_pack_cost" string="Total Mat Cost (฿)" optional="show"/>
+                <field name="platform"        optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Pivot View ────────────────────────────────────────────── -->
+    <record id="view_wms_product_box_analytics_pivot" model="ir.ui.view">
+        <field name="name">wms.product.box.analytics.pivot</field>
+        <field name="model">wms.product.box.analytics</field>
+        <field name="arch" type="xml">
+            <pivot string="Product vs Box Pivot" disable_linking="True">
+                <field name="product_id"      type="row"/>
+                <field name="actual_box_id"   type="col"/>
+                <field name="order_count"     type="measure"/>
+                <field name="avg_fill_pct"    type="measure"/>
+                <field name="avg_bubble_cost" type="measure"/>
+                <field name="avg_pack_cost"   type="measure"/>
+                <field name="total_pack_cost" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ── Graph View ────────────────────────────────────────────── -->
+    <record id="view_wms_product_box_analytics_graph" model="ir.ui.view">
+        <field name="name">wms.product.box.analytics.graph</field>
+        <field name="model">wms.product.box.analytics</field>
+        <field name="arch" type="xml">
+            <graph string="Product vs Box" type="bar" stacked="False">
+                <field name="product_id"    type="row"/>
+                <field name="actual_box_id" type="col"/>
+                <field name="order_count"   type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ── Search View ───────────────────────────────────────────── -->
+    <record id="view_wms_product_box_analytics_search" model="ir.ui.view">
+        <field name="name">wms.product.box.analytics.search</field>
+        <field name="model">wms.product.box.analytics</field>
+        <field name="arch" type="xml">
+            <search string="Product vs Box">
+                <field name="product_id"   string="Product"/>
+                <field name="actual_box_id" string="Box"/>
+                <field name="platform"/>
+                <!-- Filters -->
+                <filter string="Under-filled (&lt;50%)" name="under_filled"
+                        domain="[('avg_fill_pct', '&lt;', 50), ('avg_fill_pct', '&gt;', 0)]"/>
+                <filter string="Well-filled (&gt;=60%)" name="well_filled"
+                        domain="[('avg_fill_pct', '&gt;=', 60)]"/>
+                <filter string="Has Bubble Wrap" name="has_bubble"
+                        domain="[('avg_bubble_cost', '&gt;', 0)]"/>
+                <separator/>
+                <!-- Group By -->
+                <group expand="1" string="Group By">
+                    <filter string="Product"  name="g_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Box"      name="g_box"     context="{'group_by': 'actual_box_id'}"/>
+                    <filter string="Platform" name="g_platform" context="{'group_by': 'platform'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ────────────────────────────────────────────────── -->
+    <record id="action_wms_product_box_analytics" model="ir.actions.act_window">
+        <field name="name">Product vs Box</field>
+        <field name="res_model">wms.product.box.analytics</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_wms_product_box_analytics_search"/>
+        <field name="context">{'search_default_g_product': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No packed orders with product data yet.
+            </p>
+            <p>This view shows which box each product ships in, fill efficiency,
+               and bubble wrap cost — once orders reach <strong>Packed</strong> status.</p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="kob_wms.WmsWorkerSystray">
+        <t t-if="isLoggedIn">
+            <li class="o_nav_entry wms-systray-item">
+                <div class="wms-systray-avatar">
+                    <t t-esc="initials"/>
+                </div>
+                <span class="wms-systray-name d-none d-sm-inline">
+                    <t t-esc="workerName"/>
+                </span>
+                <button class="wms-systray-logout"
+                        t-on-click="logout"
+                        title="Logout Employee">
+                    <i class="fa fa-sign-out"/>
+                </button>
+            </li>
+        </t>
+    </t>
+
+</templates>

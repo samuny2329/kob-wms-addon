@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========================================================= -->
+    <!-- Paper formats                                              -->
+    <!-- ========================================================= -->
+    <record id="paperformat_box_label" model="report.paperformat">
+        <field name="name">KOB Box Label 100x75</field>
+        <field name="format">custom</field>
+        <field name="page_width">100</field>
+        <field name="page_height">75</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">3</field>
+        <field name="margin_bottom">3</field>
+        <field name="margin_left">3</field>
+        <field name="margin_right">3</field>
+        <field name="header_line">False</field>
+        <field name="header_spacing">0</field>
+    </record>
+
+    <record id="paperformat_awb_label" model="report.paperformat">
+        <field name="name">KOB AWB Label 100x150</field>
+        <field name="format">custom</field>
+        <field name="page_width">100</field>
+        <field name="page_height">150</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">3</field>
+        <field name="margin_bottom">3</field>
+        <field name="margin_left">3</field>
+        <field name="margin_right">3</field>
+        <field name="header_line">False</field>
+        <field name="header_spacing">0</field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- Report actions (binding to wms.sales.order)               -->
+    <!-- ========================================================= -->
+    <record id="action_report_wms_pick_list" model="ir.actions.report">
+        <field name="name">Pick List</field>
+        <field name="model">wms.sales.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">kob_wms.report_wms_pick_list</field>
+        <field name="report_file">kob_wms.report_wms_pick_list</field>
+        <field name="binding_model_id" ref="model_wms_sales_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_wms_box_label" model="ir.actions.report">
+        <field name="name">Box Label</field>
+        <field name="model">wms.sales.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">kob_wms.report_wms_box_label</field>
+        <field name="report_file">kob_wms.report_wms_box_label</field>
+        <field name="paperformat_id" ref="paperformat_box_label"/>
+        <field name="binding_model_id" ref="model_wms_sales_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_wms_awb_label" model="ir.actions.report">
+        <field name="name">AWB Label</field>
+        <field name="model">wms.sales.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">kob_wms.report_wms_awb_label</field>
+        <field name="report_file">kob_wms.report_wms_awb_label</field>
+        <field name="paperformat_id" ref="paperformat_awb_label"/>
+        <field name="binding_model_id" ref="model_wms_sales_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_wms_awb_label_100x150" model="ir.actions.report">
+        <field name="name">AWB Label 100x150</field>
+        <field name="model">wms.sales.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">kob_wms.report_wms_awb_label_100x150</field>
+        <field name="report_file">kob_wms.report_wms_awb_label_100x150</field>
+        <field name="paperformat_id" ref="paperformat_awb_label"/>
+        <field name="binding_model_id" ref="model_wms_sales_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- ── Count Session Summary Report ────────────────────────── -->
+    <record id="action_report_wms_count_session" model="ir.actions.report">
+        <field name="name">Count Session Summary</field>
+        <field name="model">wms.count.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">kob_wms.report_wms_count_session</field>
+        <field name="report_file">kob_wms.report_wms_count_session</field>
+        <field name="binding_model_id" ref="model_wms_count_session"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

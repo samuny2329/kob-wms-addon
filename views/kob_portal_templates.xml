@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Base Layout ── -->
+    <template id="kob_base_layout" name="KOB WMS Base Layout">
+        <html>
+        <head>
+            <meta charset="utf-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            <title>KOB WMS</title>
+            <style>
+                :root { --kob-purple:#714B67; --kob-purple-dark:#5a3d52; --kob-bg:#f8f9fa; --kob-surface:#fff; --kob-border:#dee2e6; --kob-text:#212529; --kob-muted:#6c757d; --kob-success:#28a745; --kob-warning:#ffac00; --kob-danger:#dc3545; --kob-info:#17a2b8; }
+                *{box-sizing:border-box;margin:0;padding:0}
+                body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--kob-bg);color:var(--kob-text);min-height:100vh}
+                .kob-nav{background:var(--kob-purple);color:#fff;padding:0 1rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+                .kob-nav a{color:#fff;text-decoration:none} .kob-nav-brand{font-weight:700;font-size:1.1rem}
+                .kob-nav-links{display:flex;gap:.25rem} .kob-nav-link{padding:.4rem .75rem;border-radius:6px;font-size:.85rem;transition:background .15s}
+                .kob-nav-link:hover,.kob-nav-link.active{background:rgba(255,255,255,.15)}
+                .kob-badge{display:inline-block;padding:.15rem .5rem;border-radius:10px;font-size:.75rem;background:rgba(255,255,255,.2)}
+                .kob-nav-user{display:flex;align-items:center;gap:.75rem;font-size:.9rem}
+                .kob-content{padding:1.5rem;max-width:1200px;margin:0 auto}
+                .kob-page-title{font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;color:var(--kob-purple)}
+                .kob-card{background:var(--kob-surface);border:1px solid var(--kob-border);border-radius:8px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+                .kob-card-title{font-weight:600;margin-bottom:.5rem}
+                .kob-stat-value{font-size:2rem;font-weight:700;line-height:1} .kob-stat-label{font-size:.85rem;color:var(--kob-muted);margin-top:.25rem}
+                .kob-grid{display:grid;gap:1rem} .kob-grid-4{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))} .kob-grid-3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+                .kob-table{width:100%;border-collapse:collapse;font-size:.9rem}
+                .kob-table th{background:var(--kob-bg);padding:.6rem .75rem;text-align:left;font-weight:600;border-bottom:2px solid var(--kob-border);font-size:.8rem;text-transform:uppercase;color:var(--kob-muted)}
+                .kob-table td{padding:.6rem .75rem;border-bottom:1px solid var(--kob-border)} .kob-table tr:hover td{background:#f0f0f0}
+                .kob-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border:none;border-radius:6px;font-size:.9rem;cursor:pointer;text-decoration:none;transition:background .15s}
+                .kob-btn-primary{background:var(--kob-purple);color:#fff} .kob-btn-primary:hover{background:var(--kob-purple-dark)}
+                .kob-btn-success{background:var(--kob-success);color:#fff} .kob-btn-sm{padding:.3rem .6rem;font-size:.8rem}
+                .kob-status{display:inline-block;padding:.2rem .6rem;border-radius:12px;font-size:.75rem;font-weight:600}
+                .kob-status-pending{background:#fff3cd;color:#856404} .kob-status-picking{background:#cce5ff;color:#004085}
+                .kob-status-picked{background:#d1ecf1;color:#0c5460} .kob-status-packed{background:#d4edda;color:#155724}
+                .kob-status-shipped{background:#e2d5f1;color:#4a235a}
+                .kob-error{background:#f8d7da;color:#721c24;padding:.6rem .75rem;border-radius:6px;margin-bottom:1rem;font-size:.85rem}
+                @media(max-width:768px){.kob-content{padding:1rem}.kob-nav-links{display:none}.kob-page-title{font-size:1.2rem}.kob-table{font-size:.8rem}}
+            </style>
+        </head>
+        <body><t t-raw="0"/></body>
+        </html>
+    </template>
+
+    <!-- ── Login Page ── -->
+    <template id="kob_login_page" name="KOB WMS Login">
+        <t t-call="kob_wms.kob_base_layout">
+            <style>
+                .login-wrapper{display:flex;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(135deg,#714B67 0%,#5a3d52 100%);padding:1rem}
+                .login-card{background:#fff;border-radius:12px;padding:2.5rem;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+                .login-logo{text-align:center;margin-bottom:2rem} .login-logo h1{font-size:1.5rem;color:var(--kob-purple);font-weight:700} .login-logo p{color:var(--kob-muted);font-size:.9rem}
+                .login-field{margin-bottom:1.25rem} .login-field label{display:block;font-weight:600;font-size:.85rem;margin-bottom:.4rem}
+                .login-field input{width:100%;padding:.65rem .75rem;border:1px solid var(--kob-border);border-radius:6px;font-size:1rem;outline:none;transition:border .15s}
+                .login-field input:focus{border-color:var(--kob-purple);box-shadow:0 0 0 3px rgba(113,75,103,.15)}
+                .login-btn{width:100%;padding:.75rem;background:var(--kob-purple);color:#fff;border:none;border-radius:6px;font-size:1rem;font-weight:600;cursor:pointer} .login-btn:hover{background:var(--kob-purple-dark)}
+                .login-tabs{display:flex;margin-bottom:1.5rem;border-bottom:2px solid var(--kob-border)}
+                .login-tab{flex:1;text-align:center;padding:.6rem;cursor:pointer;font-weight:600;font-size:.9rem;color:var(--kob-muted);border-bottom:2px solid transparent;margin-bottom:-2px}
+                .login-tab.active{color:var(--kob-purple);border-bottom-color:var(--kob-purple)} .pin-form{display:none}
+            </style>
+            <div class="login-wrapper"><div class="login-card">
+                <div class="login-logo"><h1>KOB WMS</h1><p>Warehouse Management System</p></div>
+                <t t-if="error == 'invalid'"><div class="kob-error">Username or password is incorrect.</div></t>
+                <t t-if="error == 'missing_fields'"><div class="kob-error">Please enter username and password.</div></t>
+                <div class="login-tabs">
+                    <div class="login-tab active" onclick="showPw()">Password</div>
+                    <div class="login-tab" onclick="showPin()">PIN</div>
+                </div>
+                <form id="pwForm" action="/kob/login" method="POST">
+                    <div class="login-field"><label>Username</label><input type="text" name="username" placeholder="e.g. picker01" required="required"/></div>
+                    <div class="login-field"><label>Password</label><input type="password" name="password" placeholder="Enter password" required="required"/></div>
+                    <button type="submit" class="login-btn">Login</button>
+                </form>
+                <form id="pinForm" class="pin-form" action="/kob/login" method="POST">
+                    <div class="login-field"><label>Username</label><input type="text" name="username" placeholder="e.g. picker01" required="required"/></div>
+                    <div class="login-field"><label>PIN</label><input type="password" name="pin" placeholder="4-6 digits" inputmode="numeric" maxlength="6" required="required"/></div>
+                    <button type="submit" class="login-btn">Login with PIN</button>
+                </form>
+            </div></div>
+            <script>
+                function showPw(){document.getElementById('pwForm').style.display='block';document.getElementById('pinForm').style.display='none';document.querySelectorAll('.login-tab').forEach(function(t,i){t.classList.toggle('active',i===0)})}
+                function showPin(){document.getElementById('pwForm').style.display='none';document.getElementById('pinForm').style.display='block';document.querySelectorAll('.login-tab').forEach(function(t,i){t.classList.toggle('active',i===1)})}
+            </script>
+        </t>
+    </template>
+
+    <!-- ── Navbar ── -->
+    <template id="kob_navbar" name="KOB WMS Navbar">
+        <nav class="kob-nav">
+            <a href="/kob/dashboard" class="kob-nav-brand">KOB WMS</a>
+            <div class="kob-nav-links">
+                <t t-if="'picking' in pages"><a href="/kob/picking" class="kob-nav-link">Picking</a></t>
+                <t t-if="'packing' in pages"><a href="/kob/packing" class="kob-nav-link">Packing</a></t>
+            </div>
+            <div class="kob-nav-user">
+                <span><t t-esc="user.name"/></span>
+                <span class="kob-badge"><t t-esc="user.role"/></span>
+                <a href="/kob/logout" style="opacity:.8;font-size:.85rem">Logout</a>
+            </div>
+        </nav>
+    </template>
+
+    <!-- ── Dashboard ── -->
+    <template id="kob_dashboard_page" name="KOB WMS Dashboard">
+        <t t-call="kob_wms.kob_base_layout">
+            <t t-call="kob_wms.kob_navbar"/>
+            <div class="kob-content">
+                <h1 class="kob-page-title">Dashboard</h1>
+                <t t-if="error == 'no_access'"><div class="kob-error">You don't have access to that page.</div></t>
+                <div class="kob-grid kob-grid-4">
+                    <div class="kob-card"><div class="kob-stat-value" style="color:var(--kob-warning)"><t t-esc="stats.get('pending',0)"/></div><div class="kob-stat-label">Pending</div></div>
+                    <div class="kob-card"><div class="kob-stat-value" style="color:var(--kob-info)"><t t-esc="stats.get('picking',0)"/></div><div class="kob-stat-label">Picking</div></div>
+                    <div class="kob-card"><div class="kob-stat-value" style="color:var(--kob-success)"><t t-esc="stats.get('packed',0)"/></div><div class="kob-stat-label">Packed</div></div>
+                    <div class="kob-card"><div class="kob-stat-value" style="color:var(--kob-purple)"><t t-esc="stats.get('shipped',0)"/></div><div class="kob-stat-label">Shipped</div></div>
+                </div>
+                <div class="kob-card" style="margin-top:1rem"><div class="kob-card-title">Quick Actions</div>
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.75rem">
+                        <t t-if="'picking' in pages"><a href="/kob/picking" class="kob-btn kob-btn-primary">Picking List</a></t>
+                        <t t-if="'packing' in pages"><a href="/kob/packing" class="kob-btn kob-btn-primary">Packing Station</a></t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ── Picking ── -->
+    <template id="kob_picking_page" name="KOB WMS Picking">
+        <t t-call="kob_wms.kob_base_layout">
+            <t t-call="kob_wms.kob_navbar"/>
+            <div class="kob-content">
+                <h1 class="kob-page-title">Picking List</h1>
+                <div class="kob-card" style="overflow-x:auto"><table class="kob-table"><thead><tr>
+                    <th>Reference</th><th>Platform Ref</th><th>Customer</th><th>Items</th><th>Status</th>
+                </tr></thead><tbody>
+                    <t t-foreach="orders" t-as="o"><tr>
+                        <td><strong><t t-esc="o.name"/></strong></td>
+                        <td><t t-esc="o.platform_ref or '-'"/></td>
+                        <td><t t-esc="o.customer_name or '-'"/></td>
+                        <td><t t-esc="o.expected_total"/> items</td>
+                        <td><span t-attf-class="kob-status kob-status-#{o.status}"><t t-esc="o.status"/></span></td>
+                    </tr></t>
+                    <t t-if="not orders"><tr><td colspan="5" style="text-align:center;color:var(--kob-muted);padding:2rem">No pending orders.</td></tr></t>
+                </tbody></table></div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ── Packing ── -->
+    <template id="kob_packing_page" name="KOB WMS Packing">
+        <t t-call="kob_wms.kob_base_layout">
+            <t t-call="kob_wms.kob_navbar"/>
+            <div class="kob-content">
+                <h1 class="kob-page-title">Packing Station</h1>
+                <div class="kob-card" style="overflow-x:auto"><table class="kob-table"><thead><tr>
+                    <th>Reference</th><th>Platform Ref</th><th>Customer</th><th>Items</th><th>Status</th>
+                </tr></thead><tbody>
+                    <t t-foreach="orders" t-as="o"><tr>
+                        <td><strong><t t-esc="o.name"/></strong></td>
+                        <td><t t-esc="o.platform_ref or '-'"/></td>
+                        <td><t t-esc="o.customer_name or '-'"/></td>
+                        <td><t t-esc="o.expected_total"/> items</td>
+                        <td><span class="kob-status kob-status-picked">picked</span></td>
+                    </tr></t>
+                    <t t-if="not orders"><tr><td colspan="5" style="text-align:center;color:var(--kob-muted);padding:2rem">No orders ready for packing.</td></tr></t>
+                </tbody></table></div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

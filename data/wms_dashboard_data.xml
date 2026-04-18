@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+
+    <record id="dashboard_group_kob_wms" model="spreadsheet.dashboard.group">
+        <field name="name">KOB WMS</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <!-- 1. WMS Overview — layout remapped from UAT Sales dashboard -->
+    <record id="dashboard_kob_wms_overview" model="spreadsheet.dashboard">
+        <field name="name">WMS Overview</field>
+        <field name="spreadsheet_binary_data"
+               type="base64"
+               file="kob_wms/data/files/kob_wms_dashboard.json"/>
+        <field name="dashboard_group_id" ref="dashboard_group_kob_wms"/>
+        <field name="main_data_model_ids"
+               eval="[(4, ref('kob_wms.model_wms_sales_order'))]"/>
+        <field name="group_ids"
+               eval="[Command.link(ref('kob_wms.group_wms_worker'))]"/>
+        <field name="is_published">True</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <!-- 2. KPI Performance — wms.worker.performance + wms.kpi.target -->
+    <record id="dashboard_kob_wms_kpi" model="spreadsheet.dashboard">
+        <field name="name">KPI Performance</field>
+        <field name="spreadsheet_binary_data"
+               type="base64"
+               file="kob_wms/data/files/kob_wms_kpi_dashboard.json"/>
+        <field name="dashboard_group_id" ref="dashboard_group_kob_wms"/>
+        <field name="main_data_model_ids"
+               eval="[(4, ref('kob_wms.model_wms_worker_performance'))]"/>
+        <field name="group_ids"
+               eval="[Command.link(ref('kob_wms.group_wms_supervisor'))]"/>
+        <field name="is_published">True</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- 3. WMS Operations — count sessions, pickface, dispatch, cycle -->
+    <record id="dashboard_kob_wms_operations" model="spreadsheet.dashboard">
+        <field name="name">WMS Operations</field>
+        <field name="spreadsheet_binary_data"
+               type="base64"
+               file="kob_wms/data/files/kob_wms_operations_dashboard.json"/>
+        <field name="dashboard_group_id" ref="dashboard_group_kob_wms"/>
+        <field name="main_data_model_ids"
+               eval="[(4, ref('kob_wms.model_wms_sales_order')),
+                       (4, ref('kob_wms.model_wms_count_session')),
+                       (4, ref('kob_wms.model_wms_count_adjustment')),
+                       (4, ref('kob_wms.model_wms_pickface'))]"/>
+        <field name="group_ids"
+               eval="[Command.link(ref('kob_wms.group_wms_supervisor'))]"/>
+        <field name="is_published">True</field>
+        <field name="sequence">30</field>
+    </record>
+
+
+    <!-- 4. Count Adjustments — wms.count.adjustment variance tracking -->
+    <record id="dashboard_kob_wms_count_adj" model="spreadsheet.dashboard">
+        <field name="name">Count Adjustments</field>
+        <field name="spreadsheet_binary_data"
+               type="base64"
+               file="kob_wms/data/files/kob_wms_count_dashboard.json"/>
+        <field name="dashboard_group_id" ref="dashboard_group_kob_wms"/>
+        <field name="main_data_model_ids"
+               eval="[(4, ref('kob_wms.model_wms_count_session')),
+                       (4, ref('kob_wms.model_wms_count_adjustment'))]"/>
+        <field name="group_ids"
+               eval="[Command.link(ref('kob_wms.group_wms_supervisor'))]"/>
+        <field name="is_published">True</field>
+        <field name="sequence">25</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         Box Size Recommender Wizard
+         Enter SKUs + qty → get smallest fitting box with cost breakdown
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Wizard Form ──────────────────────────────────────────────── -->
+    <record id="view_wms_box_recommender_wizard_form" model="ir.ui.view">
+        <field name="name">wms.box.recommender.wizard.form</field>
+        <field name="model">wms.box.recommender.wizard</field>
+        <field name="arch" type="xml">
+            <form string="📦 Box Recommender">
+                <field name="state" invisible="1"/>
+                <sheet>
+
+                    <!-- ── INPUT: Products to pack ──────────────────── -->
+                    <group string="Products to Pack" invisible="state == 'done'">
+                        <field name="line_ids" nolabel="1">
+                            <list editable="bottom">
+                                <field name="product_id" options="{'no_create': False}"/>
+                                <field name="sku" readonly="1" optional="show"/>
+                                <field name="qty"/>
+                                <field name="unit_vol_cm3" readonly="1"
+                                       string="Vol/Unit (cm³)" digits="[12,2]"/>
+                                <field name="line_vol_cm3" readonly="1"
+                                       string="Line Vol (cm³)" digits="[12,2]"/>
+                            </list>
+                        </field>
+                    </group>
+
+                    <group invisible="state == 'done'">
+                        <group>
+                            <field name="fill_buffer_pct"/>
+                            <field name="total_vol_cm3"    readonly="1" digits="[12,2]"/>
+                            <field name="required_vol_cm3" readonly="1" digits="[12,2]"/>
+                        </group>
+                    </group>
+
+                    <!-- ── RESULTS ──────────────────────────────────── -->
+                    <div invisible="state != 'done'">
+
+                        <!-- Summary of what was entered -->
+                        <group string="Items Packed">
+                            <field name="line_ids" nolabel="1" readonly="1">
+                                <list>
+                                    <field name="product_id"/>
+                                    <field name="sku" optional="show"/>
+                                    <field name="qty"/>
+                                    <field name="line_vol_cm3" string="Vol (cm³)" digits="[12,2]"/>
+                                </list>
+                            </field>
+                        </group>
+
+                        <group>
+                            <group string="Volume">
+                                <field name="fill_buffer_pct"  readonly="1"/>
+                                <field name="total_vol_cm3"    readonly="1" digits="[12,2]"/>
+                                <field name="required_vol_cm3" readonly="1" digits="[12,2]"/>
+                            </group>
+                        </group>
+
+                        <!-- Main recommendation -->
+                        <group string="✅ Recommended Box">
+                            <group>
+                                <field name="recommended_box_id" readonly="1"/>
+                                <field name="fill_pct"    readonly="1" string="Box Fill %"/>
+                                <field name="box_cost"    readonly="1"/>
+                                <field name="tape_cost"   readonly="1"/>
+                                <field name="bubble_cost" readonly="1"/>
+                                <field name="total_cost"  readonly="1"/>
+                            </group>
+                            <!-- Alternatives -->
+                            <group string="Alternatives" invisible="not alt1_box_id">
+                                <field name="alt1_box_id"   readonly="1" invisible="not alt1_box_id"/>
+                                <field name="alt1_fill_pct" readonly="1" invisible="not alt1_box_id"
+                                       string="Fill %"/>
+                                <field name="alt1_cost"     readonly="1" invisible="not alt1_box_id"/>
+                                <field name="alt2_box_id"   readonly="1" invisible="not alt2_box_id"/>
+                                <field name="alt2_fill_pct" readonly="1" invisible="not alt2_box_id"
+                                       string="Fill %"/>
+                                <field name="alt2_cost"     readonly="1" invisible="not alt2_box_id"/>
+                            </group>
+                        </group>
+
+                        <!-- Warning note (tight fit / no fit) -->
+                        <div invisible="not result_note" class="alert alert-warning py-2 px-3 mb-0">
+                            <field name="result_note" readonly="1" nolabel="1"/>
+                        </div>
+
+                    </div>
+                </sheet>
+
+                <footer>
+                    <button name="action_compute" type="object"
+                            string="🔍 Recommend Box"
+                            class="btn-primary"
+                            invisible="state == 'done'"/>
+                    <button name="action_reset" type="object"
+                            string="↩ Try Again"
+                            class="btn-secondary"
+                            invisible="state == 'draft'"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Action ────────────────────────────────────────────────────── -->
+    <record id="action_wms_box_recommender" model="ir.actions.act_window">
+        <field name="name">📦 Box Recommender</field>
+        <field name="res_model">wms.box.recommender.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

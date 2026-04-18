@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_wms_pickface_list" model="ir.ui.view">
+        <field name="name">wms.pickface.list</field>
+        <field name="model">wms.pickface</field>
+        <field name="arch" type="xml">
+            <list string="Pickfaces" decoration-warning="needs_restock == True">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="zone_id"/>
+                <field name="product_id"/>
+                <field name="current_qty"/>
+                <field name="min_qty"/>
+                <field name="max_qty"/>
+                <field name="needs_restock"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_pickface_form" model="ir.ui.view">
+        <field name="name">wms.pickface.form</field>
+        <field name="model">wms.pickface</field>
+        <field name="arch" type="xml">
+            <form string="Pickface">
+                <header>
+                    <button name="action_create_restock_transfer" type="object"
+                            string="Create Restock Transfer"
+                            class="btn-warning"
+                            invisible="not needs_restock"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="zone_id"/>
+                            <field name="product_id"/>
+                            <field name="location_id"/>
+                        </group>
+                        <group>
+                            <field name="current_qty"/>
+                            <field name="min_qty"/>
+                            <field name="max_qty"/>
+                            <field name="needs_restock"/>
+                            <field name="restock_qty"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wms_pickface" model="ir.actions.act_window">
+        <field name="name">Pickfaces</field>
+        <field name="res_model">wms.pickface</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

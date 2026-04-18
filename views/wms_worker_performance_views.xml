@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Access rules (defined in XML instead of CSV so they load AFTER
+         models are registered — SQL view models must exist first). -->
+    <record id="access_wms_worker_performance_worker" model="ir.model.access">
+        <field name="name">wms.worker.performance.worker</field>
+        <field name="model_id" ref="model_wms_worker_performance"/>
+        <field name="group_id" ref="group_wms_worker"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="access_wms_worker_performance_supervisor" model="ir.model.access">
+        <field name="name">wms.worker.performance.supervisor</field>
+        <field name="model_id" ref="model_wms_worker_performance"/>
+        <field name="group_id" ref="group_wms_supervisor"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="access_wms_worker_performance_manager" model="ir.model.access">
+        <field name="name">wms.worker.performance.manager</field>
+        <field name="model_id" ref="model_wms_worker_performance"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="view_wms_worker_performance_list" model="ir.ui.view">
+        <field name="name">wms.worker.performance.list</field>
+        <field name="model">wms.worker.performance</field>
+        <field name="arch" type="xml">
+            <list string="Worker Performance" create="false" delete="false" edit="false">
+                <field name="date"/>
+                <field name="kob_user_id" string="Employee"/>
+                <field name="user_id" optional="hide" string="Odoo Account"/>
+                <field name="pick_count"/>
+                <field name="pack_count"/>
+                <field name="box_count"/>
+                <field name="ship_count"/>
+                <field name="total_actions" string="Total Acti…"/>
+                <field name="uph"/>
+                <field name="pick_errors" optional="show"/>
+                <field name="pack_errors" optional="show"/>
+                <field name="total_errors" string="Total Err…"/>
+                <field name="error_rate" string="Error Rate %"
+                       decoration-danger="error_rate > 5"
+                       decoration-warning="error_rate > 2"/>
+                <field name="quality_score" string="Quality %"
+                       decoration-success="quality_score >= 98"
+                       decoration-warning="quality_score >= 95 and quality_score &lt; 98"
+                       decoration-danger="quality_score &lt; 95"/>
+                <field name="worker_score" string="Worker Score"
+                       decoration-success="worker_score >= 15"
+                       decoration-warning="worker_score >= 8 and worker_score &lt; 15"
+                       decoration-danger="worker_score &lt; 8"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_worker_performance_search" model="ir.ui.view">
+        <field name="name">wms.worker.performance.search</field>
+        <field name="model">wms.worker.performance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="kob_user_id" string="Employee"/>
+                <field name="date"/>
+                <filter string="Today" name="today"
+                        domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="This Week" name="this_week"
+                        domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Worker" name="group_worker"
+                            context="{'group_by': 'kob_user_id'}"/>
+                    <filter string="Day" name="group_day"
+                            context="{'group_by': 'date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_wms_worker_performance_graph" model="ir.ui.view">
+        <field name="name">wms.worker.performance.graph</field>
+        <field name="model">wms.worker.performance</field>
+        <field name="arch" type="xml">
+            <graph string="Worker Performance" type="bar">
+                <field name="kob_user_id"/>
+                <field name="total_actions" type="measure"/>
+                <field name="uph" type="measure"/>
+                <field name="worker_score" type="measure"/>
+                <field name="error_rate" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_wms_worker_performance_pivot" model="ir.ui.view">
+        <field name="name">wms.worker.performance.pivot</field>
+        <field name="model">wms.worker.performance</field>
+        <field name="arch" type="xml">
+            <pivot string="Worker Performance">
+                <field name="kob_user_id" type="row"/>
+                <field name="date" type="col" interval="day"/>
+                <field name="pick_count" type="measure"/>
+                <field name="total_errors" type="measure"/>
+                <field name="quality_score" type="measure"/>
+                <field name="worker_score" type="measure"/>
+                <field name="pack_count" type="measure"/>
+                <field name="ship_count" type="measure"/>
+                <field name="uph" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_wms_worker_performance" model="ir.actions.act_window">
+        <field name="name">Worker Performance</field>
+        <field name="res_model">wms.worker.performance</field>
+        <field name="view_mode">list,graph,pivot</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No activity yet</p>
+            <p>Once workers start picking/packing/shipping, KPIs will appear here automatically (refreshed from wms.activity.log).</p>
+        </field>
+    </record>
+
+</odoo>

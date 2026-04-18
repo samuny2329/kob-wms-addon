@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Access rules -->
+    <record id="access_kob_wms_user_manager" model="ir.model.access">
+        <field name="name">kob.wms.user.manager</field>
+        <field name="model_id" ref="model_kob_wms_user"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="access_kob_wms_user_supervisor" model="ir.model.access">
+        <field name="name">kob.wms.user.supervisor</field>
+        <field name="model_id" ref="model_kob_wms_user"/>
+        <field name="group_id" ref="group_wms_supervisor"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+    </record>
+    <record id="access_kob_wms_user_public" model="ir.model.access">
+        <field name="name">kob.wms.user.public</field>
+        <field name="model_id" ref="model_kob_wms_user"/>
+        <field name="group_id" ref="base.group_public"/>
+        <field name="perm_read" eval="True"/>
+    </record>
+    <record id="access_kob_wms_set_pw" model="ir.model.access">
+        <field name="name">kob.wms.user.set.password.mgr</field>
+        <field name="model_id" ref="model_kob_wms_user_set_password"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="access_kob_wms_set_pin" model="ir.model.access">
+        <field name="name">kob.wms.user.set.pin.mgr</field>
+        <field name="model_id" ref="model_kob_wms_user_set_pin"/>
+        <field name="group_id" ref="group_wms_manager"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- ── List ── -->
+    <record id="view_kob_wms_user_tree" model="ir.ui.view">
+        <field name="name">kob.wms.user.tree</field>
+        <field name="model">kob.wms.user</field>
+        <field name="arch" type="xml">
+            <list string="Employees" decoration-muted="not is_active">
+                <field name="name"          string="Full Name"/>
+                <field name="position"      string="Position"/>
+                <field name="username"      string="Login"/>
+                <field name="role"          string="System Role" widget="badge"
+                       decoration-success="role in ('admin','supervisor')"
+                       decoration-info="role in ('picker','packer','outbound')"
+                       decoration-muted="role == 'viewer'"/>
+                <field name="is_active"     string="Active" widget="boolean_toggle"/>
+                <field name="last_login"    string="Last Login" optional="show"/>
+                <field name="res_user_id"   string="Odoo Account" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Form ── -->
+    <record id="view_kob_wms_user_form" model="ir.ui.view">
+        <field name="name">kob.wms.user.form</field>
+        <field name="model">kob.wms.user</field>
+        <field name="arch" type="xml">
+            <form string="Employee">
+                <header>
+                    <button name="action_set_password" type="object"
+                            string="Set Password" class="oe_highlight"/>
+                    <button name="action_set_pin"      type="object" string="Set PIN"/>
+                    <button name="action_unlock"       type="object" string="Unlock"
+                            class="btn-warning" invisible="not locked_until"/>
+                    <button name="action_force_logout" type="object" string="Force Logout"
+                            invisible="not token"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Locked"
+                            bg_color="text-bg-danger"    invisible="not locked_until"/>
+                    <widget name="web_ribbon" title="Inactive"
+                            bg_color="text-bg-secondary" invisible="is_active"/>
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                        <h4 class="text-muted"><field name="position"
+                              placeholder="e.g. Senior Picker, Packer, Outbound Lead..."/></h4>
+                    </div>
+
+                    <group>
+                        <group string="Identity">
+                            <field name="username"   string="Login Username"/>
+                            <field name="role"       string="System Role"
+                                   help="Controls which WMS screens this employee can access."/>
+                            <field name="is_active"  widget="boolean_toggle"/>
+                        </group>
+                        <group string="Session">
+                            <field name="last_login"         readonly="1"/>
+                            <field name="login_count"        readonly="1"/>
+                            <field name="token_expiry"       readonly="1" string="Session Expires"/>
+                            <field name="failed_login_count" readonly="1"/>
+                            <field name="locked_until"       readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Odoo Account (Optional)" colspan="2">
+                        <field name="res_user_id" string="Linked Odoo User"
+                               help="Optional. Link to an Odoo user to enable KPI access and backend views."/>
+                        <div class="text-muted">
+                            <small>Leave blank for warehouse-floor employees — they don't need an Odoo license.</small>
+                        </div>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Search ── -->
+    <record id="view_kob_wms_user_search" model="ir.ui.view">
+        <field name="name">kob.wms.user.search</field>
+        <field name="model">kob.wms.user</field>
+        <field name="arch" type="xml">
+            <search string="Employees">
+                <field name="name"     string="Name"/>
+                <field name="username" string="Login"/>
+                <field name="position" string="Position"/>
+                <filter name="active"   string="Active"   domain="[('is_active','=',True)]"/>
+                <filter name="inactive" string="Inactive" domain="[('is_active','=',False)]"/>
+                <filter name="locked"   string="Locked"   domain="[('locked_until','!=',False)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_role"     string="System Role" context="{'group_by':'role'}"/>
+                    <filter name="group_position" string="Position"    context="{'group_by':'position'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Server Action: Reset PINs ── -->
+    <record id="action_wms_reset_all_pins" model="ir.actions.server">
+        <field name="name">Reset Default PINs (→ 1234)</field>
+        <field name="model_id" ref="model_kob_wms_user"/>
+        <field name="binding_model_id" ref="model_kob_wms_user"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">model._init_default_pins()</field>
+        <field name="groups_id" eval="[(4, ref('group_wms_manager'))]"/>
+    </record>
+
+    <!-- ── Action ── -->
+    <record id="action_kob_wms_user" model="ir.actions.act_window">
+        <field name="name">Employees</field>
+        <field name="res_model">kob.wms.user</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_kob_wms_user_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add your first employee</p>
+            <p>Employees login at <code>/kob/login</code> using their Username and PIN.
+               No Odoo license required.</p>
+        </field>
+    </record>
+
+    <!-- ── Set Password Wizard ── -->
+    <record id="view_wms_user_set_password_form" model="ir.ui.view">
+        <field name="name">kob.wms.user.set.password.form</field>
+        <field name="model">kob.wms.user.set.password</field>
+        <field name="arch" type="xml">
+            <form string="Set Password">
+                <group>
+                    <field name="user_id" string="Employee"/>
+                    <field name="new_password"     password="True"/>
+                    <field name="confirm_password"  password="True"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object"
+                            string="Set Password" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Set PIN Wizard ── -->
+    <record id="view_wms_user_set_pin_form" model="ir.ui.view">
+        <field name="name">kob.wms.user.set.pin.form</field>
+        <field name="model">kob.wms.user.set.pin</field>
+        <field name="arch" type="xml">
+            <form string="Set PIN">
+                <group>
+                    <field name="user_id" string="Employee"/>
+                    <field name="new_pin"     password="True"/>
+                    <field name="confirm_pin" password="True"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object"
+                            string="Set PIN" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

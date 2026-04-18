@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+<!-- ═══════════════════════════════════════════════════════════
+     WmsTopNav — Slim topbar: brand | mode | worker | logout
+     Props: activeMode, accentColor (optional), onNavigate (optional), onBack (optional)
+     ═══════════════════════════════════════════════════════════ -->
+<t t-name="kob_wms.WmsTopNav">
+    <header class="wms-appbar">
+        <!-- Left: brand + mode label -->
+        <div class="wms-appbar-brand">
+            <i class="fa fa-cubes me-2"/>KOB WMS
+            <span class="wms-mode-badge ms-2">
+                <t t-esc="getModeLabel()"/>
+            </span>
+        </div>
+
+        <!-- Centre: logged-in worker -->
+        <div class="wms-appbar-worker">
+            <div class="wms-avatar me-2"><t t-esc="workerInitials"/></div>
+            <span class="wms-appbar-worker-name"><t t-esc="workerName"/></span>
+        </div>
+
+        <!-- Right: logout -->
+        <div class="wms-appbar-actions">
+            <button class="wms-btn-logout" t-on-click="logout">
+                <i class="fa fa-sign-out me-1"/>Logout
+            </button>
+        </div>
+    </header>
+</t>
+
+<!-- ═══════════════════════════════════════════════════════════
+     WmsPickCard — product card (kept for backward compat)
+     ═══════════════════════════════════════════════════════════ -->
+<t t-name="kob_wms.WmsPickCard">
+    <div t-att-class="'wms-product-cell p-2 rounded ' +
+        (props.isDone ? 'wms-row-done ' : '') +
+        (props.isFlashing and props.flashType === 'success' ? 'wms-flash-success ' : '') +
+        (props.isFlashing and props.flashType === 'error'   ? 'wms-flash-error '   : '')">
+        <div class="wms-product-thumb">
+            <img t-if="props.imageUrl" t-att-src="props.imageUrl" loading="lazy"/>
+            <i t-else="" class="fa fa-cube"/>
+        </div>
+        <div>
+            <div class="wms-product-name" t-esc="props.line.product_name"/>
+            <div class="wms-product-sku" t-esc="props.line.sku"/>
+            <div style="font-size:12px; font-weight:700; color:var(--wms-primary-container);">
+                <t t-esc="qty"/> / <t t-esc="total"/>
+            </div>
+        </div>
+    </div>
+</t>
+
+<!-- ═══════════════════════════════════════════════════════════
+     WmsPickScreen — F1 Pick
+     Fields: wms.sales.order + wms.sales.order.line
+     ═══════════════════════════════════════════════════════════ -->
+<t t-name="kob_wms.WmsPickScreen">
+<div class="wms-screen">
+
+    <!-- Sidebar + app bar -->
+    <WmsTopNav activeMode="activeMode" accentColor="accentColor"
+               onNavigate="(m) => this.goToMode(m)" onBack="() => this.onClickBack()"/>
+
+    <main class="wms-main">
+        <div class="wms-page">
+
+            <!-- ═══ QUEUE VIEW (no order selected) ═══ -->
+            <t t-if="!state.currentOrder">
+
+                <div class="wms-page-header">
+                    <div>
+                        <div class="wms-page-title">Pick Queue</div>
+                        <div class="wms-page-subtitle">
+                            <t t-esc="state.orders.length"/> orders pending · scan or click to start
+                        </div>
+                    </div>
+                    <div class="wms-page-actions">
+                        <button class="wms-btn-secondary" t-on-click="loadOrders">
+                            <i class="fa fa-refresh me-1"/>Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scan to jump directly to an order -->
+                <div class="wms-scan-panel">
+                    <label class="wms-scan-panel-label">Scan Order Barcode</label>
+                    <div class="wms-scan-field-wrap">
+                        <i class="fa fa-barcode wms-scan-field-icon"/>
+                        <input class="wms-scan-field" t-ref="scanInput"
+                               placeholder="Scan order ref / barcode…"
+                               t-on-keydown="onScanKeydown"
+                               autocomplete="off" inputmode="none"/>
+                        <span t-if="state.scanning" class="wms-scan-badge wms-scan-badge-scanning">
+                            <span class="wms-dot me-1"/>Scanning…
+                        </span>
+                        <span t-elif="!state.scanning" class="wms-scan-badge wms-scan-badge-ready">
+                            Ready
+                        </span>
+                    </div>
+                    <div t-if="state.lastScan" class="wms-scan-feedback-row">
+                        <span t-if="state.lastScanOk === true"  class="badge text-bg-success">
+                            <i class="fa fa-check"/> <t t-esc="state.lastScan"/>
+                        </span>
+                        <span t-elif="state.lastScanOk === false" class="badge text-bg-danger">
+                            <i class="fa fa-times"/> <t t-esc="state.lastScan"/>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Platform filter + search -->
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <t t-foreach="platforms" t-as="p" t-key="p">
+                        <button t-on-click="() => this.setFilter(p)"
+                                class="btn btn-sm rounded-pill px-3"
+                                t-att-class="state.filterPlatform === p ? 'btn-primary' : 'btn-outline-secondary'"
+                                style="font-size:10px; font-weight:700; text-transform:uppercase;">
+                            <i t-att-class="'fa ' + getPlatformIcon(p)"/> <t t-esc="p"/>
+                        </button>
+                    </t>
+                    <input type="text" class="form-control form-control-sm ms-auto"
+                           style="max-width:220px; font-size:12px;"
+                           placeholder="Search ref / customer…"
+                           t-on-input="onSearchInput"/>
+                </div>
+
+                <!-- Order ledger table -->
+                <div class="wms-ledger-card">
+                    <div class="wms-ledger-card-header">
+                        <span>Picking Operations</span>
+                        <span class="wms-chip wms-chip-pending">
+                            <t t-esc="filteredOrders.length"/> orders
+                        </span>
+                    </div>
+
+                    <t t-if="state.loading">
+                        <div class="text-center py-5"><i class="fa fa-spinner fa-spin fa-2x text-muted"/></div>
+                    </t>
+                    <t t-elif="filteredOrders.length === 0">
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa fa-inbox fa-2x mb-2 d-block"/>No orders to pick
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <table class="wms-ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Platform</th>
+                                    <th>SLA</th>
+                                    <th class="align-right">Progress</th>
+                                    <th class="align-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="filteredOrders" t-as="order" t-key="order.id"
+                                    t-on-click="() => this.selectOrder(order)"
+                                    style="cursor:pointer;">
+                                    <td>
+                                        <div style="font-weight:700; font-family:monospace; font-size:13px;"
+                                             t-esc="order.ref || order.name"/>
+                                        <div style="font-size:10px; color:var(--wms-on-surface-variant);"
+                                             t-esc="order.name"/>
+                                    </td>
+                                    <td style="font-size:12px;" t-esc="order.customer"/>
+                                    <td>
+                                        <span t-att-class="getPlatformBadge(order)"
+                                              style="font-size:10px;"
+                                              t-esc="order.platform"/>
+                                    </td>
+                                    <td>
+                                        <span t-att-class="getSlaClass(order)"
+                                              style="font-size:10px; padding:2px 8px; border-radius:999px;"
+                                              t-esc="order.sla_status"/>
+                                    </td>
+                                    <td class="align-right">
+                                        <div class="d-flex align-items-center justify-content-end gap-2">
+                                            <div class="progress flex-grow-1" style="height:4px; min-width:60px;">
+                                                <div class="progress-bar bg-success"
+                                                     t-att-style="'width:' + orderProgress(order) + '%;'"/>
+                                            </div>
+                                            <small style="font-size:11px; white-space:nowrap; color:var(--wms-on-surface-variant);">
+                                                <t t-esc="order.picked_total"/>/<t t-esc="order.expected_total"/>
+                                            </small>
+                                        </div>
+                                    </td>
+                                    <td class="align-right">
+                                        <span t-if="order.all_picked" class="wms-chip wms-chip-ready">Done</span>
+                                        <span t-elif="order.status === 'picking'" class="wms-chip wms-chip-pending">Picking</span>
+                                        <span t-else="" class="wms-chip wms-chip-draft">Pending</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="wms-ledger-footer">
+                            <span>Showing <t t-esc="filteredOrders.length"/> of <t t-esc="state.orders.length"/> orders</span>
+                        </div>
+                    </t>
+                </div>
+            </t>
+
+            <!-- ═══ DETAIL VIEW (order selected) ═══ -->
+            <t t-if="state.currentOrder">
+
+                <div class="wms-page-header">
+                    <div>
+                        <div class="wms-breadcrumb">
+                            <span t-on-click="deselectOrder" style="cursor:pointer;">Pick Queue</span>
+                            <span class="wms-bc-sep">/</span>
+                            <span class="wms-bc-active"
+                                  t-esc="state.currentOrder.ref || state.currentOrder.name"/>
+                        </div>
+                        <div class="wms-page-title">Picking Operation</div>
+                        <div class="wms-page-subtitle" t-esc="state.currentOrder.customer"/>
+                    </div>
+                    <div class="wms-page-actions">
+                        <a t-if="state.currentOrder.picking_id"
+                           t-att-href="'/report/pdf/kob_wms.report_wms_pick_list/' + state.currentOrder.id"
+                           target="_blank" class="wms-btn-secondary">
+                            <i class="fa fa-print"/> Print Picklist
+                        </a>
+                        <button class="wms-btn-primary"
+                                t-att-disabled="!state.currentOrder.all_picked"
+                                t-on-click="completePick">
+                            <i class="fa fa-check-circle"/> Validate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scan panel -->
+                <div class="wms-scan-panel">
+                    <label class="wms-scan-panel-label">Scan SKU / Barcode</label>
+                    <div class="wms-scan-field-wrap">
+                        <i class="fa fa-barcode wms-scan-field-icon"/>
+                        <input class="wms-scan-field" t-ref="scanInput"
+                               placeholder="Scan product SKU or barcode…"
+                               t-on-keydown="onScanKeydown"
+                               autocomplete="off" inputmode="none"/>
+                        <span t-if="state.scanning" class="wms-scan-badge wms-scan-badge-scanning">
+                            <span class="wms-dot me-1"/>Scanning…
+                        </span>
+                        <span t-elif="state.currentOrder.all_picked" class="wms-scan-badge wms-scan-badge-ready"
+                              style="background:rgba(75,93,51,0.15); color:#4b5d33;">
+                            <i class="fa fa-check me-1"/>All Picked
+                        </span>
+                        <span t-else="" class="wms-scan-badge wms-scan-badge-ready">Ready</span>
+                    </div>
+                    <div t-if="state.lastScan" class="wms-scan-feedback-row">
+                        <span t-if="state.lastScanOk === true"  class="badge text-bg-success">
+                            <i class="fa fa-check"/> <t t-esc="state.lastScan"/>
+                        </span>
+                        <span t-elif="state.lastScanOk === false" class="badge text-bg-danger">
+                            <i class="fa fa-times"/> <t t-esc="state.lastScan"/>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Progress bar -->
+                <div class="d-flex align-items-center gap-3 mb-4"
+                     style="background:white; border-radius:10px; padding:12px 20px; box-shadow:0 1px 4px rgba(25,28,29,0.05);">
+                    <div class="progress flex-grow-1" style="height:8px; border-radius:4px;">
+                        <div class="progress-bar progress-bar-striped"
+                             t-att-class="progressPct > 0 and progressPct &lt; 100 ? 'progress-bar-animated' : ''"
+                             t-att-style="'width:' + progressPct + '%; background:var(--wms-primary-container);'"/>
+                    </div>
+                    <span style="font-family:'Manrope',sans-serif; font-weight:700; font-size:14px; color:var(--wms-primary-container); white-space:nowrap;">
+                        <t t-esc="state.currentOrder.picked_total"/> /
+                        <t t-esc="state.currentOrder.expected_total"/> items
+                        (<t t-esc="progressPct"/>%)
+                    </span>
+                </div>
+
+                <!-- Order lines ledger table -->
+                <div class="wms-ledger-card">
+                    <div class="wms-ledger-card-header">
+                        <span>
+                            Items to Pick
+                            <span class="ms-2 wms-chip wms-chip-draft"
+                                  style="font-size:10px;">
+                                <t t-esc="state.currentLines.length"/>
+                            </span>
+                        </span>
+                        <span t-if="state.currentOrder.all_picked" class="wms-chip wms-chip-ready">
+                            100% Complete
+                        </span>
+                        <span t-else="" style="font-size:12px; color:var(--wms-on-surface-variant);">
+                            <t t-esc="progressPct"/>% Complete
+                        </span>
+                    </div>
+
+                    <t t-if="state.currentLines.length === 0">
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa fa-inbox fa-2x mb-2 d-block"/>No items
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <table class="wms-ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Lot / Barcode</th>
+                                    <th class="align-right">Demand</th>
+                                    <th class="align-right">Done</th>
+                                    <th class="align-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="state.currentLines" t-as="line" t-key="line.id"
+                                    t-att-class="(line.picked_qty >= line.expected_qty ? 'wms-row-done' : '') +
+                                        (state.flashLineId === line.id and state.flashType === 'success' ? ' wms-flash-success' : '') +
+                                        (state.flashLineId === line.id and state.flashType === 'error'   ? ' wms-flash-error'   : '')">
+                                    <td>
+                                        <div class="wms-product-cell">
+                                            <div class="wms-product-thumb">
+                                                <img t-if="getProductImage(line)"
+                                                     t-att-src="getProductImage(line)" loading="lazy"/>
+                                                <i t-else="" class="fa fa-cube"/>
+                                            </div>
+                                            <div>
+                                                <div class="wms-product-name" t-esc="line.product_name"/>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span style="font-family:monospace; font-size:12px; color:var(--wms-primary-container); font-weight:600;"
+                                              t-esc="line.sku"/>
+                                    </td>
+                                    <td>
+                                        <span t-if="line.product_barcode"
+                                              class="wms-chip wms-chip-info"
+                                              t-esc="line.product_barcode"/>
+                                        <span t-else="" style="font-style:italic; color:var(--wms-outline); font-size:12px;">—</span>
+                                    </td>
+                                    <td class="align-right">
+                                        <span style="font-family:monospace; font-weight:700;"
+                                              t-esc="line.expected_qty"/>
+                                    </td>
+                                    <td class="align-right">
+                                        <span t-att-class="'wms-qty-display ' + (line.picked_qty >= line.expected_qty ? 'full' : (line.picked_qty === 0 ? 'empty' : ''))"
+                                              t-esc="line.picked_qty"/>
+                                    </td>
+                                    <td class="align-center">
+                                        <span t-if="line.picked_qty >= line.expected_qty" class="wms-chip wms-chip-ready">
+                                            <i class="fa fa-check"/> Done
+                                        </span>
+                                        <span t-elif="line.picked_qty > 0" class="wms-chip wms-chip-pending">
+                                            Partial
+                                        </span>
+                                        <span t-else="" class="wms-chip wms-chip-draft">Pending</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="wms-ledger-footer">
+                            <span>
+                                <t t-esc="state.currentLines.filter(l => l.picked_qty >= l.expected_qty).length"/>
+                                of <t t-esc="state.currentLines.length"/> lines completed
+                            </span>
+                            <button class="btn btn-sm btn-outline-secondary" t-on-click="deselectOrder">
+                                <i class="fa fa-arrow-left me-1"/>Back to Queue
+                            </button>
+                        </div>
+                    </t>
+                </div>
+
+            </t>
+
+        </div>
+    </main>
+
+</div>
+</t>
+
+</templates>

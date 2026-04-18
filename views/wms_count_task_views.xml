@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_wms_count_task_list" model="ir.ui.view">
+        <field name="name">wms.count.task.list</field>
+        <field name="model">wms.count.task</field>
+        <field name="arch" type="xml">
+            <list string="Count Tasks"
+                  decoration-info="state == 'counting'"
+                  decoration-warning="state == 'submitted'"
+                  decoration-success="state in ('verified', 'approved')">
+                <field name="name"/>
+                <field name="session_id"/>
+                <field name="rack_id"/>
+                <field name="zone_id"/>
+                <field name="location_id" optional="show"/>
+                <field name="assigned_user_id"/>
+                <field name="expected_qty"/>
+                <field name="counted_qty"/>
+                <field name="variance"/>
+                <field name="adjustment_count" string="Adj." optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'counting'"
+                       decoration-warning="state == 'submitted'"
+                       decoration-success="state in ('verified', 'approved')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_count_task_form" model="ir.ui.view">
+        <field name="name">wms.count.task.form</field>
+        <field name="model">wms.count.task</field>
+        <field name="arch" type="xml">
+            <form string="Count Task">
+                <header>
+                    <button name="action_assign" type="object" string="Assign"
+                            invisible="state != 'draft'"/>
+                    <button name="action_start_counting" type="object"
+                            string="Start Counting" class="oe_highlight"
+                            invisible="state != 'assigned'"/>
+                    <button name="action_submit" type="object" string="Submit"
+                            class="oe_highlight" invisible="state != 'counting'"/>
+                    <!-- Supervisor: Verify or Request Recount -->
+                    <button name="action_verify" type="object"
+                            string="Verify" class="oe_highlight"
+                            invisible="state != 'submitted'"
+                            groups="kob_wms.group_wms_supervisor"/>
+                    <button name="action_request_recount" type="object"
+                            string="Request Recount" class="btn-warning"
+                            invisible="state != 'submitted'"
+                            groups="kob_wms.group_wms_supervisor"
+                            confirm="Clear entries and send back for recount?"/>
+                    <!-- Manager: Approve -->
+                    <button name="action_approve" type="object" string="Approve"
+                            class="oe_highlight" invisible="state != 'verified'"
+                            groups="kob_wms.group_wms_manager"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,assigned,counting,submitted,verified,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_wms_count_adjustment_all)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-exchange"
+                                invisible="adjustment_count == 0">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="adjustment_count"/>
+                                </span>
+                                <span class="o_stat_text">Adjustments</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="session_id"/>
+                            <field name="rack_id"/>
+                            <field name="zone_id"/>
+                            <field name="location_id"/>
+                        </group>
+                        <group>
+                            <field name="assigned_user_id"/>
+                            <field name="expected_qty"/>
+                            <field name="counted_qty"/>
+                            <field name="variance"/>
+                            <field name="verified_by"
+                                   invisible="state not in ('verified', 'approved')"/>
+                            <field name="verified_date"
+                                   invisible="state not in ('verified', 'approved')"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Scan Entries" name="entries">
+                            <field name="entry_ids">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="lot_id"/>
+                                    <field name="scan_type"/>
+                                    <field name="qty"/>
+                                    <field name="barcode"/>
+                                    <field name="user_id"/>
+                                    <field name="scan_time"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Variance Analysis" name="variance"
+                              invisible="adjustment_count == 0">
+                            <field name="adjustment_ids" readonly="1">
+                                <list decoration-danger="variance_pct &gt; 5 or variance_pct &lt; -5"
+                                      decoration-warning="variance_pct != 0 and variance_pct &lt;= 5 and variance_pct &gt;= -5"
+                                      decoration-success="variance_qty == 0">
+                                    <field name="product_id"/>
+                                    <field name="location_id"/>
+                                    <field name="lot_id"/>
+                                    <field name="system_qty" string="System"/>
+                                    <field name="counted_qty" string="Counted"/>
+                                    <field name="variance_qty" string="Variance"/>
+                                    <field name="variance_pct" string="Var %"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'pending'"
+                                           decoration-warning="state == 'approved'"
+                                           decoration-success="state == 'applied'"
+                                           decoration-danger="state == 'rejected'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Count Monitor list view (supervisor live tracking) ────────── -->
+    <record id="view_wms_count_monitor_list" model="ir.ui.view">
+        <field name="name">wms.count.task.monitor.list</field>
+        <field name="model">wms.count.task</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list string="🔴 Count Monitor"
+                  decoration-danger="state == 'counting'"
+                  decoration-warning="state == 'submitted'"
+                  decoration-success="state in ('verified', 'approved')"
+                  decoration-muted="state == 'assigned'"
+                  default_order="write_date desc">
+                <!-- Who + where — most important -->
+                <field name="assigned_user_id" string="Worker" optional="show"
+                       widget="many2one_avatar_user"/>
+                <field name="location_id" string="Location" optional="show"/>
+                <field name="zone_id" string="Zone" optional="show"/>
+                <field name="rack_id" string="Rack" optional="show"/>
+                <!-- Progress -->
+                <field name="entry_count" string="Scanned" optional="show"/>
+                <field name="counted_qty" string="Qty" optional="show"/>
+                <field name="variance" string="Variance" optional="show"
+                       decoration-danger="variance != 0"/>
+                <!-- Meta -->
+                <field name="name" string="Task Ref" optional="show"/>
+                <field name="session_id" optional="show"/>
+                <field name="write_date" string="Last Update" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-danger="state == 'counting'"
+                       decoration-warning="state == 'submitted'"
+                       decoration-success="state in ('verified', 'approved')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_wms_count_monitor" model="ir.actions.act_window">
+        <field name="name">🔴 Count Monitor</field>
+        <field name="res_model">wms.count.task</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_wms_count_monitor_list"/>
+        <field name="domain">[('session_id.state', '=', 'in_progress')]</field>
+        <field name="context">{
+            'search_default_g_state': 1,
+            'search_default_counting': 1
+        }</field>
+        <field name="search_view_id" ref="view_wms_count_task_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">ไม่มี Task ที่กำลังนับอยู่</p>
+            <p>หน้านี้แสดงเฉพาะ Task ใน Session ที่กำลัง In Progress<br/>
+               Refresh หน้าเพื่อดูสถานะล่าสุด</p>
+        </field>
+    </record>
+
+    <record id="view_wms_count_task_search" model="ir.ui.view">
+        <field name="name">wms.count.task.search</field>
+        <field name="model">wms.count.task</field>
+        <field name="arch" type="xml">
+            <search string="Count Tasks">
+                <field name="name"/>
+                <field name="session_id"/>
+                <field name="assigned_user_id"/>
+                <field name="location_id"/>
+                <filter string="🔴 Counting Now" name="counting"
+                        domain="[('state','=','counting')]"/>
+                <filter string="📋 Assigned" name="assigned"
+                        domain="[('state','=','assigned')]"/>
+                <filter string="🟡 Submitted" name="submitted"
+                        domain="[('state','=','submitted')]"/>
+                <filter string="✅ Verified" name="verified"
+                        domain="[('state','=','verified')]"/>
+                <filter string="Approved" name="approved"
+                        domain="[('state','=','approved')]"/>
+                <filter string="Active Session" name="active_session"
+                        domain="[('session_id.state','=','in_progress')]"/>
+                <separator/>
+                <group expand="1" string="Group By">
+                    <filter string="State" name="g_state"
+                            context="{'group_by':'state'}"/>
+                    <filter string="Worker" name="g_worker"
+                            context="{'group_by':'assigned_user_id'}"/>
+                    <filter string="Zone" name="g_zone"
+                            context="{'group_by':'zone_id'}"/>
+                    <filter string="Session" name="g_session"
+                            context="{'group_by':'session_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_count_task" model="ir.actions.act_window">
+        <field name="name">Count Tasks</field>
+        <field name="res_model">wms.count.task</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_wms_count_task_search"/>
+    </record>
+
+</odoo>

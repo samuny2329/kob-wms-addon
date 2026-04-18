@@ -1,0 +1,430 @@
+{
+    "version": 22,
+    "sheets": [
+        {
+            "id": "sh_wms_ops",
+            "name": "Operations",
+            "colNumber": 10,
+            "rowNumber": 60,
+            "rows": {
+                "0": { "size": 32 },
+                "1": { "size": 10 }
+            },
+            "cols": {
+                "0": { "size": 30 }
+            },
+            "merges": ["B1:I1"],
+            "cells": {
+                "B1": { "content": "KOB WMS — Operations" }
+            },
+            "styles": {
+                "B1": 1
+            },
+            "formats": {},
+            "borders": {},
+            "conditionalFormats": [],
+            "figures": [
+                {
+                    "id": "op-bar-pick-dur",
+                    "x": 18, "y": 60,
+                    "width": 475, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Avg Pick Duration by Picker (min)" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "none",
+                        "metaData": {
+                            "groupBy": ["picker_id"],
+                            "measure": "pick_duration_min",
+                            "order": "DESC",
+                            "resModel": "wms.sales.order",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [["status", "in", ["picked", "packing", "packed", "shipped"]]],
+                            "groupBy": ["picker_id"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "fieldMatching": {
+                            "gf_ops_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "op-bar-pack-dur",
+                    "x": 503, "y": 60,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Avg Pack Duration by Packer (min)" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "none",
+                        "metaData": {
+                            "groupBy": ["packer_id"],
+                            "measure": "pack_duration_min",
+                            "order": "DESC",
+                            "resModel": "wms.sales.order",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [["status", "in", ["packed", "shipped"]]],
+                            "groupBy": ["packer_id"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "fieldMatching": {
+                            "gf_ops_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "op-pie-count-state",
+                    "x": 18, "y": 420,
+                    "width": 475, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Count Sessions by State" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "right",
+                        "metaData": {
+                            "groupBy": ["state"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.count.session",
+                            "mode": "pie"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["state"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_pie",
+                        "fieldMatching": {}
+                    }
+                },
+                {
+                    "id": "op-bar-pickface-zone",
+                    "x": 503, "y": 420,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Pickfaces by Zone" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "top",
+                        "metaData": {
+                            "groupBy": ["zone_id", "needs_restock"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.pickface",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["zone_id", "needs_restock"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": true,
+                        "fieldMatching": {}
+                    }
+                },
+                {
+                    "id": "op-line-daily-ship",
+                    "x": 18, "y": 780,
+                    "width": 950, "height": 360,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Daily Shipped Orders" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "top",
+                        "metaData": {
+                            "groupBy": ["shipped_at:day"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.sales.order",
+                            "mode": "line"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [["status", "=", "shipped"]],
+                            "groupBy": ["shipped_at:day"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_line",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "cumulative": false,
+                        "fieldMatching": {
+                            "gf_ops_date": {
+                                "chain": "shipped_at",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                }
+            ],
+            "tables": [],
+            "areGridLinesVisible": false,
+            "isVisible": true,
+            "headerGroups": { "ROW": [], "COL": [] },
+            "dataValidationRules": [],
+            "comments": {}
+        },
+        {
+            "id": "sh_inv_count",
+            "name": "Inventory Count",
+            "colNumber": 10,
+            "rowNumber": 60,
+            "rows": {
+                "0": { "size": 32 },
+                "1": { "size": 10 }
+            },
+            "cols": {
+                "0": { "size": 30 }
+            },
+            "merges": ["B1:I1"],
+            "cells": {
+                "B1": { "content": "KOB WMS — Inventory Count Adjustments" }
+            },
+            "styles": {
+                "B1": 1
+            },
+            "formats": {},
+            "borders": {},
+            "conditionalFormats": [],
+            "figures": [
+                {
+                    "id": "cnt-pie-adj-state",
+                    "x": 18, "y": 60,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Adjustments by State" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "right",
+                        "metaData": {
+                            "groupBy": ["state"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.count.adjustment",
+                            "mode": "pie"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["state"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_pie",
+                        "fieldMatching": {
+                            "gf_ops_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "cnt-bar-variance-product",
+                    "x": 503, "y": 60,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Total Variance by Product" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "none",
+                        "metaData": {
+                            "groupBy": ["product_id"],
+                            "measure": "variance_qty",
+                            "order": "DESC",
+                            "resModel": "wms.count.adjustment",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [["variance_qty", "!=", 0], ["state", "!=", "rejected"]],
+                            "groupBy": ["product_id"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "fieldMatching": {
+                            "gf_ops_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "cnt-bar-adj-location",
+                    "x": 18, "y": 420,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Adjustments by Location" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "top",
+                        "metaData": {
+                            "groupBy": ["location_id"],
+                            "measure": "__count",
+                            "order": "DESC",
+                            "resModel": "wms.count.adjustment",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [["state", "!=", "rejected"]],
+                            "groupBy": ["location_id"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "fieldMatching": {
+                            "gf_ops_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "cnt-pie-session-type",
+                    "x": 503, "y": 420,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Count Sessions by Type" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "right",
+                        "metaData": {
+                            "groupBy": ["session_type"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.count.session",
+                            "mode": "pie"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["session_type"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_pie",
+                        "fieldMatching": {
+                            "gf_ops_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "cnt-line-daily-adj",
+                    "x": 18, "y": 780,
+                    "width": 950, "height": 360,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Daily Adjustments Created" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "top",
+                        "metaData": {
+                            "groupBy": ["create_date:day"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.count.adjustment",
+                            "mode": "line"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["create_date:day"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_line",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "cumulative": false,
+                        "fieldMatching": {
+                            "gf_ops_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                }
+            ],
+            "tables": [],
+            "areGridLinesVisible": false,
+            "isVisible": true,
+            "headerGroups": { "ROW": [], "COL": [] },
+            "dataValidationRules": [],
+            "comments": {}
+        }
+    ],
+    "styles": {
+        "1": {
+            "bold": true,
+            "fontSize": 18,
+            "textColor": "#111827",
+            "fillColor": "#F9FAFB"
+        }
+    },
+    "formats": {},
+    "borders": {},
+    "revisionId": "START_REVISION",
+    "uniqueFigureIds": true,
+    "settings": {
+        "locale": {
+            "name": "English (US)",
+            "code": "en_US",
+            "thousandsSeparator": ",",
+            "decimalSeparator": ".",
+            "weekStart": 7,
+            "dateFormat": "m/d/yyyy",
+            "timeFormat": "hh:mm:ss a"
+        }
+    },
+    "pivots": {},
+    "pivotNextId": 1,
+    "lists": {},
+    "listNextId": 1,
+    "chartOdooMenusReferences": {},
+    "globalFilters": [
+        {
+            "id": "gf_ops_date",
+            "type": "date",
+            "label": "Date Range",
+            "rangeType": "month",
+            "defaultValue": {}
+        }
+    ]
+}

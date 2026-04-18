@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_wms_sales_order_list" model="ir.ui.view">
+        <field name="name">wms.sales.order.list</field>
+        <field name="model">wms.sales.order</field>
+        <field name="arch" type="xml">
+            <list string="WMS Sales Orders"
+                  decoration-info="status == 'picking'"
+                  decoration-primary="status == 'packing'"
+                  decoration-success="status == 'shipped'"
+                  decoration-muted="status == 'cancelled'">
+                <field name="name"/>
+                <field name="ref"/>
+                <field name="platform" widget="badge"/>
+                <field name="customer"/>
+                <field name="courier_id"/>
+                <field name="awb"/>
+                <field name="kob_picker_id" optional="show" string="Picker"/>
+                <field name="kob_packer_id" optional="show" string="Packer"/>
+                <field name="expected_total"/>
+                <field name="picked_total"/>
+                <field name="packed_total"/>
+                <field name="total_duration_min" string="OCT (min)" optional="show"
+                       decoration-success="total_duration_min &gt; 0 and total_duration_min &lt;= 90"
+                       decoration-warning="total_duration_min &gt; 90 and total_duration_min &lt;= 120"
+                       decoration-danger="total_duration_min &gt; 120"/>
+                <field name="sla_status" widget="badge" optional="show"
+                       decoration-success="sla_status == 'on_track' or sla_status == 'done'"
+                       decoration-warning="sla_status == 'at_risk'"
+                       decoration-danger="sla_status == 'breached'"/>
+                <field name="status" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_sales_order_form" model="ir.ui.view">
+        <field name="name">wms.sales.order.form</field>
+        <field name="model">wms.sales.order</field>
+        <field name="arch" type="xml">
+            <form string="WMS Sales Order">
+                <header>
+                    <button name="action_print_picklist" type="object"
+                            string="🖨 Print Pick List"
+                            class="btn-warning"
+                            invisible="status not in ('pending', 'picking')"
+                            groups="kob_wms.group_wms_supervisor"/>
+                    <button name="action_open_scan_box" type="object"
+                            string="📮 Close Box" class="btn-primary"
+                            invisible="status != 'packing' or not all_packed"/>
+                    <button name="action_ship" type="object" string="🚚 Fulfill &amp; Ship"
+                            class="oe_highlight" invisible="status != 'packed'"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="status in ('shipped', 'cancelled')"
+                            groups="kob_wms.group_wms_supervisor"/>
+                    <button name="action_open_cancel_return" type="object"
+                            string="↩ Return" class="btn-secondary"
+                            invisible="not picking_id"/>
+                    <field name="status" widget="statusbar"
+                           statusbar_visible="pending,picking,picked,packing,packed,shipped"/>
+                </header>
+                <sheet>
+                    <!-- Barcode scan bar — always focused, routes pick/pack by status -->
+                    <widget name="wms_scan_bar"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="ref"/>
+                            <field name="platform"/>
+                            <field name="customer"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group>
+                            <field name="courier_id"/>
+                            <field name="awb"/>
+                            <field name="box_barcode"/>
+                            <field name="kob_picker_id" string="Picker"/>
+                            <field name="kob_packer_id" string="Packer"/>
+                            <field name="sale_order_id"/>
+                            <field name="picking_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Items">
+                            <field name="line_ids">
+                                <list editable="bottom"
+                                      decoration-success="picked_qty >= expected_qty and not is_service"
+                                      decoration-muted="is_service">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="sku"/>
+                                    <field name="product_barcode" string="Barcode"
+                                           readonly="1" optional="show"/>
+                                    <field name="product_name"/>
+                                    <field name="product_id"/>
+                                    <field name="expected_qty"/>
+                                    <field name="picked_qty"/>
+                                    <field name="packed_qty"/>
+                                    <field name="is_service" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <group>
+                                <group>
+                                    <field name="expected_total" readonly="1"/>
+                                    <field name="picked_total" readonly="1"/>
+                                    <field name="packed_total" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="picked_at" readonly="1"/>
+                                    <field name="packed_at" readonly="1"/>
+                                    <field name="shipped_at" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Smart Ring (SLA)">
+                            <group>
+                                <group string="Employees">
+                                    <field name="kob_picker_id" readonly="1" string="Picker"/>
+                                    <field name="kob_packer_id" readonly="1" string="Packer"/>
+                                </group>
+                                <group string="Difficulty">
+                                    <field name="items_count" readonly="1"/>
+                                    <field name="sku_count" readonly="1"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Timestamps">
+                                    <field name="sla_start_at" readonly="1" string="SLA Start (Picklist Printed)"/>
+                                    <field name="pick_start_at" readonly="1"/>
+                                    <field name="picked_at" readonly="1"/>
+                                    <field name="pack_start_at" readonly="1"/>
+                                    <field name="packed_at" readonly="1"/>
+                                    <field name="shipped_at" readonly="1"/>
+                                </group>
+                                <group string="Net Working Duration (min, หักเวลาพัก)">
+                                    <field name="wait_pick_min" readonly="1" string="Wait → Pick"/>
+                                    <field name="pick_duration_min" readonly="1" string="Pick Time"/>
+                                    <field name="wait_pack_min" readonly="1" string="Wait → Pack"/>
+                                    <field name="pack_duration_min" readonly="1" string="Pack Time"/>
+                                    <field name="wait_ship_min" readonly="1" string="Wait → Ship"/>
+                                    <field name="total_duration_min" readonly="1"
+                                           string="OCT (Order Cycle Time)"
+                                           decoration-success="total_duration_min &gt; 0 and total_duration_min &lt;= 90"
+                                           decoration-warning="total_duration_min &gt; 90 and total_duration_min &lt;= 120"
+                                           decoration-danger="total_duration_min &gt; 120"/>
+                                    <field name="sla_status" readonly="1"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Errors">
+                                    <field name="pick_errors" readonly="1"/>
+                                    <field name="pack_errors" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_wms_sales_order_kanban" model="ir.ui.view">
+        <field name="name">wms.sales.order.kanban</field>
+        <field name="model">wms.sales.order</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status">
+                <field name="name"/>
+                <field name="ref"/>
+                <field name="platform"/>
+                <field name="courier_id"/>
+                <field name="customer"/>
+                <field name="expected_total"/>
+                <field name="picked_total"/>
+                <field name="packed_total"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <strong><field name="name"/></strong>
+                            <div><field name="customer"/></div>
+                            <div>
+                                <span class="badge text-bg-info"><field name="platform"/></span>
+                                <field name="courier_id"/>
+                            </div>
+                            <div>
+                                Qty: <field name="picked_total"/> / <field name="expected_total"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Pick view: all orders that still need picking -->
+    <record id="action_wms_pick" model="ir.actions.act_window">
+        <field name="name">Pick Orders</field>
+        <field name="res_model">wms.sales.order</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('status', 'in', ['pending', 'picking'])]</field>
+        <field name="context">{'default_status': 'pending'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No orders to pick</p>
+            <p>Orders appear here once they are synced from platforms (F1 shortcut).</p>
+        </field>
+    </record>
+
+    <!-- Pack view: orders that are fully picked -->
+    <record id="action_wms_pack" model="ir.actions.act_window">
+        <field name="name">Pack Orders</field>
+        <field name="res_model">wms.sales.order</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('status', 'in', ['picked', 'packing'])]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No orders to pack</p>
+            <p>Complete picking first to see orders here (F2 shortcut).</p>
+        </field>
+    </record>
+
+    <!-- All sales orders -->
+    <record id="action_wms_sales_order_all" model="ir.actions.act_window">
+        <field name="name">All Orders</field>
+        <field name="res_model">wms.sales.order</field>
+        <field name="view_mode">list,kanban,form</field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- List-bound server actions (appear under Actions dropdown)  -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <!-- Print Picklist for selected orders (sets SLA start timer) -->
+    <record id="action_batch_print_picklist" model="ir.actions.server">
+        <field name="name">Print Picklist (Set SLA Start)</field>
+        <field name="model_id" ref="model_wms_sales_order"/>
+        <field name="binding_model_id" ref="model_wms_sales_order"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_print_picklist()</field>
+        <field name="groups_id" eval="[(4, ref('group_wms_manager')), (4, ref('group_wms_supervisor'))]"/>
+    </record>
+
+    <!-- Print AWB Labels 100×150 for selected orders -->
+    <record id="action_batch_print_awb" model="ir.actions.server">
+        <field name="name">Print AWB Labels (100x150)</field>
+        <field name="model_id" ref="model_wms_sales_order"/>
+        <field name="binding_model_id" ref="model_wms_sales_order"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+report = env.ref('kob_wms.action_report_wms_awb_label')
+action = report.report_action(records)
+        </field>
+        <field name="groups_id" eval="[(4, ref('group_wms_manager')), (4, ref('group_wms_supervisor'))]"/>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- WMS Queue List Views — Pick / Pack / Outbound / Dispatch  -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <!-- Shared search view for all queue screens -->
+    <record id="view_wms_queue_search" model="ir.ui.view">
+        <field name="name">wms.sales.order.queue.search</field>
+        <field name="model">wms.sales.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Order / Barcode"
+                       filter_domain="['|',('name','ilike',self),('ref','ilike',self)]"/>
+                <field name="customer"/>
+                <field name="courier_id"/>
+                <filter string="SLA At Risk"   name="sla_risk"
+                        domain="[('sla_status','=','at_risk')]"/>
+                <filter string="SLA Breached"  name="sla_breach"
+                        domain="[('sla_status','=','breached')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Platform" name="by_platform"
+                            context="{'group_by':'platform'}"/>
+                    <filter string="Courier"  name="by_courier"
+                            context="{'group_by':'courier_id'}"/>
+                    <filter string="Status"   name="by_status"
+                            context="{'group_by':'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Pick Queue (F1) -->
+    <record id="view_wms_pick_list" model="ir.ui.view">
+        <field name="name">wms.sales.order.pick.list</field>
+        <field name="model">wms.sales.order</field>
+        <field name="arch" type="xml">
+            <list string="Pick Queue" js_class="wms_list"
+                  decoration-warning="sla_status == 'at_risk'"
+                  decoration-danger="sla_status == 'breached'"
+                  decoration-info="status == 'picking'">
+                <field name="name"           string="Order"/>
+                <field name="ref"            string="Platform Ref" optional="show"/>
+                <field name="customer"/>
+                <field name="platform"       widget="badge"/>
+                <field name="expected_total" string="Items"/>
+                <field name="picked_total"   string="Picked" optional="show"/>
+                <field name="sla_status"     widget="badge" optional="show"
+                       decoration-success="sla_status == 'on_track'"
+                       decoration-warning="sla_status == 'at_risk'"
+                       decoration-danger="sla_status == 'breached'"/>
+                <field name="status"         widget="badge"
+                       decoration-warning="status == 'picking'"
+                       decoration-success="status == 'picked'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Pack Queue (F2) -->
+    <record id="view_wms_pack_list" model="ir.ui.view">
+        <field name="name">wms.sales.order.pack.list</field>
+        <field name="model">wms.sales.order</field>
+        <field name="arch" type="xml">
+            <list string="Pack Queue" js_class="wms_list"
+                  decoration-warning="sla_status == 'at_risk'"
+                  decoration-danger="sla_status == 'breached'"
+                  decoration-info="status == 'packing'">
+                <field name="name"           string="Order"/>
+                <field name="ref"            string="Platform Ref" optional="show"/>
+                <field name="customer"/>
+                <field name="platform"       widget="badge"/>
+                <field name="kob_picker_id"  string="Picker"/>
+                <field name="expected_total" string="Items"/>
+                <field name="picked_total"   string="Picked"/>
+                <field name="packed_total"   string="Packed" optional="show"/>
+                <field name="sla_status"     widget="badge" optional="show"
+                       decoration-success="sla_status == 'on_track'"
+                       decoration-warning="sla_status == 'at_risk'"
+                       decoration-danger="sla_status == 'breached'"/>
+                <field name="status"         widget="badge"
+                       decoration-warning="status == 'packing'"
+                       decoration-success="status == 'packed'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Outbound Queue (F3) -->
+    <record id="view_wms_outbound_list" model="ir.ui.view">
+        <field name="name">wms.sales.order.outbound.list</field>
+        <field name="model">wms.sales.order</field>
+        <field name="arch" type="xml">
+            <list string="Outbound Queue" js_class="wms_outbound_list"
+                  decoration-success="status == 'shipped'">
+                <field name="name"           string="Order"/>
+                <field name="ref"            string="Platform Ref" optional="show"/>
+                <field name="customer"/>
+                <field name="courier_id"     string="Courier"/>
+                <field name="awb"            string="AWB / Tracking"/>
+                <field name="box_barcode"    optional="show"/>
+                <field name="kob_packer_id"  string="Packer" optional="show"/>
+                <field name="sla_status"     widget="badge" optional="show"
+                       decoration-success="sla_status == 'on_track'"
+                       decoration-warning="sla_status == 'at_risk'"
+                       decoration-danger="sla_status == 'breached'"/>
+                <field name="status"         widget="badge"
+                       decoration-warning="status == 'packed'"
+                       decoration-success="status == 'shipped'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Dispatch Queue (F4) -->
+    <record id="view_wms_dispatch_list" model="ir.ui.view">
+        <field name="name">wms.sales.order.dispatch.list</field>
+        <field name="model">wms.sales.order</field>
+        <field name="arch" type="xml">
+            <list string="Dispatch Queue" js_class="wms_list"
+                  decoration-success="status == 'dispatched'">
+                <field name="name"       string="Order"/>
+                <field name="customer"/>
+                <field name="courier_id" string="Courier"/>
+                <field name="awb"        string="AWB"/>
+                <field name="shipped_at" optional="show"/>
+                <field name="status"     widget="badge"
+                       decoration-warning="status == 'shipped'"
+                       decoration-success="status == 'dispatched'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Seed demo KPI data — assign workers + timestamps to existing orders -->
+    <record id="action_seed_demo_workers" model="ir.actions.server">
+        <field name="name">Assign Demo Workers (KPI Sample)</field>
+        <field name="model_id" ref="model_wms_sales_order"/>
+        <field name="binding_model_id" ref="model_wms_sales_order"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_seed_demo_workers()</field>
+        <field name="groups_id" eval="[(4, ref('group_wms_manager'))]"/>
+    </record>
+
+</odoo>

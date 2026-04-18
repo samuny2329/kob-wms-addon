@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<!-- ═══════════════════════════════════════════════════════════════
+     THE BOX — กล่องไปรษณีย์ราคาถูก
+     Dimensions: Length × Width × Height (cm)
+     Volume computed automatically by _compute_volume
+
+     v4 — 2026-04-16: Added tape_cost_per_m + bubble_cost_est
+     ─────────────────────────────────────────────────────────────
+     Tape baseline: OPP 48mm × 100m roll @ ฿30 → ฿0.30/m
+     Tape formula (auto-computed by model):
+       tape_length_m = [(W + H) × 2 × 3 rounds + 20 cm] ÷ 100
+       tape_cost_est = tape_length_m × tape_cost_per_m
+
+     Bubble wrap estimate: Based on typical product fragility
+     and interior surface coverage per box size category.
+     Baseline: แผ่นบับเบิ้ล 50m × 100cm roll @ ฿350 = ฿0.07/cm²
+     ═══════════════════════════════════════════════════════════════ -->
+<data noupdate="1">
+
+    <!-- ── Micro / Flat ──────────────────────────────────────── -->
+    <record id="box_00" model="wms.box.size">
+        <field name="code">00</field><field name="label">00 — 14×9.75×6 cm</field>
+        <field name="length">14</field><field name="width">9.75</field><field name="height">6</field>
+        <field name="sequence">1</field><field name="unit_cost">3.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">0.30</field>
+    </record>
+    <record id="box_0" model="wms.box.size">
+        <field name="code">0</field><field name="label">0 — 11×17×6 cm</field>
+        <field name="length">11</field><field name="width">17</field><field name="height">6</field>
+        <field name="sequence">2</field><field name="unit_cost">4.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">0.50</field>
+    </record>
+    <record id="box_0p4" model="wms.box.size">
+        <field name="code">0+4</field><field name="label">0+4 — 11×17×10 cm</field>
+        <field name="length">11</field><field name="width">17</field><field name="height">10</field>
+        <field name="sequence">3</field><field name="unit_cost">5.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">0.75</field>
+    </record>
+
+    <!-- ── Small ─────────────────────────────────────────────── -->
+    <record id="box_AA" model="wms.box.size">
+        <field name="code">AA</field><field name="label">AA — 13×17×7 cm</field>
+        <field name="length">13</field><field name="width">17</field><field name="height">7</field>
+        <field name="sequence">5</field><field name="unit_cost">5.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">0.75</field>
+    </record>
+    <record id="box_A" model="wms.box.size">
+        <field name="code">A</field><field name="label">A — 14×20×6 cm</field>
+        <field name="length">14</field><field name="width">20</field><field name="height">6</field>
+        <field name="sequence">6</field><field name="unit_cost">5.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">0.75</field>
+    </record>
+    <record id="box_AB" model="wms.box.size">
+        <field name="code">AB</field><field name="label">AB — 14×20×8 cm</field>
+        <field name="length">14</field><field name="width">20</field><field name="height">8</field>
+        <field name="sequence">7</field><field name="unit_cost">6.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">1.00</field>
+    </record>
+    <record id="box_2A" model="wms.box.size">
+        <field name="code">2A</field><field name="label">2A — 13×40×12 cm</field>
+        <field name="length">13</field><field name="width">40</field><field name="height">12</field>
+        <field name="sequence">8</field><field name="unit_cost">8.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">1.25</field>
+    </record>
+    <record id="box_CD" model="wms.box.size">
+        <field name="code">CD</field><field name="label">CD — 15×15×15 cm</field>
+        <field name="length">15</field><field name="width">15</field><field name="height">15</field>
+        <field name="sequence">9</field><field name="unit_cost">7.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">1.00</field>
+    </record>
+
+    <!-- ── Small-Medium ──────────────────────────────────────── -->
+    <record id="box_B" model="wms.box.size">
+        <field name="code">B</field><field name="label">B — 17×25×9 cm</field>
+        <field name="length">17</field><field name="width">25</field><field name="height">9</field>
+        <field name="sequence">10</field><field name="unit_cost">7.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">1.25</field>
+    </record>
+    <record id="box_BH" model="wms.box.size">
+        <field name="code">BH</field><field name="label">BH — 17×25×13 cm</field>
+        <field name="length">17</field><field name="width">25</field><field name="height">13</field>
+        <field name="sequence">11</field><field name="unit_cost">8.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">1.50</field>
+    </record>
+    <record id="box_2B" model="wms.box.size">
+        <field name="code">2B</field><field name="label">2B — 17×25×18 cm</field>
+        <field name="length">17</field><field name="width">25</field><field name="height">18</field>
+        <field name="sequence">12</field><field name="unit_cost">10.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">2.00</field>
+    </record>
+    <record id="box_C" model="wms.box.size">
+        <field name="code">C</field><field name="label">C — 20×30×11 cm</field>
+        <field name="length">20</field><field name="width">30</field><field name="height">11</field>
+        <field name="sequence">13</field><field name="unit_cost">10.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">1.50</field>
+    </record>
+
+    <!-- ── Medium ────────────────────────────────────────────── -->
+    <record id="box_2C" model="wms.box.size">
+        <field name="code">2C</field><field name="label">2C — 20×30×22 cm</field>
+        <field name="length">20</field><field name="width">30</field><field name="height">22</field>
+        <field name="sequence">14</field><field name="unit_cost">13.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">2.50</field>
+    </record>
+    <record id="box_Cp8" model="wms.box.size">
+        <field name="code">C+8</field><field name="label">C+8 — 20×30×19 cm</field>
+        <field name="length">20</field><field name="width">30</field><field name="height">19</field>
+        <field name="sequence">15</field><field name="unit_cost">12.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">2.00</field>
+    </record>
+    <record id="box_E" model="wms.box.size">
+        <field name="code">E</field><field name="label">E — 24×40×17 cm</field>
+        <field name="length">24</field><field name="width">40</field><field name="height">17</field>
+        <field name="sequence">16</field><field name="unit_cost">15.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">2.50</field>
+    </record>
+    <record id="box_Dp11" model="wms.box.size">
+        <field name="code">D+11</field><field name="label">D+11 — 22×35×25 cm</field>
+        <field name="length">22</field><field name="width">35</field><field name="height">25</field>
+        <field name="sequence">17</field><field name="unit_cost">17.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">3.00</field>
+    </record>
+    <record id="box_2D" model="wms.box.size">
+        <field name="code">2D</field><field name="label">2D — 22×35×28 cm</field>
+        <field name="length">22</field><field name="width">35</field><field name="height">28</field>
+        <field name="sequence">18</field><field name="unit_cost">18.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">3.50</field>
+    </record>
+    <record id="box_M" model="wms.box.size">
+        <field name="code">M</field><field name="label">M — 27×43×20 cm</field>
+        <field name="length">27</field><field name="width">43</field><field name="height">20</field>
+        <field name="sequence">19</field><field name="unit_cost">20.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">3.00</field>
+    </record>
+
+    <!-- ── Medium-Large ──────────────────────────────────────── -->
+    <record id="box_F_S" model="wms.box.size">
+        <field name="code">F-S</field><field name="label">F เล็ก — 31×36×13 cm</field>
+        <field name="length">31</field><field name="width">36</field><field name="height">13</field>
+        <field name="sequence">20</field><field name="unit_cost">18.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">2.50</field>
+    </record>
+    <record id="box_a_mm" model="wms.box.size">
+        <field name="code">a(มม)</field><field name="label">a มม — 30×45×22 cm</field>
+        <field name="length">30</field><field name="width">45</field><field name="height">22</field>
+        <field name="sequence">21</field><field name="unit_cost">22.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">3.50</field>
+    </record>
+    <record id="box_Mp" model="wms.box.size">
+        <field name="code">M+</field><field name="label">M+ — 35×45×25 cm</field>
+        <field name="length">35</field><field name="width">45</field><field name="height">25</field>
+        <field name="sequence">22</field><field name="unit_cost">25.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">4.00</field>
+    </record>
+    <record id="box_G" model="wms.box.size">
+        <field name="code">G</field><field name="label">G — 31×36×26 cm</field>
+        <field name="length">31</field><field name="width">36</field><field name="height">26</field>
+        <field name="sequence">23</field><field name="unit_cost">22.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">3.50</field>
+    </record>
+
+    <!-- ── Large ─────────────────────────────────────────────── -->
+    <record id="box_F_L" model="wms.box.size">
+        <field name="code">F-L</field><field name="label">F ใหญ่ — 32×48×30 cm</field>
+        <field name="length">32</field><field name="width">48</field><field name="height">30</field>
+        <field name="sequence">24</field><field name="unit_cost">28.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">4.50</field>
+    </record>
+    <record id="box_L" model="wms.box.size">
+        <field name="code">L</field><field name="label">L — 40×50×30 cm</field>
+        <field name="length">40</field><field name="width">50</field><field name="height">30</field>
+        <field name="sequence">25</field><field name="unit_cost">35.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">5.00</field>
+    </record>
+    <record id="box_I" model="wms.box.size">
+        <field name="code">I</field><field name="label">I — 30×50×32 cm</field>
+        <field name="length">30</field><field name="width">50</field><field name="height">32</field>
+        <field name="sequence">26</field><field name="unit_cost">33.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">5.00</field>
+    </record>
+    <record id="box_H" model="wms.box.size">
+        <field name="code">H</field><field name="label">H — 40×45×35 cm</field>
+        <field name="length">40</field><field name="width">45</field><field name="height">35</field>
+        <field name="sequence">27</field><field name="unit_cost">40.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">5.00</field>
+    </record>
+
+    <!-- ── Extra Large ───────────────────────────────────────── -->
+    <record id="box_i_mm" model="wms.box.size">
+        <field name="code">i(มม)</field><field name="label">i มม — 45×55×40 cm</field>
+        <field name="length">45</field><field name="width">55</field><field name="height">40</field>
+        <field name="sequence">28</field><field name="unit_cost">50.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">6.00</field>
+    </record>
+    <record id="box_P1" model="wms.box.size">
+        <field name="code">P1</field><field name="label">P1 — 24×58×17 cm</field>
+        <field name="length">24</field><field name="width">58</field><field name="height">17</field>
+        <field name="sequence">29</field><field name="unit_cost">30.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">3.00</field>
+    </record>
+    <record id="box_P2" model="wms.box.size">
+        <field name="code">P2</field><field name="label">P2 — 33×58×24 cm</field>
+        <field name="length">33</field><field name="width">58</field><field name="height">24</field>
+        <field name="sequence">30</field><field name="unit_cost">40.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">4.00</field>
+    </record>
+    <record id="box_P3" model="wms.box.size">
+        <field name="code">P3</field><field name="label">P3 — 40×80×20 cm</field>
+        <field name="length">40</field><field name="width">80</field><field name="height">20</field>
+        <field name="sequence">31</field><field name="unit_cost">45.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">5.00</field>
+    </record>
+    <record id="box_P4" model="wms.box.size">
+        <field name="code">P4</field><field name="label">P4 — 30×100×20 cm</field>
+        <field name="length">30</field><field name="width">100</field><field name="height">20</field>
+        <field name="sequence">32</field><field name="unit_cost">50.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">5.50</field>
+    </record>
+    <record id="box_BIG" model="wms.box.size">
+        <field name="code">BIG</field><field name="label">BIG BOX — 52×92×48 cm</field>
+        <field name="length">52</field><field name="width">92</field><field name="height">48</field>
+        <field name="sequence">33</field><field name="unit_cost">80.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="bubble_cost_est">8.00</field>
+    </record>
+
+    <!-- ── Envelope / Bag (no rigid dimensions) ─────────────── -->
+    <record id="box_ENV" model="wms.box.size">
+        <field name="code">ENV</field><field name="label">Envelope — 28×36×3 cm</field>
+        <field name="length">28</field><field name="width">36</field><field name="height">3</field>
+        <field name="sequence">4</field><field name="unit_cost">2.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="tape_rounds">1</field>
+        <field name="tape_overlap_cm">10.0</field>
+        <field name="bubble_cost_est">0.00</field>
+    </record>
+    <record id="box_BAG" model="wms.box.size">
+        <field name="code">BAG</field><field name="label">Poly Bag — Flexible</field>
+        <field name="length">40</field><field name="width">30</field><field name="height">5</field>
+        <field name="note">ถุงพลาสติก / ยืดหยุ่น — ใช้เทปปิดปากถุง 1 รอบ</field>
+        <field name="sequence">4</field><field name="unit_cost">3.00</field>
+        <field name="tape_cost_per_m">0.30</field>
+        <field name="tape_rounds">1</field>
+        <field name="tape_overlap_cm">10.0</field>
+        <field name="bubble_cost_est">0.50</field>
+    </record>
+
+</data>
+</odoo>

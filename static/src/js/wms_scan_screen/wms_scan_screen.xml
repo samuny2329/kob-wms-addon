@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<!--
+    KOB WMS Scan Screen — modelled after the React POSPack.jsx layout.
+    LEFT column  (flex 3)  : Order queue → Customer Details → Scan+Table → Recent
+    RIGHT column (320 px)  : Order Summary → Order Details
+-->
+<t t-name="kob_wms.WmsScanScreen">
+    <div class="o_wms_scan_screen">
+
+        <!-- ======================== HEADER ======================== -->
+        <div class="o_wms_header">
+            <div class="o_wms_brand">
+                <div class="brand_icon">📦</div>
+                <div class="brand_text">
+                    <div class="brand_title">KOB WMS</div>
+                    <div class="brand_sub">Pick • Pack • Scan • Ship</div>
+                </div>
+            </div>
+            <div class="o_wms_mode_tabs">
+                <button t-att-class="'mode_btn ' + (state.mode === 'pick' ? 'active' : '')"
+                        t-on-click="() => this.setMode('pick')">
+                    <span class="mode_icon">📦</span>
+                    <span>PICK</span>
+                    <span class="mode_hk">F1</span>
+                </button>
+                <button t-att-class="'mode_btn ' + (state.mode === 'pack' ? 'active' : '')"
+                        t-on-click="() => this.setMode('pack')">
+                    <span class="mode_icon">🗂</span>
+                    <span>PACK</span>
+                    <span class="mode_hk">F2</span>
+                </button>
+                <button t-att-class="'mode_btn ' + (state.mode === 'box' ? 'active' : '')"
+                        t-on-click="() => this.setMode('box')">
+                    <span class="mode_icon">📮</span>
+                    <span>BOX</span>
+                </button>
+                <button t-att-class="'mode_btn ' + (state.mode === 'ship' ? 'active' : '')"
+                        t-on-click="() => this.setMode('ship')">
+                    <span class="mode_icon">🚚</span>
+                    <span>SHIP</span>
+                    <span class="mode_hk">F4</span>
+                </button>
+            </div>
+            <div class="o_wms_user">
+                <span class="dot"/>
+                <span>LIVE</span>
+            </div>
+        </div>
+
+        <!-- ======================== MAIN ========================== -->
+        <div class="o_wms_main">
+
+            <!-- ==================== LEFT COLUMN ==================== -->
+            <div class="o_wms_left_col">
+
+                <!-- ① Order queue -->
+                <div class="queue_card">
+                    <div class="queue_header">
+                        <h4>
+                            Queue
+                            <span class="count" t-esc="state.orders.length"/>
+                        </h4>
+                        <button class="refresh_btn" t-on-click="loadOrders">↻</button>
+                    </div>
+                    <div class="queue_scroll">
+                        <t t-if="state.loading">
+                            <div class="empty_queue">Loading…</div>
+                        </t>
+                        <t t-foreach="state.orders" t-as="order" t-key="order.id">
+                            <div t-att-class="'order_row ' + (state.currentOrder &amp;&amp; state.currentOrder.id === order.id ? 'selected' : '')"
+                                 t-on-click="() => this.selectOrder(order)">
+                                <div class="platform_avatar"
+                                     t-esc="platformLabel(order).slice(0, 3)"/>
+                                <div class="order_body">
+                                    <div class="top_row">
+                                        <span class="order_ref" t-esc="order.ref or order.name"/>
+                                        <span class="count_badge">
+                                            <t t-if="state.mode === 'pack'">
+                                                <t t-esc="order.packed_total"/>/<t t-esc="order.picked_total"/>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-esc="order.picked_total"/>/<t t-esc="order.expected_total"/>
+                                            </t>
+                                        </span>
+                                    </div>
+                                    <div class="customer" t-esc="order.customer"/>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-if="!state.loading and !state.orders.length">
+                            <div class="empty_queue">No orders</div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- ② Customer Details -->
+                <div class="customer_card" t-if="state.currentOrder">
+                    <div class="card_head">
+                        <h3>Customer Details</h3>
+                        <span class="pill" t-esc="state.currentOrder.customer or 'Walk-in Customer'"/>
+                    </div>
+                    <div class="grid2">
+                        <div>
+                            <label>Full Name</label>
+                            <input type="text" readonly="readonly"
+                                   t-att-value="state.currentOrder.customer or ''"
+                                   placeholder="e.g. John Doe"/>
+                        </div>
+                        <div>
+                            <label>Platform Ref</label>
+                            <input type="text" readonly="readonly"
+                                   t-att-value="state.currentOrder.ref or ''"
+                                   placeholder="—"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ③ Scan + Table -->
+                <div class="scan_card">
+                    <div class="scan_input_wrap">
+                        <span class="scan_icon">⎙</span>
+                        <input type="text"
+                               t-ref="scanInput"
+                               t-model="state.scanValue"
+                               t-on-keydown="onScanKeydown"
+                               placeholder="SCAN SKU OR BARCODE..."
+                               autocomplete="off"/>
+                    </div>
+
+                    <div class="scan_feedback" t-if="state.history.length and state.history[0]">
+                        <div t-att-class="'feedback_pill ' + (state.history[0].ok ? 'ok' : 'err')">
+                            <t t-if="state.history[0].ok">
+                                ✓ <span t-esc="state.history[0].mode.toUpperCase()"/> — <span class="mono" t-esc="state.history[0].code"/>
+                            </t>
+                            <t t-else="">
+                                ✗ <span t-esc="state.history[0].error or 'Error'"/>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Odoo-style notebook tabs -->
+                    <div class="wms_notebook" t-if="state.currentOrder">
+                        <ul class="wms_notebook_headers">
+                            <li t-att-class="'nb_tab ' + (state.activeTab === 'items' ? 'active' : '')"
+                                t-on-click="() => this.setTab('items')">
+                                <span class="tab_icon">📋</span>
+                                <span>Items</span>
+                                <span class="tab_badge" t-esc="state.currentLines.length"/>
+                            </li>
+                            <li t-att-class="'nb_tab ' + (state.activeTab === 'activity' ? 'active' : '')"
+                                t-on-click="() => this.setTab('activity')">
+                                <span class="tab_icon">📝</span>
+                                <span>Activity Log</span>
+                                <span class="tab_badge" t-esc="state.history.length"/>
+                            </li>
+                            <li t-att-class="'nb_tab ' + (state.activeTab === 'flow' ? 'active' : '')"
+                                t-on-click="() => this.setTab('flow')">
+                                <span class="tab_icon">🔀</span>
+                                <span>Flow / ERD</span>
+                            </li>
+                        </ul>
+
+                        <div class="wms_notebook_content">
+
+                            <!-- === Tab 1: Items === -->
+                            <div class="items_table" t-if="state.activeTab === 'items'">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Product</th>
+                                            <th class="center">Qty</th>
+                                            <th class="num">Picked/Packed</th>
+                                            <th class="num">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.currentLines" t-as="line" t-key="line.id">
+                                            <t t-set="prog" t-value="lineProgress(line)"/>
+                                            <tr t-att-class="lineIsDone(line) ? 'row_done' : ''">
+                                                <td>
+                                                    <span class="sku" t-esc="line.sku or '—'"/>
+                                                </td>
+                                                <td>
+                                                    <div class="product">
+                                                        <span t-esc="line.product_name or ''"/>
+                                                    </div>
+                                                </td>
+                                                <td class="center">
+                                                    <span class="qty_big" t-esc="line.expected_qty"/>
+                                                </td>
+                                                <td class="num">
+                                                    <span t-att-class="'qty_big ' + (lineIsDone(line) ? 'done' : '')">
+                                                        <t t-esc="prog.done"/><span class="sep">/</span><t t-esc="prog.total"/>
+                                                    </span>
+                                                </td>
+                                                <td class="num">
+                                                    <span t-att-class="'status_chip ' + (lineIsDone(line) ? 'done' : 'pending')">
+                                                        <t t-if="lineIsDone(line)">✓ Verified</t>
+                                                        <t t-else="">Pending</t>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                        <tr t-if="!state.currentLines.length">
+                                            <td colspan="5" style="text-align:center; padding:40px; color:#80747A;">
+                                                No items in this order
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- === Tab 2: Activity Log === -->
+                            <div class="activity_log" t-if="state.activeTab === 'activity'">
+                                <t t-if="state.history.length === 0">
+                                    <div class="log_empty">
+                                        <div class="empty_icon">📝</div>
+                                        <div class="empty_title">No scans yet</div>
+                                        <div class="empty_sub">Scan an SKU or barcode to log activity</div>
+                                    </div>
+                                </t>
+                                <t t-foreach="state.history" t-as="h" t-key="h_index">
+                                    <div t-att-class="'log_entry ' + (h.ok ? 'ok' : 'err')">
+                                        <div class="log_icon">
+                                            <t t-if="h.ok">✓</t>
+                                            <t t-else="">✗</t>
+                                        </div>
+                                        <div class="log_body">
+                                            <div class="log_head">
+                                                <span class="log_mode" t-esc="h.mode"/>
+                                                <span class="log_code mono" t-esc="h.code"/>
+                                                <span class="log_time" t-esc="h.time"/>
+                                            </div>
+                                            <t t-if="!h.ok">
+                                                <div class="log_error" t-esc="h.error"/>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- === Tab 3: Flow / ERD === -->
+                            <div class="flow_erd" t-if="state.activeTab === 'flow'">
+
+                                <div class="flow_section">
+                                    <div class="flow_title">ORDER STATUS FLOW</div>
+                                    <div class="flow_steps">
+                                        <t t-foreach="FLOW_STEPS" t-as="step" t-key="step_index">
+                                            <div t-att-class="'flow_step ' + flowStepClass(step.key)">
+                                                <div class="step_icon" t-esc="step.icon"/>
+                                                <div class="step_body">
+                                                    <div class="step_label" t-esc="step.label"/>
+                                                    <div class="step_desc" t-esc="step.desc"/>
+                                                </div>
+                                            </div>
+                                            <t t-if="!step_last">
+                                                <div t-att-class="'flow_arrow ' + (flowStepClass(FLOW_STEPS[step_index + 1].key) !== 'pending' ? 'done' : '')">→</div>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <div class="flow_section">
+                                    <div class="flow_title">DATA MODEL (ERD)</div>
+                                    <div class="erd_diagram">
+                                        <div class="erd_entity primary">
+                                            <div class="entity_title">wms.sales.order</div>
+                                            <div class="entity_fields">
+                                                <div class="field"><span class="fk">PK</span> name</div>
+                                                <div class="field">ref, platform</div>
+                                                <div class="field">status, courier_id</div>
+                                                <div class="field">awb, box_barcode</div>
+                                                <div class="field">picked_at, packed_at</div>
+                                            </div>
+                                        </div>
+                                        <div class="erd_arrow">1 ── N</div>
+                                        <div class="erd_entity">
+                                            <div class="entity_title">wms.sales.order.line</div>
+                                            <div class="entity_fields">
+                                                <div class="field"><span class="fk">FK</span> order_id</div>
+                                                <div class="field">sku, product_id</div>
+                                                <div class="field">expected_qty</div>
+                                                <div class="field">picked_qty</div>
+                                                <div class="field">packed_qty</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="erd_diagram" style="margin-top: 16px;">
+                                        <div class="erd_entity primary">
+                                            <div class="entity_title">wms.sales.order</div>
+                                            <div class="entity_fields">
+                                                <div class="field"><span class="fk">FK</span> picking_id</div>
+                                                <div class="field"><span class="fk">FK</span> sale_order_id</div>
+                                            </div>
+                                        </div>
+                                        <div class="erd_arrow">→</div>
+                                        <div class="erd_entity odoo_core">
+                                            <div class="entity_title">stock.picking</div>
+                                            <div class="entity_fields">
+                                                <div class="field">(Odoo core)</div>
+                                                <div class="field">stock.move.line</div>
+                                                <div class="field">stock.quant</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="erd_diagram" style="margin-top: 16px;">
+                                        <div class="erd_entity primary">
+                                            <div class="entity_title">wms.sales.order</div>
+                                            <div class="entity_fields">
+                                                <div class="field">action_ship()</div>
+                                            </div>
+                                        </div>
+                                        <div class="erd_arrow">creates</div>
+                                        <div class="erd_entity">
+                                            <div class="entity_title">wms.scan.item</div>
+                                            <div class="entity_fields">
+                                                <div class="field">barcode (AWB)</div>
+                                                <div class="field"><span class="fk">FK</span> courier_id</div>
+                                                <div class="field"><span class="fk">FK</span> batch_id</div>
+                                            </div>
+                                        </div>
+                                        <div class="erd_arrow">N ── 1</div>
+                                        <div class="erd_entity">
+                                            <div class="entity_title">wms.courier.batch</div>
+                                            <div class="entity_fields">
+                                                <div class="field">state, signature</div>
+                                                <div class="field">dispatched_at</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="empty_state" t-if="!state.currentOrder">
+                        <div class="empty_icon">📥</div>
+                        <div class="empty_title">Scan work order to start</div>
+                        <div class="empty_sub">Or pick an order from the queue above</div>
+                    </div>
+                </div>
+
+                <!-- ④ Recent Orders -->
+                <div class="recent_orders">
+                    <h5>Recent Orders</h5>
+                    <div class="recent_grid">
+                        <t t-foreach="state.orders.slice(0, 5)" t-as="ro" t-key="ro.id">
+                            <div class="recent_card" t-on-click="() => this.selectOrder(ro)">
+                                <span class="ref" t-esc="ro.name"/>
+                                <span class="meta">
+                                    <t t-esc="platformLabel(ro)"/>
+                                </span>
+                            </div>
+                        </t>
+                        <t t-foreach="[1, 2, 3, 4, 5].slice(state.orders.length)" t-as="_p" t-key="_p_index">
+                            <div class="recent_card placeholder">
+                                <span class="ref">—</span>
+                                <span class="meta">—</span>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== RIGHT COLUMN ==================== -->
+            <div class="o_wms_right_col">
+
+                <!-- ① Order Summary -->
+                <div class="summary_card">
+                    <h3>Order Summary</h3>
+
+                    <div class="summary_rows">
+                        <div class="row">
+                            <span class="label">Items Count</span>
+                            <span class="value" t-esc="state.currentOrder?.expected_total or 0"/>
+                        </div>
+                        <div class="row">
+                            <span class="label">Picked</span>
+                            <span class="value" t-esc="state.currentOrder?.picked_total or 0"/>
+                        </div>
+                        <div class="row">
+                            <span class="label">Packed</span>
+                            <span class="value" t-esc="state.currentOrder?.packed_total or 0"/>
+                        </div>
+                        <div class="row">
+                            <span class="label">Progress</span>
+                            <span class="value" t-esc="progressPct() + '%'"/>
+                        </div>
+                    </div>
+
+                    <div class="progress_bar">
+                        <div t-att-class="'progress_fill ' + (progressPct() >= 100 ? 'full' : '')"
+                             t-att-style="'width:' + progressPct() + '%'"/>
+                    </div>
+
+                    <div class="big_counter">
+                        <div class="cnt_label">Packed Items</div>
+                        <div class="cnt_value">
+                            <t t-esc="state.currentOrder?.packed_total or 0"/>
+                            <span class="sep"> / <t t-esc="state.currentOrder?.expected_total or 0"/></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ② Order Details -->
+                <div class="details_card">
+                    <h3>Order Details</h3>
+
+                    <t t-if="state.currentOrder">
+                        <div class="order_gradient">
+                            <div class="row1">
+                                <div class="icon_box">📦</div>
+                                <div>
+                                    <div class="title" t-esc="state.currentOrder.name"/>
+                                    <div class="sub">
+                                        <t t-esc="state.currentOrder.customer"/> • <t t-esc="courierLabel(state.currentOrder)"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div t-att-class="'status_pill ' + (state.currentOrder.status === 'packed' ? 'ok' : state.currentOrder.status === 'cancelled' ? 'bad' : '')">
+                            <span class="dot"/>
+                            <span class="label" t-esc="state.currentOrder.status"/>
+                            <span class="count">
+                                <t t-esc="state.currentLines.length"/> SKU<t t-if="state.currentLines.length !== 1">s</t>
+                            </span>
+                        </div>
+
+                        <div class="action_btns">
+                            <button class="btn primary"
+                                    t-att-disabled="!canShip()"
+                                    t-on-click="shipOrder">
+                                🚚 Ship Order
+                            </button>
+                            <div class="btn_row">
+                                <button class="btn outline small"
+                                        t-on-click="() => this.printReport('kob_wms.report_wms_pick_list')">
+                                    📄 Pick List
+                                </button>
+                                <button class="btn outline small"
+                                        t-on-click="() => this.printReport('kob_wms.report_wms_awb_label')">
+                                    🏷 AWB
+                                </button>
+                            </div>
+                            <button class="btn outline small" t-on-click="openFormView">
+                                ↗ Open full form
+                            </button>
+                        </div>
+                    </t>
+
+                    <t t-else="">
+                        <div class="status_pill">
+                            <span class="dot"/>
+                            <span class="label">No order selected</span>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </div>
+</t>
+
+</templates>

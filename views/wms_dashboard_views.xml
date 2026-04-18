@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Dashboard MENU points to spreadsheet_dashboard.ir_actions_dashboard_action
+         (see views/wms_menus.xml) so it matches /odoo/dashboards in Odoo.
+         This kanban action is kept as the target of the "Back" buttons in
+         Pick / Pack / Outbound / Dispatch screens (hard-coded in JS). -->
+    <record id="action_wms_dashboard" model="ir.actions.act_window">
+        <field name="name">Orders</field>
+        <field name="res_model">wms.sales.order</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Welcome to KOB WMS</p>
+            <p>Orders grouped by status. Use F1 (Pick), F2 (Pack), F3 (Scan), F4 (Dispatch) to jump between workflows.</p>
+        </field>
+    </record>
+
+    <record id="action_wms_users" model="ir.actions.act_window">
+        <field name="name">Odoo Accounts</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('groups_id.category_id.name', '=', 'KOB WMS')]</field>
+    </record>
+
+</odoo>

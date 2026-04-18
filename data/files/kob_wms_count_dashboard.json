@@ -1,0 +1,240 @@
+{
+    "version": 22,
+    "sheets": [
+        {
+            "id": "sh_count_adj",
+            "name": "Count Adjustments",
+            "colNumber": 10,
+            "rowNumber": 60,
+            "rows": {
+                "0": { "size": 32 },
+                "1": { "size": 10 }
+            },
+            "cols": {
+                "0": { "size": 30 }
+            },
+            "merges": ["B1:I1"],
+            "cells": {
+                "B1": { "content": "KOB WMS — Inventory Count Adjustments" }
+            },
+            "styles": {
+                "B1": 1
+            },
+            "formats": {},
+            "borders": {},
+            "conditionalFormats": [],
+            "figures": [
+                {
+                    "id": "cnt-pie-adj-state",
+                    "x": 18, "y": 60,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Adjustments by State" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "right",
+                        "metaData": {
+                            "groupBy": ["state"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.count.adjustment",
+                            "mode": "pie"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["state"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_pie",
+                        "fieldMatching": {
+                            "gf_count_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "cnt-bar-variance-product",
+                    "x": 503, "y": 60,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Total Variance by Product" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "none",
+                        "metaData": {
+                            "groupBy": ["product_id"],
+                            "measure": "variance_qty",
+                            "order": "DESC",
+                            "resModel": "wms.count.adjustment",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [["variance_qty", "!=", 0], ["state", "!=", "rejected"]],
+                            "groupBy": ["product_id"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "fieldMatching": {
+                            "gf_count_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "cnt-bar-adj-location",
+                    "x": 18, "y": 420,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Adjustments by Location" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "top",
+                        "metaData": {
+                            "groupBy": ["location_id"],
+                            "measure": "__count",
+                            "order": "DESC",
+                            "resModel": "wms.count.adjustment",
+                            "mode": "bar"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [["state", "!=", "rejected"]],
+                            "groupBy": ["location_id"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_bar",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "fieldMatching": {
+                            "gf_count_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "cnt-pie-session-type",
+                    "x": 503, "y": 420,
+                    "width": 465, "height": 340,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Count Sessions by Type" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "right",
+                        "metaData": {
+                            "groupBy": ["session_type"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.count.session",
+                            "mode": "pie"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["session_type"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_pie",
+                        "fieldMatching": {
+                            "gf_count_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "cnt-line-daily-adj",
+                    "x": 18, "y": 780,
+                    "width": 950, "height": 360,
+                    "tag": "chart",
+                    "data": {
+                        "title": { "text": "Daily Adjustments Created" },
+                        "background": "#FFFFFF",
+                        "legendPosition": "top",
+                        "metaData": {
+                            "groupBy": ["create_date:day"],
+                            "measure": "__count",
+                            "order": null,
+                            "resModel": "wms.count.adjustment",
+                            "mode": "line"
+                        },
+                        "searchParams": {
+                            "comparison": null,
+                            "context": {},
+                            "domain": [],
+                            "groupBy": ["create_date:day"],
+                            "orderBy": []
+                        },
+                        "type": "odoo_line",
+                        "verticalAxisPosition": "left",
+                        "stacked": false,
+                        "cumulative": false,
+                        "fieldMatching": {
+                            "gf_count_date": {
+                                "chain": "create_date",
+                                "type": "datetime"
+                            }
+                        }
+                    }
+                }
+            ],
+            "tables": [],
+            "areGridLinesVisible": false,
+            "isVisible": true,
+            "headerGroups": { "ROW": [], "COL": [] },
+            "dataValidationRules": [],
+            "comments": {}
+        }
+    ],
+    "styles": {
+        "1": {
+            "bold": true,
+            "fontSize": 18,
+            "textColor": "#111827",
+            "fillColor": "#F9FAFB"
+        }
+    },
+    "formats": {},
+    "borders": {},
+    "revisionId": "START_REVISION",
+    "uniqueFigureIds": true,
+    "settings": {
+        "locale": {
+            "name": "English (US)",
+            "code": "en_US",
+            "thousandsSeparator": ",",
+            "decimalSeparator": ".",
+            "weekStart": 7,
+            "dateFormat": "m/d/yyyy",
+            "timeFormat": "hh:mm:ss a"
+        }
+    },
+    "pivots": {},
+    "pivotNextId": 1,
+    "lists": {},
+    "listNextId": 1,
+    "chartOdooMenusReferences": {},
+    "globalFilters": [
+        {
+            "id": "gf_count_date",
+            "type": "date",
+            "label": "Date Range",
+            "rangeType": "month",
+            "defaultValue": {}
+        }
+    ]
+}
