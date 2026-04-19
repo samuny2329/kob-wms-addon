@@ -32,3 +32,54 @@ build/
 .coverage
 htmlcov/
 .pytest_cache/
+
+# ── React / Vite SPA (not part of Odoo addon) ────────────────────────────────
+src/
+public/
+node_modules/
+package.json
+package-lock.json
+yarn.lock
+bun.lockb
+vite.config.js
+vite.config.ts
+tsconfig*.json
+.eslintrc*
+.prettierrc*
+index.html
+
+# ── Docker / deployment ───────────────────────────────────────────────────────
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+.dockerignore
+deploy/
+nginx.conf
+nginx/
+
+# ── Push / dev scripts (not addon files) ─────────────────────────────────────
+cleanup-*.bat
+push_odoo_clean.bat
+do_git_push.py
+*.sh
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env
+.env.*
+*.env
+
+# ── GitHub / CI ───────────────────────────────────────────────────────────────
+.github/
+
+# ── MCP / editor config ───────────────────────────────────────────────────────
+.mcp.json
+
+# ── Non-addon docs ────────────────────────────────────────────────────────────
+README.md
+ODOO_MODULE_PLAN.md
+WMS.txt
+
+# ── Misc scratch / build artifacts ───────────────────────────────────────────
+migrations/
+scratch/
+*.tmp
