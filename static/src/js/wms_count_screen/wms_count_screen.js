@@ -306,6 +306,18 @@ export class WmsCountScreen extends Component {
             return;
         }
         const pid = result.product_id;
+
+        // Guard: ABC/SKU-specific tasks may only count the target product
+        if (task.target_product_id && pid !== task.target_product_id) {
+            this.state.scanFlash = "error";
+            this.notification.add(
+                `🚫 Task นี้นับเฉพาะ ${task.target_product_code || task.target_product_name} เท่านั้น`,
+                { type: "danger" }
+            );
+            setTimeout(() => { this.state.scanFlash = null; }, 1500);
+            return;
+        }
+
         let idx = this.state.products.findIndex(p => p.product_id === pid);
         if (idx === -1) {
             // Product not in snapshot — add with empty lots

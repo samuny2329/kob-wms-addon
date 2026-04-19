@@ -121,7 +121,7 @@
                                             </t>
                                         </td>
                                         <td class="text-end">
-                                            <span t-esc="'%.0f' % (ml.reserved_uom_qty or ml.move_id.product_uom_qty or 0)"/>
+                                            <span t-esc="'%.0f' % (ml.quantity_product_uom or ml.move_id.product_uom_qty or 0)"/>
                                         </td>
                                         <td class="text-end">
                                             <span t-esc="'%.0f' % (ml.quantity or 0)"/>

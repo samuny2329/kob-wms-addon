@@ -1,5 +1,7 @@
 from odoo import models, fields, api, _
 from datetime import timedelta
+import random
+import math
 
 
 class StockLocationCountLock(models.Model):
@@ -67,78 +69,172 @@ class WmsCountSession(models.Model):
     abc_based = fields.Boolean(string='ABC Based',
                                help='Auto-generate tasks based on order volume (ABC classification)')
 
+    # ── ABC sample sizes per rank ──────────────────────────────────────────
+    # A (fast movers)  : sample 30% of yesterday's A movers, max 5 tasks
+    # B (medium movers): sample 20% of yesterday's B movers, max 3 tasks
+    # C (slow movers)  : sample 10% of yesterday's C movers, max 2 tasks
+    _ABC_SAMPLE = {
+        'A': {'pct': 0.30, 'max': 5},
+        'B': {'pct': 0.20, 'max': 3},
+        'C': {'pct': 0.10, 'max': 2},
+    }
+
+    @staticmethod
+    def _weighted_sample_no_replace(items, n):
+        """Weighted random sample without replacement.
+
+        items: [(product_id, weight), ...]  weight = yesterday qty (> 0)
+        Returns list of product_ids (up to n, deduplicated).
+        """
+        if not items or n <= 0:
+            return []
+        n = min(n, len(items))
+        pool = list(items)
+        result = []
+        for _ in range(n):
+            if not pool:
+                break
+            total = sum(w for _, w in pool)
+            r = random.uniform(0, total)
+            cumsum = 0.0
+            for i, (pid, w) in enumerate(pool):
+                cumsum += w
+                if cumsum >= r:
+                    result.append(pid)
+                    pool.pop(i)
+                    break
+        return result
+
     def action_generate_abc_tasks(self):
         """Generate cycle count tasks based on ABC classification.
-        A = top 20% products by order volume → count daily
-        B = next 30% → count weekly
-        C = bottom 50% → count monthly
+
+        Logic:
+          1. Classify all products into A/B/C by 30-day order volume.
+          2. Get yesterday's outbound qty per product (only movers get sampled).
+          3. From each rank, randomly sample a subset weighted by yesterday's qty
+             — fast movers are more likely to be picked.
+          4. Create one task per sampled product (specific SKU, specific location).
+
+        Sample sizes (see _ABC_SAMPLE):
+          A → 30% of yesterday's A-movers, max 5
+          B → 20% of yesterday's B-movers, max 3
+          C → 10% of yesterday's C-movers, max 2
         """
         self.ensure_one()
         if self.state != 'draft':
             return
 
-        # Get order volume from last 30 days
-        date_from = fields.Date.today() - timedelta(days=30)
+        today = fields.Date.today()
+
+        # ── Step 1: 30-day actual OUT volume → A/B/C rank ────────────────
+        # Use packed_at + status packed/shipped = confirmed OUT only.
+        date_from_30 = today - timedelta(days=30)
         self.env.cr.execute("""
-            SELECT sol.product_id, SUM(sol.expected_qty) as total_qty
+            SELECT sol.product_id, SUM(sol.expected_qty) AS total_qty
             FROM wms_sales_order_line sol
             JOIN wms_sales_order so ON so.id = sol.order_id
-            WHERE so.create_date >= %s
+            WHERE so.packed_at >= %s
+              AND so.status IN ('packed', 'shipped')
               AND sol.product_id IS NOT NULL
             GROUP BY sol.product_id
             ORDER BY total_qty DESC
-        """, (date_from,))
-        results = self.env.cr.fetchall()
+        """, (date_from_30,))
+        results_30d = self.env.cr.fetchall()   # [(product_id, qty), ...]
 
-        if not results:
+        if not results_30d:
             return
 
-        total_products = len(results)
-        a_cutoff = int(total_products * 0.2)  # top 20%
-        b_cutoff = int(total_products * 0.5)  # next 30%
+        total_products = len(results_30d)
+        a_cutoff = max(1, int(total_products * 0.20))   # top 20%
+        b_cutoff = max(a_cutoff + 1, int(total_products * 0.50))  # next 30%
 
-        # Get pickface locations for these products
+        # Build rank map: product_id → 'A' | 'B' | 'C'
+        rank_map = {}
+        for idx, (product_id, _) in enumerate(results_30d):
+            if idx < a_cutoff:
+                rank_map[product_id] = 'A'
+            elif idx < b_cutoff:
+                rank_map[product_id] = 'B'
+            else:
+                rank_map[product_id] = 'C'
+
+        # ── Step 2: yesterday's actual OUT qty per product ───────────────────
+        # Use packed_at (= when stock was validated/cut) not create_date.
+        # Status must be packed or shipped = stock actually left the warehouse.
+        yesterday = today - timedelta(days=1)
+        self.env.cr.execute("""
+            SELECT sol.product_id, SUM(sol.expected_qty) AS yest_qty
+            FROM wms_sales_order_line sol
+            JOIN wms_sales_order so ON so.id = sol.order_id
+            WHERE so.packed_at::date = %s
+              AND so.status IN ('packed', 'shipped')
+              AND sol.product_id IS NOT NULL
+            GROUP BY sol.product_id
+        """, (yesterday,))
+        yesterday_qty = dict(self.env.cr.fetchall())   # {product_id: qty}
+
+        # ── Step 3: group yesterday's movers by rank ──────────────────────
+        groups = {'A': [], 'B': [], 'C': []}
+        for product_id, yest_qty in yesterday_qty.items():
+            if yest_qty <= 0:
+                continue
+            abc = rank_map.get(product_id)
+            if abc:
+                groups[abc].append((product_id, float(yest_qty)))
+
+        # For cycle count skip C entirely (count C only in full counts)
+        if self.session_type == 'cycle':
+            groups['C'] = []
+
+        # ── Step 4: weighted random sample from each rank ─────────────────
+        sampled = []   # [(product_id, abc_rank), ...]
+        for abc, items in groups.items():
+            if not items:
+                continue
+            cfg = self._ABC_SAMPLE[abc]
+            n = min(cfg['max'], max(1, math.ceil(len(items) * cfg['pct'])))
+            chosen = self._weighted_sample_no_replace(items, n)
+            for pid in chosen:
+                sampled.append((pid, abc))
+
+        if not sampled:
+            return
+
+        # ── Step 5: create tasks ──────────────────────────────────────────
         Pickface = self.env['wms.pickface']
         Task = self.env['wms.count.task']
         created = 0
 
-        for idx, (product_id, qty) in enumerate(results):
-            if idx < a_cutoff:
-                abc = 'A'
-            elif idx < b_cutoff:
-                abc = 'B'
-            else:
-                abc = 'C'
-
-            # For cycle count: only count A items daily, B weekly
-            if self.session_type == 'cycle':
-                if abc == 'C':
-                    continue  # skip C items in cycle count
-
-            # Find pickface for this product
+        for product_id, abc in sampled:
             pf = Pickface.search([('product_id', '=', product_id)], limit=1)
-            location = pf.location_id if pf else None
-            zone = pf.zone_id if pf else None
-
-            if not location:
+            if not pf or not pf.location_id:
                 continue
 
-            # zone_id on wms.count.task is a related field (rack_id.zone_id)
-            # so we must set rack_id — find any rack in the pickface zone.
+            location = pf.location_id
+            zone = pf.zone_id
             rack = self.env['wms.rack'].search(
                 [('zone_id', '=', zone.id)], limit=1
             ) if zone else self.env['wms.rack']
 
-            product_code = self.env['product.product'].browse(product_id).default_code or str(product_id)
+            product = self.env['product.product'].browse(product_id)
+            product_code = product.default_code or str(product_id)
+            yest_qty = yesterday_qty.get(product_id, 0)
+
             Task.create({
                 'session_id': self.id,
                 'name': _('[%s] Count %s') % (abc, product_code),
                 'location_id': location.id,
                 'rack_id': rack.id if rack else False,
+                'product_id': product_id,
+                'expected_qty': yest_qty,   # yesterday's out qty as reference
             })
             created += 1
 
         self.abc_based = True
+        a_n = sum(1 for _, r in sampled if r == 'A')
+        b_n = sum(1 for _, r in sampled if r == 'B')
+        c_n = sum(1 for _, r in sampled if r == 'C')
         self.message_post(body=_(
-            'ABC tasks generated: %d tasks (A=%d, B=%d products analyzed from %d total)'
-        ) % (created, a_cutoff, b_cutoff - a_cutoff, total_products))
+            'ABC tasks generated (yesterday %s): %d tasks — A=%d, B=%d, C=%d '
+            '(sampled from %d total products in 30-day window)'
+        ) % (yesterday, created, a_n, b_n, c_n, total_products))

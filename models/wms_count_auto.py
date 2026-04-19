@@ -43,7 +43,8 @@ class WmsCountSessionAuto(models.Model):
                 )
                 return existing
 
-            warehouse = self.env['stock.warehouse'].search([], limit=1)
+            warehouse = self.env['stock.warehouse'].search(
+                [('company_id', '=', self.env.company.id)], limit=1)
             if not warehouse:
                 _logger.warning('Auto cycle count: no warehouse configured — aborted.')
                 return

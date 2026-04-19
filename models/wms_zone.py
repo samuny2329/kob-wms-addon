@@ -15,7 +15,8 @@ class WmsZone(models.Model):
                             help='Display color for maps and dashboards')
     warehouse_id = fields.Many2one('stock.warehouse', string='Warehouse',
                                    required=True,
-                                   default=lambda self: self.env['stock.warehouse'].search([], limit=1))
+                                   default=lambda self: self.env['stock.warehouse'].search(
+                                       [('company_id', '=', self.env.company.id)], limit=1))
     company_id = fields.Many2one('res.company', string='Company',
                                  related='warehouse_id.company_id', store=True)
     rack_ids = fields.One2many('wms.rack', 'zone_id', string='Racks')

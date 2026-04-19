@@ -50,6 +50,12 @@
                             invisible="status != 'packing' or not all_packed"/>
                     <button name="action_ship" type="object" string="🚚 Fulfill &amp; Ship"
                             class="oe_highlight" invisible="status != 'packed'"/>
+                    <button name="action_fix_packed_status" type="object"
+                            string="🔧 Fix Status"
+                            class="btn-secondary"
+                            invisible="status in ('packed', 'shipped', 'cancelled') or not picking_id"
+                            confirm="Sync WMS status with Odoo delivery? (Use only if picking was validated manually in Inventory.)"
+                            groups="kob_wms.group_wms_manager"/>
                     <button name="action_cancel" type="object" string="Cancel"
                             invisible="status in ('shipped', 'cancelled')"
                             groups="kob_wms.group_wms_supervisor"/>
@@ -239,6 +245,17 @@
         <field name="state">code</field>
         <field name="code">action = records.action_print_picklist()</field>
         <field name="groups_id" eval="[(4, ref('group_wms_manager')), (4, ref('group_wms_supervisor'))]"/>
+    </record>
+
+    <!-- Fix packed status (bulk: sync WMS status when picking was validated manually in Inventory) -->
+    <record id="action_batch_fix_packed_status" model="ir.actions.server">
+        <field name="name">🔧 Fix Packed Status (Sync from Inventory)</field>
+        <field name="model_id" ref="model_wms_sales_order"/>
+        <field name="binding_model_id" ref="model_wms_sales_order"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_fix_packed_status()</field>
+        <field name="groups_id" eval="[(4, ref('group_wms_manager'))]"/>
     </record>
 
     <!-- Print AWB Labels 100×150 for selected orders -->

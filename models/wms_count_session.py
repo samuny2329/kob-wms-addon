@@ -23,7 +23,8 @@ class WmsCountSession(models.Model):
     ], string='State', default='draft', tracking=True)
     warehouse_id = fields.Many2one('stock.warehouse', string='Warehouse',
                                    required=True,
-                                   default=lambda self: self.env['stock.warehouse'].search([], limit=1))
+                                   default=lambda self: self.env['stock.warehouse'].search(
+                                       [('company_id', '=', self.env.company.id)], limit=1))
     company_id = fields.Many2one('res.company', related='warehouse_id.company_id',
                                  store=True)
     date_start = fields.Datetime(string='Start Date', default=fields.Datetime.now)
@@ -118,6 +119,14 @@ class WmsCountSession(models.Model):
             sess.date_end = fields.Datetime.now()
 
     def action_cancel(self):
+        # Clear location locks for ALL tasks in the session.
+        # Without this, ghost locks remain on stock.location.counting_task_id
+        # and block WMS pick/pack even after the session is cancelled.
+        for task in self.mapped('task_ids').filtered(
+                lambda t: t.location_id and t.location_id.counting_task_id):
+            loc = task.location_id
+            if loc.counting_task_id and loc.counting_task_id.session_id in self:
+                loc.sudo().counting_task_id = False
         self.write({'state': 'cancelled'})
 
     def action_draft(self):

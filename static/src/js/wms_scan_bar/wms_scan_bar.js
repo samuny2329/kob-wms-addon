@@ -198,6 +198,7 @@ class WmsScanBar extends Component {
         } catch (err) {
             console.error("[WMS] get_close_box_data error:", err);
             this._setStatus("Could not load box data", "wms-scan-error");
+            this._scheduleReset();   // ← reset to READY after 1.8s so worker is not stuck
         }
     }
 

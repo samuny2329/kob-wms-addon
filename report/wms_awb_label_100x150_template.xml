@@ -29,7 +29,8 @@
                             <span t-esc="o.platform_id.name" t-if="o.platform_id"/>
                         </div>
                         <div style="font-size: 24pt; font-weight: bold; margin-bottom: 10px;">
-                            <span t-esc="o.awb_number" t-if="o.awb_number" t-esc="o.name" t-else=""/>
+                            <t t-if="o.awb_number"><span t-esc="o.awb_number"/></t>
+                            <t t-else=""><span t-esc="o.name"/></t>
                         </div>
                         <div style="font-size: 8pt;">
                             <span>Printed on: <span t-esc="o.write_date"/></span>

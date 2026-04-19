@@ -114,7 +114,9 @@ export class WmsScanScreen extends Component {
             case "ship":
                 return [["status", "=", "packed"]];
             default:
-                return [];
+                // Guard: unknown mode — return impossible domain instead of [] (which loads ALL orders)
+                console.warn("[WMS] _domainForMode: unknown mode:", this.state.mode);
+                return [["id", "=", 0]];
         }
     }
 

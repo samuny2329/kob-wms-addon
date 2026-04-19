@@ -426,6 +426,23 @@ class WmsSalesOrder(models.Model):
                 line.packed_qty = line.picked_qty or line.expected_qty
 
     # ------------------------------------------------------------------
+    # Count-lock helper
+    # ------------------------------------------------------------------
+    def _count_lock_msg(self):
+        """Return error message if any picking location is being counted, else None."""
+        self.ensure_one()
+        if not self.picking_id:
+            return None
+        for move in self.picking_id.move_ids:
+            for loc in (move.location_id, move.location_dest_id):
+                if loc.counting_task_id:
+                    return _(
+                        '🔒 Location "%s" is currently being counted (Task: %s).\n'
+                        'Please finish the count task before scanning this order.'
+                    ) % (loc.display_name, loc.counting_task_id.name)
+        return None
+
+    # ------------------------------------------------------------------
     # Scan workflows
     # ------------------------------------------------------------------
     def scan_pick(self, sku, kob_worker_id=None):
@@ -442,6 +459,11 @@ class WmsSalesOrder(models.Model):
         # 1. Must have delivery
         if not self.picking_id:
             return _err(_('No delivery linked to %s.') % (self.ref or self.name))
+
+        # 1b. Count lock — block pick if source location is being counted
+        lock_msg = self._count_lock_msg()
+        if lock_msg:
+            return _err(lock_msg)
 
         # 2. Ensure delivery is reserved (all items must be available)
         picking = self.picking_id
@@ -463,6 +485,17 @@ class WmsSalesOrder(models.Model):
                 'Missing: %s\n'
                 'Location: %s'
             ) % (missing, picking.location_id.complete_name))
+
+        # 2b. Guard: picking is "assigned" but reserved qty may be 0 (e.g. after
+        #     a cycle count adjustment unreserved the stock between order creation
+        #     and scanning).  Re-verify actual reserved qty on move lines.
+        total_reserved = sum(
+            ml.quantity_product_uom for ml in picking.move_line_ids)
+        if total_reserved == 0:
+            return _err(_(
+                '⚠️ สต็อคสำรองหาย (Delivery %s ไม่มี reserved qty)\n'
+                'กรุณาตรวจสอบ Inventory → %s ว่ามีสินค้าพร้อมส่งหรือไม่'
+            ) % (picking.name, picking.location_id.complete_name))
 
         # 3. Find WMS line (case-insensitive)
         line = self._find_line_by_code(sku)
@@ -565,20 +598,30 @@ class WmsSalesOrder(models.Model):
         if not self.all_packed:
             return {'ok': False, 'error': _('Not all items are packed yet.')}
 
+        # 0. Count lock — block BEFORE setting any status or posting invoice
+        lock_msg = self._count_lock_msg()
+        if lock_msg:
+            return {'ok': False, 'error': lock_msg}
+
         if box_size:
             self.box_barcode = box_size
         elif box_barcode:
             self.box_barcode = box_barcode
-        self.status = 'packed'
-        self.packed_at = fields.Datetime.now()
+
         self._log_action('box', self.box_barcode or '', kob_user_id=kob_worker_id)
 
         # 1. Validate stock.picking → ตัด stock จริง
         stock_errors = self._validate_picking()
 
-        # 2. Auto create + post invoice (only when stock validated cleanly)
-        if not stock_errors:
-            self._auto_create_invoice()
+        if stock_errors:
+            # Stock failed — do NOT set packed status, do NOT post invoice
+            # Return ok: False so pack screen shows the error clearly
+            return {'ok': False, 'error': stock_errors[0]}
+
+        # 2. Stock OK → mark packed + auto invoice
+        self.status = 'packed'
+        self.packed_at = fields.Datetime.now()
+        self._auto_create_invoice()
 
         # 3. Return AWB print action
         awb_action = None
@@ -591,7 +634,6 @@ class WmsSalesOrder(models.Model):
         return {
             'ok': True,
             'awb_action': awb_action,
-            'stock_warning': stock_errors[0] if stock_errors else None,
         }
 
     def select_box_and_close(self, box_size, kob_worker_id=None):
@@ -604,80 +646,113 @@ class WmsSalesOrder(models.Model):
     def _validate_picking(self):
         """Set move_line done qty = reserved qty, then validate delivery.
 
-        Returns list of error strings for any failure so callers can surface
-        the error to the user instead of silently dropping it.
+        Auto-retry strategy (no manual button needed):
+          Attempt 1 — confirm + assign + set done=reserved + button_validate
+          Attempt 2 — if state != done: unreserve → re-assign → set done=reserved
+                      → button_validate again (handles stale reservation after
+                        count-adjustment or external stock change)
+          Failure   — clear error pointing supervisor to Inventory directly.
 
-        Key Odoo 18 fields on stock.move.line:
-          ml.quantity_product_uom = reserved qty (what Odoo allocated)
-          ml.quantity             = done qty (what we're confirming)
-          ml.picked               = True signals the line is ready to validate
+        Odoo 18 field names on stock.move.line:
+          ml.quantity_product_uom = reserved qty
+          ml.quantity             = done qty (set before button_validate)
+          ml.picked               = True signals line ready to validate
         """
         errors = []
         for order in self:
-            # ── No picking linked ────────────────────────────────────────
-            if not order.picking_id:
+            picking = order.picking_id
+
+            # ── No picking ───────────────────────────────────────────────
+            if not picking:
                 msg = _('No delivery order linked — stock was NOT deducted. '
-                        'Link a Delivery Order on this WMS order and validate manually.')
+                        'Assign a Delivery Order and validate manually in Inventory.')
                 errors.append(msg)
-                order.message_post(body=_('⚠️ %s') % msg)
+                order.message_post(body='⚠️ %s' % msg)
                 continue
 
-            if order.picking_id.state == 'done':
-                continue   # already validated, nothing to do
-            if order.picking_id.state == 'cancel':
-                msg = _('Delivery %s is cancelled — stock was NOT deducted.') % order.picking_id.name
+            # ── Already done ─────────────────────────────────────────────
+            if picking.state == 'done':
+                continue
+
+            # ── Cancelled ────────────────────────────────────────────────
+            if picking.state == 'cancel':
+                msg = _('Delivery %s is cancelled — stock was NOT deducted.') % picking.name
                 errors.append(msg)
-                order.message_post(body=_('⚠️ %s') % msg)
+                order.message_post(body='⚠️ %s' % msg)
                 continue
 
             try:
-                # Ensure picking is confirmed + reserved first
-                if order.picking_id.state == 'draft':
-                    order.picking_id.action_confirm()
-                if order.picking_id.state in ('confirmed', 'waiting'):
-                    order.picking_id.action_assign()
+                # ── Ensure picking is confirmed + reserved ────────────────
+                if picking.state == 'draft':
+                    picking.action_confirm()
+                if picking.state in ('confirmed', 'waiting'):
+                    picking.action_assign()
 
-                # Set done qty = reserved qty for each move line.
-                # IMPORTANT: use ml.quantity_product_uom (reserved per line),
-                # NOT ml.move_id.product_uom_qty (total move demand) — the latter
-                # over-counts when a move has multiple lines (e.g. different lots).
-                for ml in order.picking_id.move_line_ids:
-                    reserved = ml.quantity_product_uom or 0
-                    if reserved > 0:
-                        ml.quantity = reserved   # done = reserved
-                    if hasattr(ml, 'picked'):
-                        ml.picked = True
+                # ── Attempt 1 ────────────────────────────────────────────
+                ok = order._picking_attempt(picking)
 
-                # skip_immediate=True  → bypass "Set Quantities" dialog
-                # skip_backorder=True  → bypass "Create Backorder?" dialog
-                order.picking_id.with_context(
-                    skip_immediate=True,
-                    skip_backorder=True,
-                    picking_ids_not_to_backorder=order.picking_id.ids,
-                ).button_validate()
+                # ── Attempt 2: unreserve → re-assign → retry ─────────────
+                if not ok:
+                    picking.invalidate_recordset()   # flush ORM cache first
+                    if picking.state == 'done':
+                        ok = True
+                    else:
+                        picking.do_unreserve()
+                        picking.action_assign()
+                        ok = order._picking_attempt(picking)
 
-                # Verify the picking is actually done — button_validate() can
-                # return a wizard action dict without raising, so we must check.
-                if order.picking_id.state != 'done':
-                    msg = _(
-                        'Validation incomplete — delivery %s is still "%s". '
-                        'Validate manually in Inventory.'
-                    ) % (order.picking_id.name, order.picking_id.state)
-                    errors.append(msg)
-                    order.message_post(body=_('⚠️ %s') % msg)
+                if ok:
+                    order.message_post(body='✅ Stock validated: %s' % picking.name)
                 else:
-                    order.message_post(body=_(
-                        '✅ Stock validated: %s') % order.picking_id.name)
+                    picking.invalidate_recordset()
+                    msg = _(
+                        '❌ Validation incomplete — delivery %s is still "%s".\n'
+                        'กรุณาไปที่ Inventory → Transfers → %s แล้วกด Validate โดยตรง'
+                    ) % (picking.name, picking.state, picking.name)
+                    errors.append(msg)
+                    order.message_post(body='⚠️ %s' % msg)
 
             except Exception as exc:
                 msg = str(exc)
                 errors.append(msg)
                 order.message_post(body=_(
-                    '❌ Stock validation FAILED: %s\n'
-                    'Go to Inventory → %s and validate manually.'
-                ) % (msg, order.picking_id.name))
+                    '❌ Stock validation error: %s\n'
+                    'กรุณาไปที่ Inventory → Transfers → %s แล้ว Validate โดยตรง'
+                ) % (msg, picking.name))
 
         return errors
+
+    def _picking_attempt(self, picking):
+        """Single validation attempt: set done=reserved → button_validate.
+
+        Returns True if picking.state == 'done' after the attempt.
+        Called by _validate_picking(); safe to call twice (idempotent).
+        """
+        # Guard: if all reserved qty = 0 after assign, stock is truly gone
+        total_reserved = sum(ml.quantity_product_uom for ml in picking.move_line_ids)
+        if total_reserved == 0 and picking.move_line_ids:
+            return False   # will trigger attempt 2 (unreserve → re-assign)
+
+        # Set done qty = reserved qty
+        # Use quantity_product_uom (reserved per line) NOT move demand
+        # to avoid over-counting when a move has multiple lot lines.
+        for ml in picking.move_line_ids:
+            reserved = ml.quantity_product_uom or 0
+            if reserved > 0:
+                ml.quantity = reserved
+            if hasattr(ml, 'picked'):
+                ml.picked = True
+
+        # skip_immediate → bypass "Set Quantities" wizard
+        # skip_backorder → bypass "Create Backorder?" wizard
+        picking.with_context(
+            skip_immediate=True,
+            skip_backorder=True,
+            picking_ids_not_to_backorder=picking.ids,
+        ).button_validate()
+
+        picking.invalidate_recordset()
+        return picking.state == 'done'
 
     def _auto_create_invoice(self):
         """Auto create and post invoice from the linked sale.order."""
@@ -699,6 +774,46 @@ class WmsSalesOrder(models.Model):
             except Exception as exc:
                 order.message_post(
                     body=_('Auto-invoice warning: %s') % exc)
+
+    def action_fix_packed_status(self):
+        """Supervisor: fix WMS orders where picking is 'done' but status not updated.
+
+        Scenario B only — picking already validated externally (e.g. via Inventory UI),
+        WMS status still shows wrong state. Auto-retry validation is built into
+        _validate_picking() so this button covers only the manual-fix edge case.
+        """
+        fixed, skipped = [], []
+        for order in self:
+            picking = order.picking_id
+            if picking and picking.state == 'done':
+                if order.status not in ('packed', 'shipped', 'cancelled'):
+                    order.status = 'packed'
+                    if not order.packed_at:
+                        order.packed_at = fields.Datetime.now()
+                    # Create invoice if missing
+                    so = order.sale_order_id
+                    if so and not so.invoice_ids.filtered(lambda i: i.state == 'posted'):
+                        order._auto_create_invoice()
+                    order.message_post(body='✅ Status synced: picking was already done.')
+                    fixed.append(order.name)
+                else:
+                    skipped.append(order.name)
+            else:
+                skipped.append(order.name)
+
+        msg = []
+        if fixed:   msg.append('✅ Fixed: %s' % ', '.join(fixed))
+        if skipped: msg.append('⏭ Skipped (not applicable): %s' % ', '.join(skipped))
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Fix Packed Status'),
+                'message': '\n'.join(msg) or 'Nothing to fix.',
+                'type': 'success',
+                'sticky': False,
+            },
+        }
 
     def action_ship(self):
         """Mark as shipped + create scan item + auto add to active batch."""

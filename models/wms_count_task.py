@@ -17,6 +17,10 @@ class WmsCountTask(models.Model):
     zone_id = fields.Many2one('wms.zone', string='Zone',
                               related='rack_id.zone_id', store=True)
     location_id = fields.Many2one('stock.location', string='Location')
+    product_id = fields.Many2one('product.product', string='Product',
+                                 index=True,
+                                 help='Set for ABC/SKU-specific tasks. '
+                                      'When set, only this product is counted.')
     assigned_user_id = fields.Many2one('res.users', string='Assigned To',
                                        tracking=True)
     state = fields.Selection([
@@ -165,13 +169,17 @@ class WmsCountTask(models.Model):
             rack_name = t.rack_id.name or ''
             loc_name  = t.location_id.complete_name or t.location_id.name or ''
 
-            # Expected products from stock.quant at this location
+            # Expected products from stock.quant at this location.
+            # If the task has a specific product_id (ABC/SKU tasks), only load that product.
             products = []
             if t.location_id:
-                quants = self.env['stock.quant'].sudo().search([
+                quant_domain = [
                     ('location_id', '=', t.location_id.id),
                     ('quantity', '>', 0),
-                ])
+                ]
+                if t.product_id:
+                    quant_domain.append(('product_id', '=', t.product_id.id))
+                quants = self.env['stock.quant'].sudo().search(quant_domain)
                 seen = set()
                 for q in quants:
                     pid = q.product_id.id
@@ -195,6 +203,11 @@ class WmsCountTask(models.Model):
                 'location_name': loc_name,
                 'product_count': len(products),
                 'products':     products,
+                'session_name': t.session_id.name if t.session_id else '',
+                # For SKU-specific tasks (ABC): the single target product
+                'target_product_id':   t.product_id.id if t.product_id else False,
+                'target_product_name': t.product_id.display_name if t.product_id else '',
+                'target_product_code': t.product_id.default_code if t.product_id else '',
             })
         return result
 
@@ -217,25 +230,39 @@ class WmsCountTask(models.Model):
         if not location:
             return {'ok': False, 'error': _('Task has no location assigned.')}
 
-        # Block if another task already holds this location
-        if location.counting_task_id and location.counting_task_id != self:
-            return {
-                'ok': False,
-                'error': _('Location "%s" is already locked by task %s. '
-                           'Finish that count first.')
-                         % (location.display_name, location.counting_task_id.name),
-            }
+        # Block if another task from a DIFFERENT session holds this location.
+        # Tasks in the SAME session share the location lock — allowed.
+        existing = location.counting_task_id
+        if existing and existing != self:
+            same_session = (
+                existing.session_id and
+                self.session_id and
+                existing.session_id == self.session_id
+            )
+            if not same_session:
+                return {
+                    'ok': False,
+                    'error': _('Location "%s" is already locked by task %s (session %s). '
+                               'Finish that session first.')
+                             % (location.display_name,
+                                existing.name,
+                                existing.session_id.name if existing.session_id else '?'),
+                }
+            # Same session — proceed without re-locking (already locked)
 
-        # ── Lock location ────────────────────────────────────────────
-        location.sudo().counting_task_id = self
+        # ── Lock location (set to this task; same-session tasks share it) ─
+        if not location.counting_task_id:
+            location.sudo().counting_task_id = self
 
         # ── Take snapshot (clear old one first for re-entry) ─────────
         Snapshot = self.env['wms.count.snapshot'].sudo()
         Snapshot.search([('task_id', '=', self.id)]).unlink()
 
-        quants = self.env['stock.quant'].sudo().search([
-            ('location_id', '=', location.id),
-        ], order='product_id, lot_id')
+        snap_domain = [('location_id', '=', location.id)]
+        if self.product_id:
+            snap_domain.append(('product_id', '=', self.product_id.id))
+        quants = self.env['stock.quant'].sudo().search(
+            snap_domain, order='product_id, lot_id')
 
         for q in quants:
             Snapshot.create({
@@ -265,7 +292,9 @@ class WmsCountTask(models.Model):
                 'lot_id':       lot.id if lot else False,
                 'lot_name':     lot.name if lot else '',
                 'lot_ref':      lot.ref if lot else '',
-                'expiry_date':  str(lot.expiration_date.date())
+                'expiry_date':  str(lot.expiration_date.date()
+                                    if hasattr(lot.expiration_date, 'date')
+                                    else lot.expiration_date)
                                 if lot and lot.expiration_date else '',
                 'expected_qty': snap.qty,
             })
@@ -290,7 +319,9 @@ class WmsCountTask(models.Model):
                 'lot_id':       lot.id if lot else False,
                 'lot_name':     lot.name if lot else '',
                 'lot_ref':      lot.ref if lot else '',
-                'expiry_date':  str(lot.expiration_date.date())
+                'expiry_date':  str(lot.expiration_date.date()
+                                    if hasattr(lot.expiration_date, 'date')
+                                    else lot.expiration_date)
                                 if lot and lot.expiration_date else '',
                 'expected_qty': q.quantity,
             })

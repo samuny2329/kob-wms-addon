@@ -159,6 +159,22 @@
   &:active { transform: scale(0.99); }
 }
 
+// Task name — แสดงชัดเจน ดูออกว่า task ไหน
+.wms-count-task-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--wms-primary, #714b67);
+  font-family: monospace;
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+}
+
+.wms-count-session-ref {
+  font-size: 11px;
+  color: var(--wms-outline, #80747a);
+  font-style: italic;
+}
+
 .wms-count-loc-path {
   display: flex;
   align-items: center;

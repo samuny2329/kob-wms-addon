@@ -39,6 +39,8 @@
             <div t-foreach="state.tasks" t-as="task" t-key="task.id"
                  class="wms-count-task-card"
                  t-on-click="() => selectTask(task)">
+                <!-- Task name — ใหญ่ชัด ดูออกว่า task ไหน -->
+                <div class="wms-count-task-name" t-esc="task.name"/>
                 <!-- Location breadcrumb -->
                 <div class="wms-count-loc-path">
                     <span class="wms-count-zone-badge" t-esc="task.zone_code or task.zone_name"/>
@@ -51,7 +53,7 @@
                     <span class="wms-count-product-count">
                         📦 <t t-esc="task.product_count"/> สินค้า
                     </span>
-                    <span class="wms-count-task-ref" t-esc="task.name"/>
+                    <span class="wms-count-session-ref" t-esc="task.session_name or ''"/>
                 </div>
                 <div class="wms-count-task-action">เริ่มนับ →</div>
             </div>

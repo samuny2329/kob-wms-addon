@@ -32,13 +32,24 @@ class WmsPickface(models.Model):
 
     @api.depends('product_id', 'location_id')
     def _compute_current_qty(self):
+        # Batch-fetch all quants in one query to avoid N+1
+        pf_with_data = self.filtered(lambda p: p.product_id and p.location_id)
+        if pf_with_data:
+            quants = self.env['stock.quant'].sudo().search([
+                ('product_id', 'in', pf_with_data.mapped('product_id').ids),
+                ('location_id', 'in', pf_with_data.mapped('location_id').ids),
+            ])
+            # Index by (product_id, location_id) for O(1) lookup
+            qty_map = {}
+            for q in quants:
+                key = (q.product_id.id, q.location_id.id)
+                qty_map[key] = qty_map.get(key, 0) + q.quantity
+        else:
+            qty_map = {}
+
         for pf in self:
             if pf.product_id and pf.location_id:
-                quants = self.env['stock.quant'].search([
-                    ('product_id', '=', pf.product_id.id),
-                    ('location_id', '=', pf.location_id.id),
-                ])
-                pf.current_qty = sum(q.quantity for q in quants)
+                pf.current_qty = qty_map.get((pf.product_id.id, pf.location_id.id), 0)
             else:
                 pf.current_qty = 0
 

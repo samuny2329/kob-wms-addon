@@ -30,7 +30,7 @@ DB           : odoo18_db
 PostgreSQL   : 127.0.0.1:5433  (user: odoo / pass: odoo)
 venv         : odoo-18.0/venv/Scripts/python
 Config       : odoo-18.0/config/odoo18_local.conf
-kob_wms      : custom_addons/kob_wms  v2.11.0
+kob_wms      : custom_addons/kob_wms  v2.12.0
 GitHub       : https://github.com/samuny2329/kob-wms-addon
 ```
 
@@ -509,29 +509,59 @@ venv/Scripts/pip install xlsxwriter
 
 ---
 
-## 11. Known Issues
+## 11. Known Issues & Fixed Bugs
 
-| ปัญหา | สาเหตุ | วิธีแก้ |
+| ปัญหา | สาเหตุ | สถานะ |
 |-------|--------|--------|
-| Stock ไม่ถูกตัด | `_validate_picking()` field ผิด | Fix ใน v2.11 แล้ว |
-| Dashboard ไม่โหลด | Binary cache | สร้าง XML ID ใหม่ |
-| Report ไม่ขึ้น | Load order ผิด | ใช้ binding_type=report |
-| SLA ไม่เริ่ม | ยังไม่ Print Pick List | กด Print Pick List ก่อน |
-| account_account query ผิด | Odoo 18 ไม่มี company_id บน account | ใช้ `code_store` แทน `code` |
-| product_category query ผิด | ไม่มี property_stock_location_id ใน Odoo 18 | ใช้ UI แทน |
+| Stock ไม่ถูกตัด | `_validate_picking()` field ผิด | ✅ Fixed v2.11 |
+| Dashboard ไม่โหลด | Binary cache | ✅ สร้าง XML ID ใหม่ |
+| Report ไม่ขึ้น | Load order ผิด | ✅ ใช้ binding_type=report |
+| SLA ไม่เริ่ม | ยังไม่ Print Pick List | ✅ กด Print Pick List ก่อน |
+| account_account query ผิด | Odoo 18 ไม่มี company_id | ✅ ใช้ `code_store` แทน `code` |
+| AWB label upgrade ผิด | `t-esc` attribute ซ้ำ | ✅ Fixed v2.12 |
+| Count lock บล็อค Validate ช้าไป | lock check อยู่ใน close_box ไม่ใช่ scan_pick | ✅ Fixed v2.12 |
+| Cycle count tasks โหลดทุก SKU | `wms.count.task` ไม่มี `product_id` | ✅ Fixed v2.12 |
+| ABC สร้าง task ทุก product | ไม่มีการสุ่ม sample | ✅ Fixed v2.12 — weighted sample by yesterday OUT |
+| Session cancel ไม่ล้าง location lock | `action_cancel()` ไม่ clear `counting_task_id` | ✅ Fixed v2.12 |
+| Close Box ค้าง "still assigned" | `button_validate()` ไม่ complete ครั้งแรก | ✅ Fixed v2.12 — auto-retry built-in |
+| Pick list report qty ผิด | `reserved_uom_qty` ไม่มีใน Odoo 18 | ✅ Fixed v2.12 → `quantity_product_uom` |
+| `_domainForMode()` default โหลด order ทั้งหมด | `return []` ใน default case | ✅ Fixed v2.12 → `return [["id","=",0]]` |
+| Warehouse default ไม่กรอง company | `search([], limit=1)` | ✅ Fixed v2.12 → filter by `env.company` |
+| N+1 query ใน pickface | `search()` inside for loop | ✅ Fixed v2.12 — batch fetch |
+| scan_bar dialog error ไม่ reset | catch ไม่ call `_scheduleReset()` | ✅ Fixed v2.12 |
 
 ---
 
-## 12. Claude Prompt สำหรับเครื่องใหม่
+## 12. Cycle Count — การทำงาน (v2.12+)
+
+```
+WMS → Count (F5) → Count Sessions → New → Run Auto Cycle Count
+
+Logic:
+  1. ดึงยอด OUT เมื่อวาน (packed_at::date = yesterday, status=packed/shipped)
+  2. จัดอันดับ A/B/C จาก 30-day OUT volume
+  3. สุ่ม weighted sample จากแต่ละ rank (น้ำหนัก = qty เมื่อวาน):
+       Rank A → 30% of A-movers, max 5 tasks
+       Rank B → 20% of B-movers, max 3 tasks
+       Rank C → 10% of C-movers, max 2 tasks (full count เท่านั้น)
+  4. สร้าง task 1 ต่อ SKU — นับเฉพาะ product นั้น (product_id locked)
+
+ถ้า session ค้าง → Cancel session → ไม่มี ghost lock (auto-cleared)
+ถ้า picking ค้าง → ไปที่ Inventory → Transfers → Validate โดยตรง
+```
+
+---
+
+## 13. Claude Prompt สำหรับเครื่องใหม่
 
 ```
 อ่าน CLAUDE.md และ SETUP_UAT.md ในโฟลเดอร์ kob_wms/ ก่อน
 ระบบมี 3 บริษัท: คิสออฟบิวตี้ (KOB), บิวตี้วิลล์ (BTV), คอสโมเนชั่น (CMN)
-Module version ปัจจุบัน: 18.0.2.11.0
+Module version ปัจจุบัน: 18.0.2.12.0
 ช่วยฉัน setup/แก้ปัญหา: [ระบุงาน]
 ```
 
 ---
 
-> **ข้อมูลนี้ดึงจาก UAT DB เมื่อ 2026-04-18**
+> **ข้อมูลนี้ดึงจาก UAT DB เมื่อ 2026-04-19**
 > วิธีที่ดีที่สุดคือ **Restore DB** จาก backup — ไม่ต้อง manual setup ทุกอย่าง
