@@ -1,579 +1,509 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   KOB WMS — Count Screen  v3  (SAP Fiori layout · Odoo 19 palette)
+   KOB WMS — Count Screen  v4  (SAP Fiori Analytical Table + Odoo 19 teal)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Design tokens ─────────────────────────────────────────────────────── */
+/* ── Design tokens (SAP Fiori Horizon theme + Odoo 19 teal) ─────────────── */
 :root {
-  --cnt-bg:           #F0F2F5;
-  --cnt-surface:      #FFFFFF;
-  --cnt-surface-2:    #F7F8FA;
-  --cnt-header-bg:    #1B2B3A;          /* SAP dark navy                   */
-  --cnt-primary:      #00A99D;          /* Odoo 19 teal                    */
-  --cnt-primary-dk:   #007D73;
-  --cnt-primary-lt:   #E0F5F4;
-  --cnt-on-primary:   #FFFFFF;
-  --cnt-accent:       #714B67;          /* Odoo brand purple (secondary)   */
-  --cnt-success:      #1A7F5A;
-  --cnt-success-bg:   #E6F4EE;
-  --cnt-error:        #C5392D;
-  --cnt-error-bg:     #FDECEA;
-  --cnt-warning:      #B45309;
-  --cnt-warning-bg:   #FEF3C7;
-  --cnt-border:       #DDE1E7;
-  --cnt-border-2:     #C8CDD5;
-  --cnt-text:         #1A2633;
-  --cnt-text-2:       #4A5568;
-  --cnt-text-3:       #9BA3B0;
-  --cnt-shadow-sm:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-  --cnt-shadow-md:    0 4px 16px rgba(0,0,0,.10), 0 2px 6px rgba(0,0,0,.06);
-  --cnt-radius:       10px;
-  --cnt-radius-sm:    6px;
-  --cnt-radius-lg:    14px;
+  --sap-bg:           #F2F4F7;
+  --sap-surface:      #FFFFFF;
+  --sap-surface-2:    #F7F8F9;
+
+  /* Shell */
+  --sap-shell:        #1D2D3E;
+  --sap-shell-hover:  rgba(255,255,255,.08);
+
+  /* Primary = Odoo 19 teal */
+  --sap-primary:      #00A99D;
+  --sap-primary-dk:   #007D73;
+  --sap-primary-lt:   #E0F5F4;
+  --sap-on-primary:   #FFFFFF;
+
+  /* Semantic */
+  --sap-ok:           #1A7F5A;
+  --sap-ok-bg:        #DCFCE7;
+  --sap-ok-border:    #86EFAC;
+  --sap-err:          #C5392D;
+  --sap-err-bg:       #FEE2E2;
+  --sap-err-border:   #FCA5A5;
+  --sap-warn:         #92400E;
+  --sap-warn-bg:      #FEF3C7;
+  --sap-pos:          #0369A1;   /* positive variance = blue */
+  --sap-neg:          #C5392D;   /* negative variance = red  */
+
+  /* Text */
+  --sap-text:         #1D2D3E;
+  --sap-text-2:       #556070;
+  --sap-text-3:       #9BA8B5;
+
+  /* Table */
+  --sap-th-bg:        #F2F4F7;
+  --sap-th-border:    #D5DAE0;
+  --sap-td-border:    #E8EAED;
+  --sap-tr-hover:     #F0F9F8;
+  --sap-tr-ok:        #F0FDF4;
+  --sap-tr-err:       #FFF1F0;
+
+  /* Misc */
+  --sap-radius:       8px;
+  --sap-radius-sm:    4px;
+  --sap-shadow:       0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --sap-shadow-md:    0 4px 16px rgba(0,0,0,.10);
 }
 
-/* ── Root ────────────────────────────────────────────────────────────────── */
-.cnt-root {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--cnt-bg);
-  color: var(--cnt-text);
+/* ── Reset / root ────────────────────────────────────────────────────────── */
+.sap-root {
+  font-family: '72', 'Inter', -apple-system, 'Segoe UI', sans-serif;
+  background: var(--sap-bg);
+  color: var(--sap-text);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   font-size: 14px;
   line-height: 1.5;
+
+  *, *::before, *::after { box-sizing: border-box; }
 }
 
-.cnt-page {
+.sap-page {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  flex: 1;
 }
 
-/* ── Loading overlay ─────────────────────────────────────────────────────── */
-.cnt-loading {
+/* ── Loading ─────────────────────────────────────────────────────────────── */
+.sap-loading {
   position: fixed;
   inset: 0;
-  background: rgba(240, 242, 245, 0.92);
+  background: rgba(242,244,247,.92);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 14px;
   z-index: 999;
-}
-
-.cnt-loading-text {
   font-size: 14px;
-  font-weight: 500;
-  color: var(--cnt-text-2);
-  letter-spacing: .02em;
+  color: var(--sap-text-2);
 }
 
-/* keep spinner name for JS compatibility */
+/* Spinner — keep class name for JS compat */
 .wms-count-spinner {
   display: block;
-  width: 32px;
-  height: 32px;
-  border: 3px solid rgba(0, 169, 157, .2);
-  border-top-color: var(--cnt-primary);
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(0,169,157,.2);
+  border-top-color: var(--sap-primary);
   border-radius: 50%;
-  animation: cntSpin 0.65s linear infinite;
+  animation: sapSpin .65s linear infinite;
 }
+.sap-spinner-sm { width: 14px; height: 14px; border-width: 2px; }
+@keyframes sapSpin { to { transform: rotate(360deg); } }
 
-.cnt-spinner-sm {
-  width: 16px;
-  height: 16px;
-  border-width: 2px;
-}
-
-@keyframes cntSpin { to { transform: rotate(360deg); } }
-
-/* ── SAP-style Shell Header ───────────────────────────────────────────────── */
-.cnt-shell-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--cnt-header-bg);
-  color: #fff;
+/* ── SAP Shell Bar ───────────────────────────────────────────────────────── */
+.sap-shellbar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 16px;
-  height: 52px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+  height: 48px;
+  padding: 0 12px;
+  background: var(--sap-shell);
+  color: #fff;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.22);
+  position: sticky;
+  top: 0;
+  z-index: 60;
   flex-shrink: 0;
 }
 
-.cnt-icon-btn {
+.sap-shellbar-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, .08);
+  border-radius: 6px;
+  background: none;
   border: none;
-  color: rgba(255, 255, 255, .85);
+  color: rgba(255,255,255,.75);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background .12s;
+  transition: background .12s, color .12s;
 
-  &:hover  { background: rgba(255, 255, 255, .16); color: #fff; }
-  &:active { background: rgba(255, 255, 255, .24); }
+  &:hover { background: var(--sap-shell-hover); color: #fff; }
 }
 
-.cnt-shell-brand {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-  min-width: 0;
-}
-
-.cnt-shell-app {
+.sap-shellbar-logo {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: .06em;
-  color: var(--cnt-primary);
+  color: var(--sap-primary);
   text-transform: uppercase;
   white-space: nowrap;
+  padding-right: 2px;
 }
 
-.cnt-shell-sep {
-  color: rgba(255, 255, 255, .25);
-  font-size: 14px;
-}
-
-.cnt-shell-screen {
+.sap-shellbar-title {
   font-size: 15px;
   font-weight: 600;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
 
-/* ── Step indicator ──────────────────────────────────────────────────────── */
-.cnt-step-indicator {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.cnt-step {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 700;
-  background: rgba(255, 255, 255, .12);
-  color: rgba(255, 255, 255, .50);
-  border: 1.5px solid rgba(255, 255, 255, .15);
-  transition: all .2s;
-
-  &.cnt-step-active {
-    background: var(--cnt-primary);
-    color: #fff;
-    border-color: var(--cnt-primary);
-    box-shadow: 0 0 0 3px rgba(0, 169, 157, .25);
+  &::before {
+    content: '/';
+    color: rgba(255,255,255,.25);
+    margin-right: 6px;
+    font-weight: 300;
   }
 }
 
-.cnt-step-line {
-  width: 20px;
-  height: 2px;
-  background: rgba(255, 255, 255, .15);
-  border-radius: 1px;
+.sap-shellbar-spacer { flex: 1; }
 
-  &.cnt-step-line-done { background: var(--cnt-primary); }
+/* ── Step indicator ──────────────────────────────────────────────────────── */
+.sap-step-wrap {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
 }
 
-/* ── Toolbar ─────────────────────────────────────────────────────────────── */
-.cnt-toolbar {
+.sap-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(255,255,255,.1);
+  color: rgba(255,255,255,.4);
+  border: 1.5px solid rgba(255,255,255,.15);
+
+  &.sap-step-on {
+    background: var(--sap-primary);
+    color: #fff;
+    border-color: var(--sap-primary);
+    box-shadow: 0 0 0 3px rgba(0,169,157,.3);
+  }
+}
+
+.sap-step-line {
+  width: 18px;
+  height: 2px;
+  background: rgba(255,255,255,.15);
+  border-radius: 1px;
+
+  &.sap-step-line-done { background: var(--sap-primary); }
+}
+
+/* ── Toolbar (table-level) ───────────────────────────────────────────────── */
+.sap-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
-  background: var(--cnt-surface);
-  border-bottom: 1px solid var(--cnt-border);
-}
-
-.cnt-toolbar-left { display: flex; align-items: center; gap: 8px; }
-
-.cnt-chip-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px 4px 8px;
-  border-radius: 999px;
-  background: var(--cnt-primary-lt);
-  color: var(--cnt-primary-dk);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .02em;
-}
-
-/* ── Location breadcrumb bar ─────────────────────────────────────────────── */
-.cnt-loc-bar {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 16px;
-  background: var(--cnt-header-bg);
-  color: rgba(255, 255, 255, .65);
-  font-size: 12px;
-  font-weight: 500;
-  border-bottom: 1px solid rgba(255, 255, 255, .07);
+  padding: 0 16px;
+  height: 44px;
+  background: var(--sap-surface);
+  border-bottom: 1px solid var(--sap-td-border);
   flex-shrink: 0;
-
-  strong { color: #fff; font-weight: 700; }
-  svg { opacity: .5; flex-shrink: 0; }
 }
 
-/* ── Content area ─────────────────────────────────────────────────────────── */
-.cnt-content {
-  flex: 1;
-  overflow: hidden;
+.sap-toolbar-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sap-text);
   display: flex;
-  gap: 0;
+  align-items: center;
+  gap: 8px;
 }
 
-.cnt-content-2col {
-  @media (min-width: 768px) {
-    flex-direction: row;
-  }
-  @media (max-width: 767px) {
-    flex-direction: column;
-    overflow-y: auto;
-  }
-}
-
-.cnt-content-count {
-  @media (min-width: 768px) {
-    flex-direction: row;
-  }
-  @media (max-width: 767px) {
-    flex-direction: column;
-    overflow-y: auto;
-  }
-}
-
-/* ── Panels ───────────────────────────────────────────────────────────────── */
-.cnt-panel {
-  background: var(--cnt-surface);
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.cnt-panel-title {
+.sap-toolbar-actions {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 12px 16px 10px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .05em;
-  color: var(--cnt-text-2);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--cnt-border);
-  background: var(--cnt-surface-2);
-  flex-shrink: 0;
-
-  svg { color: var(--cnt-primary); flex-shrink: 0; }
 }
 
-.cnt-count-chip {
-  margin-left: auto;
-  background: var(--cnt-primary-lt);
-  color: var(--cnt-primary-dk);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 999px;
-  letter-spacing: .01em;
-  text-transform: none;
-}
-
-/* Navigate screen panels */
-.cnt-panel-location {
-  @media (min-width: 768px) {
-    width: 320px;
-    border-right: 1px solid var(--cnt-border);
-    flex-shrink: 0;
-  }
-  padding: 0 0 16px;
-  gap: 0;
-}
-
-.cnt-panel-products {
-  flex: 1;
-  min-width: 0;
-}
-
-/* Count screen panels */
-.cnt-product-panel {
-  @media (min-width: 768px) {
-    width: 280px;
-    border-right: 1px solid var(--cnt-border);
-    flex-shrink: 0;
-  }
-  padding: 16px;
-  gap: 14px;
-}
-
-.cnt-lot-panel {
-  flex: 1;
-  min-width: 0;
-  overflow-y: auto;
-}
-
-/* ── Location guide (navigate screen) ────────────────────────────────────── */
-.cnt-loc-guide {
-  display: flex;
-  flex-direction: column;
+.sap-count-badge {
+  display: inline-flex;
   align-items: center;
-  padding: 20px 16px 16px;
-  gap: 0;
-  flex: 1;
-}
-
-.cnt-loc-node {
-  width: 100%;
-  text-align: center;
-  padding: 10px 12px;
-  border-radius: var(--cnt-radius);
-  background: var(--cnt-surface-2);
-  border: 1.5px solid var(--cnt-border);
-  transition: border-color .15s;
-
-  &:hover { border-color: var(--cnt-primary); }
-}
-
-.cnt-loc-node-target {
-  background: var(--cnt-header-bg);
-  border-color: var(--cnt-header-bg);
-
-  .cnt-loc-node-label { color: rgba(255,255,255,.55); }
-  .cnt-loc-node-value { color: #fff; font-size: 26px; }
-}
-
-.cnt-loc-node-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  color: var(--cnt-text-3);
-  margin-bottom: 3px;
-}
-
-.cnt-loc-node-value {
-  font-size: 20px;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--sap-primary-lt);
+  color: var(--sap-primary-dk);
+  font-size: 11px;
   font-weight: 800;
-  color: var(--cnt-text);
-  letter-spacing: .02em;
 }
 
-.cnt-loc-connector {
-  width: 2px;
-  height: 16px;
-  background: var(--cnt-border);
-  margin: 2px auto;
-  border-radius: 1px;
+/* ── SAP Analytical Table ────────────────────────────────────────────────── */
+.sap-table-wrap {
+  background: var(--sap-surface);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--sap-td-border);
 }
 
-/* ── Product table (navigate screen) ─────────────────────────────────────── */
-.cnt-product-table {
+.sap-table-flex {
   flex: 1;
   overflow-y: auto;
 }
 
-.cnt-product-table-head {
-  display: grid;
-  grid-template-columns: 90px 1fr 60px;
-  gap: 8px;
-  padding: 8px 16px;
-  background: var(--cnt-surface-2);
-  border-bottom: 1px solid var(--cnt-border);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .04em;
-  color: var(--cnt-text-3);
-  text-transform: uppercase;
+.sap-table-count {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* Column headers */
+.sap-th {
   position: sticky;
   top: 0;
+  z-index: 2;
+  background: var(--sap-th-bg);
+  border-bottom: 2px solid var(--sap-th-border);
+  border-right: 1px solid var(--sap-td-border);
+  padding: 0 12px;
+  height: 36px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sap-text-2);
+  letter-spacing: .03em;
+  text-align: left;
+  white-space: nowrap;
+  user-select: none;
+
+  &:last-child { border-right: none; }
 }
 
-.cnt-product-table-row {
-  display: grid;
-  grid-template-columns: 90px 1fr 60px;
-  gap: 8px;
-  align-items: center;
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--cnt-border);
+.sap-th-task    { min-width: 180px; }
+.sap-th-loc     { min-width: 100px; }
+.sap-th-num     { width: 70px; text-align: center; }
+.sap-th-session { min-width: 120px; }
+.sap-th-action  { width: 100px; }
+
+/* Data rows */
+.sap-tr {
+  border-bottom: 1px solid var(--sap-td-border);
+  cursor: pointer;
   transition: background .1s;
 
   &:last-child { border-bottom: none; }
-  &:hover { background: var(--cnt-primary-lt); }
+  &:hover { background: var(--sap-tr-hover); }
+  &:active { background: var(--sap-primary-lt); }
+
+  &.sap-tr-ok  { background: var(--sap-tr-ok);
+                  &:hover { background: #E6FDF0; } }
+  &.sap-tr-error { background: var(--sap-tr-err);
+                    &:hover { background: #FFEBE9; } }
 }
 
-.cnt-product-name {
-  font-weight: 500;
-  color: var(--cnt-text);
+.sap-tr-noclick {
+  cursor: default;
+}
+
+/* Data cells */
+.sap-td {
+  padding: 0 12px;
+  height: 44px;
+  border-right: 1px solid var(--sap-td-border);
+  vertical-align: middle;
+  color: var(--sap-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 280px;
+
+  &:last-child { border-right: none; }
 }
 
-.cnt-lot-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 28px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--cnt-primary-lt);
-  color: var(--cnt-primary-dk);
-  font-size: 12px;
+.sap-td-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.sap-td-action { text-align: right; }
+
+.sap-ta-center { text-align: center !important; }
+.sap-ta-right  { text-align: right !important; }
+
+/* Foot row */
+.sap-tfoot-row {
+  border-top: 2px solid var(--sap-th-border);
+  background: var(--sap-th-bg);
   font-weight: 700;
 }
+.sap-tfoot-label { font-size: 13px; color: var(--sap-text-2); }
+.sap-tfoot-num   { font-size: 14px; }
 
-/* ── Product panel (count screen) ────────────────────────────────────────── */
-.cnt-progress-bar-wrap {
+/* ── Status bar ──────────────────────────────────────────────────────────── */
+.sap-statusbar {
+  display: flex;
+  align-items: center;
+  padding: 4px 16px;
+  background: var(--sap-surface);
+  border-top: 1px solid var(--sap-td-border);
+  font-size: 12px;
+  color: var(--sap-text-3);
+  height: 32px;
+  flex-shrink: 0;
+}
+
+/* ── No data ─────────────────────────────────────────────────────────────── */
+.sap-no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  gap: 10px;
+  text-align: center;
+  color: var(--sap-text-3);
+  background: var(--sap-surface);
+  flex: 1;
+
+  p { margin: 0; font-size: 14px; }
+}
+
+/* ── Object Page header ──────────────────────────────────────────────────── */
+.sap-obj-header {
+  background: var(--sap-surface);
+  border-bottom: 1px solid var(--sap-td-border);
+  padding: 14px 18px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex-shrink: 0;
+  box-shadow: var(--sap-shadow);
 }
 
-.cnt-progress-label {
-  font-size: 12px;
-  color: var(--cnt-text-3);
-  font-weight: 500;
-
-  strong { color: var(--cnt-primary); font-weight: 700; }
-}
-
-.cnt-progress-track {
-  height: 4px;
-  background: var(--cnt-border);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.cnt-progress-fill {
-  height: 100%;
-  background: var(--cnt-primary);
-  border-radius: 2px;
-  transition: width .3s ease;
-  min-width: 8px;
-}
-
-.cnt-product-info-card {
-  background: var(--cnt-surface-2);
-  border: 1.5px solid var(--cnt-border);
-  border-radius: var(--cnt-radius);
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.cnt-product-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--cnt-text);
-  margin: 0;
-  line-height: 1.35;
-}
-
-.cnt-dot-row {
+.sap-obj-breadcrumb {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 4px 0;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--sap-text-3);
+
+  svg { flex-shrink: 0; }
+  strong { color: var(--sap-text-2); font-weight: 600; }
 }
 
-.cnt-dot {
-  display: block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--cnt-border);
-  transition: background .15s, transform .15s;
-
-  &.cnt-dot-on {
-    background: var(--cnt-primary);
-    transform: scale(1.4);
-  }
+.sap-obj-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--sap-text);
+  line-height: 1.2;
 }
 
-/* ── Lot table (count screen) ────────────────────────────────────────────── */
-.cnt-lot-table-head {
-  display: grid;
-  grid-template-columns: 1fr 72px 140px;
-  gap: 8px;
-  padding: 9px 16px;
-  background: var(--cnt-surface-2);
-  border-bottom: 1px solid var(--cnt-border);
+.sap-obj-attrs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.sap-attr {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.sap-attr-label {
+  color: var(--sap-text-3);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .04em;
-  color: var(--cnt-text-3);
   text-transform: uppercase;
-  position: sticky;
-  top: 0;
 }
 
-.cnt-lot-row {
-  display: grid;
-  grid-template-columns: 1fr 72px 140px;
+.sap-attr-val {
+  color: var(--sap-text);
+  font-weight: 600;
+}
+
+.sap-attr-sep {
+  display: inline-block;
+  width: 1px;
+  height: 14px;
+  background: var(--sap-td-border);
+  margin: 0 12px;
+}
+
+/* ── KPI strip (summary) ─────────────────────────────────────────────────── */
+.sap-kpi-strip {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--cnt-border);
-  transition: background .1s;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: var(--sap-radius);
+  border: 1.5px solid var(--sap-td-border);
+  background: var(--sap-surface-2);
+  align-self: flex-start;
+  margin-top: 4px;
 
-  &:hover { background: rgba(0, 169, 157, .03); }
-  &.cnt-lot-variance { background: var(--cnt-error-bg); }
+  &.sap-kpi-ok  { background: var(--sap-ok-bg);  border-color: var(--sap-ok-border);
+                   .sap-kpi-value,.sap-kpi-status { color: var(--sap-ok); } }
+  &.sap-kpi-err { background: var(--sap-err-bg); border-color: var(--sap-err-border);
+                   .sap-kpi-value,.sap-kpi-status { color: var(--sap-err); } }
 }
 
-.cnt-lot-info {
+.sap-kpi-label  { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--sap-text-3); text-transform: uppercase; }
+.sap-kpi-value  { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.sap-kpi-status { font-size: 12px; font-weight: 700; }
+
+/* ── Object footer ───────────────────────────────────────────────────────── */
+.sap-obj-footer {
+  padding: 12px 18px;
+  background: var(--sap-surface);
+  border-top: 1px solid var(--sap-td-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 -2px 6px rgba(0,0,0,.06);
+}
+
+/* ── Lot cell content ────────────────────────────────────────────────────── */
+.sap-lot-cell {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  gap: 1px;
+  line-height: 1.3;
 }
 
-.cnt-lot-name {
+.sap-lot-name {
   font-size: 13px;
   font-weight: 600;
-  color: var(--cnt-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: var(--sap-text);
 }
 
-.cnt-lot-ref {
-  font-size: 10px;
-  color: var(--cnt-text-3);
+.sap-lot-ref {
+  font-size: 11px;
+  color: var(--sap-text-3);
   font-family: 'SF Mono', 'Consolas', monospace;
 }
 
-.cnt-lot-expiry {
-  font-size: 10px;
-  color: var(--cnt-warning);
+.sap-lot-expiry {
+  font-size: 11px;
+  color: var(--sap-warn);
   font-weight: 600;
 }
 
-.cnt-badge-new {
+.sap-badge-new {
   display: inline-block;
-  padding: 1px 6px;
-  border-radius: 4px;
+  padding: 1px 5px;
+  border-radius: 3px;
   background: #D1FAE5;
   color: #065F46;
   font-size: 10px;
@@ -582,623 +512,469 @@
   align-self: flex-start;
 }
 
-.cnt-expected-qty {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--cnt-text-2);
-}
-
-/* ── Quantity controls ────────────────────────────────────────────────────── */
-.cnt-qty-ctrl {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.cnt-qty-btn {
+/* ── Numbers ─────────────────────────────────────────────────────────────── */
+.sap-num-cell  { font-variant-numeric: tabular-nums; font-size: 14px; }
+.sap-num-bold  { font-weight: 700; }
+.sap-num-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: var(--cnt-surface-2);
-  border: 1.5px solid var(--cnt-border);
-  color: var(--cnt-text);
-  font-size: 20px;
+  min-width: 26px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--sap-primary-lt);
+  color: var(--sap-primary-dk);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ── Variance values ─────────────────────────────────────────────────────── */
+.sap-diff-val  { font-weight: 700; font-size: 13px; }
+.sap-diff-pos  { color: var(--sap-pos); }
+.sap-diff-neg  { color: var(--sap-neg); }
+.sap-diff-zero { color: var(--sap-text-3); }
+
+/* ── Status dots ─────────────────────────────────────────────────────────── */
+.sap-status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+
+  &.sap-status-ok      { background: var(--sap-ok); }
+  &.sap-status-err     { background: var(--sap-err); }
+  &.sap-status-pending { background: var(--sap-text-3); }
+}
+
+/* ── Tags / misc ─────────────────────────────────────────────────────────── */
+.sap-zone-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--sap-radius-sm);
+  background: var(--sap-shell);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.sap-task-name { font-weight: 600; font-family: 'SF Mono','Consolas',monospace; letter-spacing:.02em; }
+.sap-mono      { font-family: 'SF Mono','Consolas',monospace; font-size: 12px; color: var(--sap-text-2); }
+.sap-text-muted { color: var(--sap-text-3); font-size: 13px; }
+
+/* ── Count screen layout (sidebar + main) ────────────────────────────────── */
+.sap-count-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.sap-count-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--sap-surface);
+  border-right: 1px solid var(--sap-td-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  overflow-y: auto;
+
+  @media (max-width: 720px) {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--sap-td-border);
+    flex-shrink: 0;
+  }
+}
+
+.sap-count-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .sap-count-layout { flex-direction: column; overflow-y: auto; }
+  .sap-count-main   { min-height: 0; }
+}
+
+/* Location strip */
+.sap-loc-strip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--sap-text-3);
+  flex-wrap: wrap;
+
+  svg { flex-shrink: 0; }
+  strong { color: var(--sap-text-2); font-weight: 700; font-size: 12px; }
+}
+
+/* Product card */
+.sap-product-card {
+  background: var(--sap-surface-2);
+  border: 1.5px solid var(--sap-td-border);
+  border-radius: var(--sap-radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sap-product-card-label {
+  font-size: 11px;
+  color: var(--sap-text-3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.sap-progress-bar {
+  height: 3px;
+  background: var(--sap-td-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.sap-progress-fill {
+  height: 100%;
+  background: var(--sap-primary);
+  border-radius: 2px;
+  transition: width .3s ease;
+  min-width: 6px;
+}
+
+.sap-product-card-sku {
+  font-family: 'SF Mono','Consolas',monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sap-text-3);
+  letter-spacing: .04em;
+}
+
+.sap-product-card-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sap-text);
+  line-height: 1.35;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Product dots */
+.sap-dot-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.sap-dot {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sap-td-border);
+  transition: background .15s, transform .15s;
+
+  &.sap-dot-on { background: var(--sap-primary); transform: scale(1.5); }
+}
+
+/* ── Quantity controls ────────────────────────────────────────────────────── */
+.sap-qty-ctrl {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.sap-qty-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--sap-radius-sm);
+  background: var(--sap-surface-2);
+  border: 1.5px solid var(--sap-td-border);
+  color: var(--sap-text);
+  font-size: 18px;
   font-weight: 700;
   cursor: pointer;
   flex-shrink: 0;
-  transition: all .1s;
   line-height: 1;
+  transition: all .1s;
 
-  &:hover  { background: var(--cnt-primary-lt); border-color: var(--cnt-primary); color: var(--cnt-primary); }
-  &:active { background: var(--cnt-primary); color: #fff; border-color: var(--cnt-primary); }
+  &:hover  { background: var(--sap-primary-lt); border-color: var(--sap-primary); color: var(--sap-primary-dk); }
+  &:active { background: var(--sap-primary); color: #fff; border-color: var(--sap-primary); }
 }
 
-.cnt-qty-input {
-  width: 52px;
-  height: 36px;
+.sap-qty-input {
+  width: 54px;
+  height: 32px;
   text-align: center;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  border: 1.5px solid var(--cnt-border);
-  border-radius: 8px;
+  border: 1.5px solid var(--sap-td-border);
+  border-radius: var(--sap-radius-sm);
   background: #fff;
-  color: var(--cnt-text);
+  color: var(--sap-text);
   padding: 0;
   -moz-appearance: textfield;
+  font-variant-numeric: tabular-nums;
 
   &::-webkit-outer-spin-button,
   &::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   &:focus {
     outline: none;
-    border-color: var(--cnt-primary);
-    box-shadow: 0 0 0 3px rgba(0, 169, 157, .15);
+    border-color: var(--sap-primary);
+    box-shadow: 0 0 0 3px rgba(0,169,157,.15);
   }
 }
 
-/* ── Lot actions row ──────────────────────────────────────────────────────── */
-.cnt-lot-actions {
+/* ── Count screen footer ─────────────────────────────────────────────────── */
+.sap-count-footer {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
   padding: 10px 16px;
-  border-top: 1px solid var(--cnt-border);
-  background: var(--cnt-surface-2);
-  flex-wrap: wrap;
-}
-
-/* ── Task list (screen 1) ─────────────────────────────────────────────────── */
-.cnt-task-grid {
-  flex: 1;
-  padding: 14px 16px;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  align-content: start;
-  overflow-y: auto;
-
-  @media (min-width: 900px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  @media (min-width: 1300px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.cnt-task-card {
-  display: flex;
-  background: var(--cnt-surface);
-  border: 1px solid var(--cnt-border);
-  border-radius: var(--cnt-radius-lg);
-  box-shadow: var(--cnt-shadow-sm);
-  overflow: hidden;
-  cursor: pointer;
-  transition: box-shadow .15s, transform .08s, border-color .15s;
-
-  &:hover {
-    box-shadow: var(--cnt-shadow-md);
-    border-color: var(--cnt-primary);
-    transform: translateY(-1px);
-
-    .cnt-task-card-accent { background: var(--cnt-primary); }
-    .cnt-start-cta { color: var(--cnt-primary); }
-  }
-
-  &:active { transform: scale(.99); }
-}
-
-.cnt-task-card-accent {
-  width: 4px;
+  background: var(--sap-surface);
+  border-top: 1px solid var(--sap-td-border);
   flex-shrink: 0;
-  background: var(--cnt-border-2);
-  transition: background .15s;
-}
-
-.cnt-task-card-body {
-  flex: 1;
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
-.cnt-task-header-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.cnt-task-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--cnt-text);
-  font-family: 'SF Mono', 'Consolas', monospace;
-  letter-spacing: .02em;
-}
-
-.cnt-task-ref {
-  font-size: 11px;
-  color: var(--cnt-text-3);
-  font-style: italic;
-  white-space: nowrap;
-}
-
-.cnt-loc-path {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--cnt-text-2);
-
-  svg { color: var(--cnt-text-3); flex-shrink: 0; }
-}
-
-.cnt-zone-chip {
-  display: inline-block;
-  padding: 2px 7px;
-  border-radius: 5px;
-  background: var(--cnt-header-bg);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .04em;
-}
-
-.cnt-rack-text {
-  color: var(--cnt-text-2);
-  font-weight: 500;
-}
-
-.cnt-loc-text {
-  font-weight: 700;
-  color: var(--cnt-text);
-}
-
-.cnt-task-footer-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.cnt-product-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--cnt-text-2);
-
-  svg { color: var(--cnt-primary); }
-}
-
-.cnt-start-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--cnt-text-3);
-  transition: color .15s;
-}
-
-/* ── Empty state ─────────────────────────────────────────────────────────── */
-.cnt-empty {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 24px;
-  gap: 12px;
-  text-align: center;
-}
-
-.cnt-empty-icon { color: var(--cnt-text-3); }
-.cnt-empty-title { font-size: 16px; font-weight: 700; color: var(--cnt-text); margin: 0; }
-.cnt-empty-sub   { font-size: 13px; color: var(--cnt-text-3); margin: 0; }
-.cnt-empty-small { padding: 20px 16px; font-size: 13px; color: var(--cnt-text-3); text-align: center; }
-
-/* ── Footer ──────────────────────────────────────────────────────────────── */
-.cnt-footer {
-  position: sticky;
-  bottom: 0;
-  padding: 10px 16px;
-  background: var(--cnt-surface);
-  border-top: 1px solid var(--cnt-border);
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  box-shadow: 0 -2px 8px rgba(0,0,0,.06);
-  flex-shrink: 0;
-}
-
-.cnt-footer-nav {
-  justify-content: space-between;
-  align-items: center;
+  box-shadow: 0 -2px 6px rgba(0,0,0,.06);
 }
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
-.cnt-btn-primary {
+.sap-btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 11px 22px;
-  border-radius: var(--cnt-radius);
-  background: var(--cnt-primary);
-  color: var(--cnt-on-primary);
+  padding: 0 20px;
+  height: 40px;
+  border-radius: var(--sap-radius);
+  background: var(--sap-primary);
+  color: var(--sap-on-primary);
   border: none;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  min-height: 44px;
-  transition: background .12s, opacity .12s, box-shadow .12s;
-  letter-spacing: .01em;
+  transition: background .12s, box-shadow .12s;
+  white-space: nowrap;
 
-  &:hover  { background: var(--cnt-primary-dk); box-shadow: 0 2px 8px rgba(0,169,157,.3); }
-  &:active { background: #005E56; }
+  &:hover  { background: var(--sap-primary-dk); box-shadow: 0 2px 8px rgba(0,169,157,.3); }
+  &:active { background: #006059; }
   &:disabled { opacity: .4; cursor: not-allowed; box-shadow: none; }
-
-  &.cnt-btn-loading { opacity: .7; cursor: wait; pointer-events: none; }
+  &.sap-btn-loading { opacity: .7; cursor: wait; pointer-events: none; }
 }
 
-.cnt-btn-full  { width: calc(100% - 32px); margin: 0 16px; max-width: none; }
-.cnt-btn-nav   { min-width: 110px; flex: none; }
-.cnt-btn-submit { flex: 1; max-width: 280px; }
-
-.cnt-btn-outline {
+.sap-btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 20px;
-  border-radius: var(--cnt-radius);
-  background: transparent;
-  color: var(--cnt-primary);
-  border: 1.5px solid var(--cnt-primary);
+  padding: 0 18px;
+  height: 40px;
+  border-radius: var(--sap-radius);
+  background: var(--sap-surface);
+  color: var(--sap-primary);
+  border: 1.5px solid var(--sap-primary);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  min-height: 44px;
   transition: background .12s;
+  white-space: nowrap;
 
-  &:hover  { background: var(--cnt-primary-lt); }
-  &:active { background: rgba(0,169,157,.15); }
+  &:hover  { background: var(--sap-primary-lt); }
   &:disabled { opacity: .35; cursor: not-allowed; }
 }
 
-.cnt-btn-ghost {
+.sap-btn-nav    { min-width: 108px; }
+.sap-btn-submit { min-width: 160px; }
+
+.sap-btn-toolbar {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 5px;
-  padding: 8px 14px;
-  border-radius: var(--cnt-radius-sm);
-  background: transparent;
-  color: var(--cnt-text-2);
-  border: 1.5px solid var(--cnt-border);
-  font-size: 12px;
+  padding: 0 12px;
+  height: 32px;
+  border-radius: var(--sap-radius-sm);
+  background: var(--sap-primary);
+  color: #fff;
+  border: none;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  min-height: 36px;
-  transition: all .12s;
+  transition: background .12s;
+  white-space: nowrap;
 
-  &:hover { background: var(--cnt-primary-lt); border-color: var(--cnt-primary); color: var(--cnt-primary-dk); }
+  &:hover { background: var(--sap-primary-dk); }
 }
 
-.cnt-btn-dashed { border-style: dashed; }
+.sap-btn-toolbar-ghost {
+  background: var(--sap-surface);
+  color: var(--sap-text-2);
+  border: 1.5px solid var(--sap-td-border);
 
-.cnt-btn-scan {
+  &:hover { background: var(--sap-surface-2); border-color: var(--sap-primary); color: var(--sap-primary-dk); }
+}
+
+.sap-btn-ghost-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 10px;
+  border-radius: var(--sap-radius-sm);
+  background: transparent;
+  color: var(--sap-primary);
+  border: 1.5px solid var(--sap-primary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .1s;
+
+  &:hover { background: var(--sap-primary-lt); }
+}
+
+.sap-btn-scan {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   width: 100%;
-  padding: 11px 16px;
-  border-radius: var(--cnt-radius);
-  background: var(--cnt-header-bg);
-  color: rgba(255,255,255,.85);
+  height: 38px;
+  border-radius: var(--sap-radius);
+  background: var(--sap-shell);
+  color: rgba(255,255,255,.8);
   border: none;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  min-height: 44px;
+  letter-spacing: .03em;
   transition: background .12s;
-  letter-spacing: .02em;
 
   &:hover { background: #243447; color: #fff; }
 }
 
-/* ── Summary screen ───────────────────────────────────────────────────────── */
-.cnt-summary-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.cnt-variance-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  border-radius: var(--cnt-radius-lg);
-  border: 2px solid var(--cnt-border);
-  background: var(--cnt-surface);
-
-  &.cnt-variance-ok {
-    background: var(--cnt-success-bg);
-    border-color: #86EFAC;
-    .cnt-variance-value { color: var(--cnt-success); }
-    .cnt-variance-icon  { color: var(--cnt-success); }
-  }
-
-  &.cnt-variance-diff {
-    background: var(--cnt-error-bg);
-    border-color: #FCA5A5;
-    .cnt-variance-value { color: var(--cnt-error); }
-    .cnt-variance-icon  { color: var(--cnt-error); }
-  }
-}
-
-.cnt-variance-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--cnt-text-2);
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-
-.cnt-variance-value {
-  font-size: 24px;
-  font-weight: 800;
-  margin-left: auto;
-  font-variant-numeric: tabular-nums;
-}
-
-.cnt-variance-icon {
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.cnt-summary-card {
-  background: var(--cnt-surface);
-  border: 1px solid var(--cnt-border);
-  border-radius: var(--cnt-radius-lg);
-  overflow: hidden;
-  box-shadow: var(--cnt-shadow-sm);
-}
-
-.cnt-summary-card-head {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 10px 14px;
-  background: var(--cnt-surface-2);
-  border-bottom: 1px solid var(--cnt-border);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--cnt-text);
-}
-
-.cnt-summary-lot-table { overflow: hidden; }
-
-.cnt-summary-lot-head {
-  display: grid;
-  grid-template-columns: 1fr 70px 70px 70px;
-  gap: 8px;
-  padding: 7px 14px;
-  background: var(--cnt-surface-2);
-  border-bottom: 1px solid var(--cnt-border);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .04em;
-  color: var(--cnt-text-3);
-  text-transform: uppercase;
-}
-
-.cnt-summary-lot-row {
-  display: grid;
-  grid-template-columns: 1fr 70px 70px 70px;
-  gap: 8px;
-  align-items: center;
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--cnt-border);
-  font-size: 13px;
-
-  &:last-child { border-bottom: none; }
-  &.cnt-sum-ok   { background: rgba(26, 127, 90, .04); }
-  &.cnt-sum-diff { background: var(--cnt-error-bg); }
-}
-
-.cnt-diff-val { font-weight: 700; color: var(--cnt-error); }
-.cnt-diff-ok  { color: var(--cnt-text-3); }
-
 /* ── Done state ───────────────────────────────────────────────────────────── */
-.cnt-done-state {
+.sap-done {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 14px;
   padding: 48px 24px;
   text-align: center;
+  background: var(--sap-surface);
 }
 
-.cnt-done-ring {
-  width: 72px;
-  height: 72px;
+.sap-done-ring {
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  background: var(--cnt-success-bg);
-  border: 2px solid #86EFAC;
+  background: var(--sap-ok-bg);
+  border: 2px solid var(--sap-ok-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--cnt-success);
+  color: var(--sap-ok);
 }
 
-.cnt-done-title { font-size: 22px; font-weight: 800; color: var(--cnt-text); margin: 0; }
-.cnt-done-sub   { font-size: 14px; color: var(--cnt-text-3); margin: 0; }
+.sap-done-title { font-size: 20px; font-weight: 800; color: var(--sap-text); margin: 0; }
+.sap-done-sub   { font-size: 13px; color: var(--sap-text-3); margin: 0; }
 
-/* ── SKU / mono elements ─────────────────────────────────────────────────── */
-.cnt-sku-tag {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: var(--cnt-radius-sm);
-  background: var(--cnt-surface-2);
-  border: 1px solid var(--cnt-border);
-  font-family: 'SF Mono', 'Consolas', monospace;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--cnt-text-2);
-  letter-spacing: .03em;
-}
-
-.cnt-mono    { font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; }
-.cnt-ta-center  { text-align: center; }
-.cnt-text-muted { color: var(--cnt-text-3); }
-.cnt-text-bold  { font-weight: 700; }
-
-/* ── Lot picker overlay ───────────────────────────────────────────────────── */
-.cnt-overlay {
+/* ── SAP Dialog (Lot Picker) ─────────────────────────────────────────────── */
+.sap-dialog-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, .45);
+  background: rgba(0,0,0,.4);
   z-index: 1000;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-
-  @media (min-width: 640px) {
-    align-items: center;
-  }
+  padding: 24px;
 }
 
-.cnt-sheet {
-  background: var(--cnt-surface);
-  border-radius: 20px 20px 0 0;
+.sap-dialog {
+  background: var(--sap-surface);
+  border-radius: var(--sap-radius);
   width: 100%;
-  max-width: 520px;
-  max-height: 74vh;
+  max-width: 600px;
+  max-height: 80vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 -4px 30px rgba(0,0,0,.18);
-
-  @media (min-width: 640px) {
-    border-radius: var(--cnt-radius-lg);
-    max-height: 70vh;
-  }
+  box-shadow: var(--sap-shadow-md);
 }
 
-.cnt-sheet-header {
+.sap-dialog-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
-  background: var(--cnt-header-bg);
+  padding: 0 18px;
+  height: 52px;
+  background: var(--sap-shell);
   color: #fff;
-  border-radius: 20px 20px 0 0;
   flex-shrink: 0;
-
-  @media (min-width: 640px) { border-radius: var(--cnt-radius-lg) var(--cnt-radius-lg) 0 0; }
 }
 
-.cnt-sheet-title {
-  font-size: 14px;
+.sap-dialog-title {
+  font-size: 15px;
   font-weight: 700;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-right: 10px;
+  padding-right: 12px;
 }
 
-.cnt-sheet-close {
+.sap-dialog-close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.1);
   border: none;
-  color: rgba(255,255,255,.8);
+  color: rgba(255,255,255,.75);
   cursor: pointer;
   flex-shrink: 0;
   transition: background .12s;
 
-  &:hover { background: rgba(255,255,255,.25); color: #fff; }
+  &:hover { background: rgba(255,255,255,.22); color: #fff; }
 }
 
-.cnt-sheet-loading,
-.cnt-sheet-empty {
-  padding: 36px 18px;
-  text-align: center;
-  color: var(--cnt-text-3);
-  font-size: 14px;
+.sap-dialog-loading {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  padding: 36px;
+  color: var(--sap-text-3);
+  font-size: 14px;
 }
 
-.cnt-sheet-list { overflow-y: auto; flex: 1; }
-
-.cnt-sheet-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 18px;
-  border-bottom: 1px solid var(--cnt-border);
-  cursor: pointer;
-  min-height: 56px;
-  transition: background .1s;
-
-  &:last-child { border-bottom: none; }
-  &:hover { background: var(--cnt-primary-lt); }
+.sap-dialog-body {
+  flex: 1;
+  overflow-y: auto;
 }
 
-.cnt-sheet-item-main {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
+/* ── Scan flash (keep for JS compat) ─────────────────────────────────────── */
+.sap-page.wms-scan-flash-ok  { animation: sapFlashOk  .35s ease-out; }
+.sap-page.wms-scan-flash-err { animation: sapFlashErr .35s ease-out; }
 
-.cnt-sheet-item-meta { flex-shrink: 0; padding-left: 12px; }
+@keyframes sapFlashOk  { 0% { outline: 4px solid rgba(26,127,90,.6); } 100% { outline: none; } }
+@keyframes sapFlashErr { 0% { outline: 4px solid rgba(197,57,45,.6); } 100% { outline: none; } }
 
-.cnt-qty-chip {
-  font-size: 12px;
-  color: var(--cnt-text-2);
-
-  strong { color: var(--cnt-primary-dk); font-weight: 800; }
-}
-
-/* ── Scan flash (keep for JS compatibility) ─────────────────────────────── */
-.cnt-page.wms-scan-flash-ok  { animation: cntFlashOk  .35s ease-out; }
-.cnt-page.wms-scan-flash-err { animation: cntFlashErr .35s ease-out; }
-
-@keyframes cntFlashOk  {
-  0%   { box-shadow: inset 0 0 0 4px rgba(26,127,90,.5); }
-  100% { box-shadow: none; }
-}
-
-@keyframes cntFlashErr {
-  0%   { box-shadow: inset 0 0 0 4px rgba(197,57,45,.5); }
-  100% { box-shadow: none; }
-}
-
-/* ── Scan input (hidden, keep for JS) ────────────────────────────────────── */
+/* keep for JS compat */
 .wms-count-scan-hidden {
   position: absolute;
   width: 1px;
