@@ -44,7 +44,7 @@
         </div>
 
         <!-- SAP Analytical Table -->
-        <div t-else="" class="sap-table-wrap">
+        <div t-else="" class="sap-table-wrap sap-table-flex">
             <table class="sap-table">
                 <thead>
                     <tr>
@@ -372,7 +372,7 @@
             <button class="sap-btn-primary" t-on-click="backAfterSubmit">กลับหน้าหลัก</button>
         </div>
 
-        <div t-else="">
+        <div t-else="" class="sap-page-body">
             <!-- Object header -->
             <div class="sap-obj-header">
                 <div class="sap-obj-breadcrumb">
