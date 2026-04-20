@@ -1,11 +1,11 @@
 /** @odoo-module **/
-import { Component } from "@odoo/owl";
+import { Component, useState, onWillStart, onPatched } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 
 /**
  * WmsWorkerSystray — SAP HANA style badge.
- * Visible in ALL Odoo apps when a WMS worker is logged in.
+ * Visible only inside the KOB WMS app.
  */
 class WmsWorkerSystray extends Component {
     static template = "kob_wms.WmsWorkerSystray";
@@ -13,6 +13,8 @@ class WmsWorkerSystray extends Component {
 
     setup() {
         this.action = useService("action");
+        this.menu   = useService("menu");
+        this.state  = useState({ inWms: false });
 
         try {
             this.worker = JSON.parse(
@@ -21,6 +23,13 @@ class WmsWorkerSystray extends Component {
         } catch {
             this.worker = {};
         }
+
+        const checkApp = () => {
+            const app = this.menu.getCurrentApp();
+            this.state.inWms = !!(app && app.xmlid === "kob_wms.menu_kob_wms_root");
+        };
+        onWillStart(checkApp);
+        onPatched(checkApp);
     }
 
     get isLoggedIn()  { return !!this.worker.id; }

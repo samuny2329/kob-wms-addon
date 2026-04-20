@@ -3,7 +3,7 @@
 
 <t t-name="kob_wms.WmsWorkerSystray">
     <!-- Render in all Odoo apps when worker is logged in -->
-    <t t-if="isLoggedIn">
+    <t t-if="state.inWms and isLoggedIn">
         <li class="o_nav_entry wms-systray-item"
             style="display:flex;align-items:center;gap:0;padding:0 4px;height:100%;">
 
