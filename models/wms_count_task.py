@@ -34,7 +34,16 @@ class WmsCountTask(models.Model):
     entry_ids = fields.One2many('wms.count.entry', 'task_id', string='Entries')
     entry_count = fields.Integer(string='Entry Count',
                                  compute='_compute_entry_count')
-    expected_qty = fields.Float(string='Expected Qty')
+    expected_qty = fields.Float(
+        string='Expected Qty',
+        help='System stock at this location (from stock.quant) at the time '
+             'the task was generated. This is what the system believes is '
+             'on the shelf, used to calculate Variance against counted qty.')
+    yesterday_qty = fields.Float(
+        string='Yesterday Out Qty',
+        help='Quantity shipped/packed yesterday for this product. '
+             'Shows why this product was selected for ABC cycle count. '
+             'NOT used for variance calculation.')
     counted_qty = fields.Float(string='Counted Qty',
                                compute='_compute_counted_qty', store=True)
     variance = fields.Float(string='Variance',
@@ -133,6 +142,42 @@ class WmsCountTask(models.Model):
             task.message_post(body=_(
                 'Approved by %s. %d adjustment(s) approved.')
                 % (self.env.user.name, len(pending)))
+
+    def action_refresh_expected_qty(self):
+        """Recompute Expected Qty from snapshot (or live stock.quant).
+
+        Priority:
+          1. wms.count.snapshot (taken at Start Counting — most accurate)
+          2. Live stock.quant at task.location_id (fallback)
+
+        Use this on legacy tasks where expected_qty was wrongly set to
+        yesterday's out qty instead of system stock.
+        """
+        for task in self:
+            if not task.location_id:
+                continue
+            # Try snapshot first (captured at start_counting)
+            snap_domain = [('task_id', '=', task.id)]
+            if task.product_id:
+                snap_domain.append(('product_id', '=', task.product_id.id))
+            snapshots = self.env['wms.count.snapshot'].sudo().search(snap_domain)
+            if snapshots:
+                new_qty = sum(snapshots.mapped('qty'))
+                source = 'snapshot'
+            else:
+                # Fallback: current stock.quant at location
+                quant_domain = [('location_id', '=', task.location_id.id)]
+                if task.product_id:
+                    quant_domain.append(('product_id', '=', task.product_id.id))
+                quants = self.env['stock.quant'].sudo().search(quant_domain)
+                new_qty = sum(quants.mapped('quantity'))
+                source = 'live stock.quant'
+            old_qty = task.expected_qty
+            task.expected_qty = new_qty
+            task.message_post(body=_(
+                'Expected Qty refreshed: %.2f → %.2f (from %s)'
+            ) % (old_qty, new_qty, source))
+        return True
 
     # ------------------------------------------------------------------
     # Mobile / Handheld Count Screen API
@@ -400,6 +445,17 @@ class WmsCountTask(models.Model):
 
         # Delete existing draft entries (allow re-submit from mobile)
         task.entry_ids.unlink()
+
+        # ── Refresh expected_qty from snapshot ───────────────────────
+        # snapshot was taken at start_counting → real system stock at
+        # the moment counting began. This ensures Variance = counted - real_stock
+        # (not counted - yesterday_out_qty).
+        snap_domain = [('task_id', '=', task.id)]
+        if task.product_id:
+            snap_domain.append(('product_id', '=', task.product_id.id))
+        snapshots = self.env['wms.count.snapshot'].sudo().search(snap_domain)
+        if snapshots:
+            task.expected_qty = sum(snapshots.mapped('qty'))
 
         Entry = self.env['wms.count.entry']
         for e in entries:
