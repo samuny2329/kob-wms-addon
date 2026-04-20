@@ -1,11 +1,12 @@
 /** @odoo-module **/
-import { Component, useState, onWillStart, onPatched } from "@odoo/owl";
+import { Component, useState, onWillDestroy } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 
 /**
  * WmsWorkerSystray — SAP HANA style badge.
  * Visible only inside the KOB WMS app.
+ * Listens to menu-service bus so state updates on app-switch.
  */
 class WmsWorkerSystray extends Component {
     static template = "kob_wms.WmsWorkerSystray";
@@ -25,11 +26,24 @@ class WmsWorkerSystray extends Component {
         }
 
         const checkApp = () => {
-            const app = this.menu.getCurrentApp();
+            const app = this.menu.getCurrentApp && this.menu.getCurrentApp();
             this.state.inWms = !!(app && app.xmlid === "kob_wms.menu_kob_wms_root");
         };
-        onWillStart(checkApp);
-        onPatched(checkApp);
+
+        // initial check (after menus loaded)
+        checkApp();
+
+        // subscribe to menu-service bus for app-switch events
+        const bus = this.menu && this.menu.bus;
+        if (bus && bus.addEventListener) {
+            bus.addEventListener("MENU-CHANGED", checkApp);
+            onWillDestroy(() => bus.removeEventListener("MENU-CHANGED", checkApp));
+        }
+
+        // fallback: listen to hashchange (URL-based app switch)
+        const onHashChange = () => checkApp();
+        window.addEventListener("hashchange", onHashChange);
+        onWillDestroy(() => window.removeEventListener("hashchange", onHashChange));
     }
 
     get isLoggedIn()  { return !!this.worker.id; }
