@@ -2,341 +2,444 @@
 <templates xml:space="preserve">
 
 <t t-name="kob_wms.WmsCountScreen">
-<div class="wms-count-root">
+<div class="cnt-root">
 
-    <!-- ══ GLOBAL LOADING ════════════════════════════════════════════════ -->
-    <div t-if="state.loading" class="wms-count-loading">
+    <!-- ══ GLOBAL LOADING ══════════════════════════════════════════════════ -->
+    <div t-if="state.loading" class="cnt-loading">
         <span class="wms-count-spinner"/>
-        <span>กำลังโหลด…</span>
+        <span class="cnt-loading-text">กำลังโหลด…</span>
     </div>
 
-    <!-- ══ SCREEN 1: TASK LIST ══════════════════════════════════════════ -->
-    <div t-elif="state.screen === 'tasks'" class="wms-count-screen">
+    <!-- ══ SCREEN 1 — TASK LIST ════════════════════════════════════════════ -->
+    <div t-elif="state.screen === 'tasks'" class="cnt-page">
 
-        <!-- Header -->
-        <div class="wms-count-header">
-            <button class="wms-count-back-btn" t-on-click="() => goToMode('kob_wms.action_wms_login_screen')">
-                ☰
+        <header class="cnt-shell-header">
+            <button class="cnt-icon-btn" t-on-click="() => goToMode('kob_wms.action_wms_login_screen')" title="เมนูหลัก">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6"  x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
             </button>
-            <span class="wms-count-title">🔢 งานนับสินค้า</span>
-            <button class="wms-count-refresh-btn" t-on-click="loadTasks">↺</button>
-        </div>
+            <div class="cnt-shell-brand">
+                <span class="cnt-shell-app">KOB WMS</span>
+                <span class="cnt-shell-sep">/</span>
+                <span class="cnt-shell-screen">งานนับสินค้า</span>
+            </div>
+            <button class="cnt-icon-btn" t-on-click="loadTasks" title="รีเฟรช">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+            </button>
+        </header>
 
-        <!-- Empty state -->
-        <div t-if="state.tasks.length === 0" class="wms-count-empty">
-            <div class="wms-count-empty-icon">✅</div>
-            <p>ไม่มีงานนับที่ได้รับมอบหมาย</p>
-            <button class="wms-count-btn-secondary" t-on-click="loadTasks">รีเฟรช</button>
-        </div>
-
-        <!-- Task cards -->
-        <div t-else="" class="wms-count-task-list">
-            <div class="wms-count-badge-row">
-                <span class="wms-count-badge-info">
+        <!-- Toolbar -->
+        <div class="cnt-toolbar">
+            <div class="cnt-toolbar-left">
+                <span class="cnt-chip-primary">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     <t t-esc="state.tasks.length"/> งานรอนับ
                 </span>
             </div>
-            <div t-foreach="state.tasks" t-as="task" t-key="task.id"
-                 class="wms-count-task-card"
-                 t-on-click="() => selectTask(task)">
-                <!-- Task name — ใหญ่ชัด ดูออกว่า task ไหน -->
-                <div class="wms-count-task-name" t-esc="task.name"/>
-                <!-- Location breadcrumb -->
-                <div class="wms-count-loc-path">
-                    <span class="wms-count-zone-badge" t-esc="task.zone_code or task.zone_name"/>
-                    <span class="wms-count-loc-sep">›</span>
-                    <span t-esc="task.rack_name"/>
-                    <span class="wms-count-loc-sep">›</span>
-                    <span class="wms-count-loc-name" t-esc="task.location_name"/>
-                </div>
-                <div class="wms-count-task-meta">
-                    <span class="wms-count-product-count">
-                        📦 <t t-esc="task.product_count"/> สินค้า
-                    </span>
-                    <span class="wms-count-session-ref" t-esc="task.session_name or ''"/>
-                </div>
-                <div class="wms-count-task-action">เริ่มนับ →</div>
+        </div>
+
+        <!-- Empty state -->
+        <div t-if="state.tasks.length === 0" class="cnt-empty">
+            <div class="cnt-empty-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".35">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
             </div>
-        </div>
-    </div>
-
-    <!-- ══ SCREEN 2: NAVIGATE ═══════════════════════════════════════════ -->
-    <div t-elif="state.screen === 'navigate'" class="wms-count-screen">
-
-        <div class="wms-count-header">
-            <button class="wms-count-back-btn" t-on-click="backToTasks">←</button>
-            <span class="wms-count-title">📍 นำทางไปตำแหน่ง</span>
-            <span class="wms-count-step-badge">STEP 1/3</span>
+            <p class="cnt-empty-title">ไม่มีงานที่ได้รับมอบหมาย</p>
+            <p class="cnt-empty-sub">ทุกงานนับสินค้าเสร็จสมบูรณ์แล้ว</p>
+            <button class="cnt-btn-outline" t-on-click="loadTasks">รีเฟรช</button>
         </div>
 
-        <div class="wms-count-navigate-body">
-            <!-- Location Guide: Zone → Rack → Location -->
-            <div class="wms-count-loc-guide">
-                <div class="wms-count-loc-step">
-                    <div class="wms-count-loc-label">ZONE</div>
-                    <div class="wms-count-loc-value">
-                        <t t-esc="state.task.zone_code or state.task.zone_name"/>
+        <!-- Task grid -->
+        <div t-else="" class="cnt-task-grid">
+            <div t-foreach="state.tasks" t-as="task" t-key="task.id"
+                 class="cnt-task-card" t-on-click="() => selectTask(task)">
+                <div class="cnt-task-card-accent"/>
+                <div class="cnt-task-card-body">
+                    <div class="cnt-task-header-row">
+                        <span class="cnt-task-name" t-esc="task.name"/>
+                        <span class="cnt-task-ref" t-esc="task.session_name or ''"/>
+                    </div>
+                    <div class="cnt-loc-path">
+                        <span class="cnt-zone-chip" t-esc="task.zone_code or task.zone_name"/>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        <span class="cnt-rack-text" t-esc="task.rack_name"/>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        <span class="cnt-loc-text" t-esc="task.location_name"/>
+                    </div>
+                    <div class="cnt-task-footer-row">
+                        <span class="cnt-product-chip">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                            <t t-esc="task.product_count"/> สินค้า
+                        </span>
+                        <span class="cnt-start-cta">เริ่มนับ
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        </span>
                     </div>
                 </div>
-                <div class="wms-count-loc-arrow">↓</div>
-                <div class="wms-count-loc-step">
-                    <div class="wms-count-loc-label">RACK</div>
-                    <div class="wms-count-loc-value" t-esc="state.task.rack_name"/>
-                </div>
-                <div class="wms-count-loc-arrow">↓</div>
-                <div class="wms-count-loc-step wms-count-loc-target">
-                    <div class="wms-count-loc-label">LOCATION</div>
-                    <div class="wms-count-loc-value" t-esc="state.task.location_name"/>
-                </div>
             </div>
-
-            <!-- Products to count at this location -->
-            <div class="wms-count-product-preview">
-                <div class="wms-count-section-title">สินค้าที่ต้องนับ</div>
-                <div t-if="state.products.length === 0" class="wms-count-empty-small">
-                    ไม่มีสินค้าในระบบสำหรับตำแหน่งนี้
-                </div>
-                <div t-foreach="state.products" t-as="p" t-key="p.product_id"
-                     class="wms-count-preview-row">
-                    <span class="wms-count-sku" t-esc="p.product_code or '—'"/>
-                    <span class="wms-count-pname" t-esc="p.product_name"/>
-                    <span class="wms-count-lot-count">
-                        <t t-esc="p.lots.length"/> lot
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <div class="wms-count-footer">
-            <button class="wms-count-btn-primary" t-on-click="goCount"
-                    t-att-disabled="state.products.length === 0">
-                ✅ ถึงแล้ว! เริ่มนับ
-            </button>
         </div>
     </div>
 
-    <!-- ══ SCREEN 3: COUNT ITEMS (per product / lot) ═════════════════════ -->
-    <div t-elif="state.screen === 'count'" class="wms-count-screen"
+    <!-- ══ SCREEN 2 — NAVIGATE ═════════════════════════════════════════════ -->
+    <div t-elif="state.screen === 'navigate'" class="cnt-page">
+
+        <header class="cnt-shell-header">
+            <button class="cnt-icon-btn" t-on-click="backToTasks" title="กลับ">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="cnt-shell-brand">
+                <span class="cnt-shell-app">KOB WMS</span>
+                <span class="cnt-shell-sep">/</span>
+                <span class="cnt-shell-screen">นำทางไปตำแหน่ง</span>
+            </div>
+            <div class="cnt-step-indicator">
+                <span class="cnt-step cnt-step-active">1</span>
+                <span class="cnt-step-line"/>
+                <span class="cnt-step">2</span>
+                <span class="cnt-step-line"/>
+                <span class="cnt-step">3</span>
+            </div>
+        </header>
+
+        <div class="cnt-content cnt-content-2col">
+
+            <!-- Left: location guide -->
+            <div class="cnt-panel cnt-panel-location">
+                <div class="cnt-panel-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    เส้นทางไปยัง
+                </div>
+                <div class="cnt-loc-guide">
+                    <div class="cnt-loc-node">
+                        <div class="cnt-loc-node-label">ZONE</div>
+                        <div class="cnt-loc-node-value">
+                            <t t-esc="state.task.zone_code or state.task.zone_name"/>
+                        </div>
+                    </div>
+                    <div class="cnt-loc-connector"/>
+                    <div class="cnt-loc-node">
+                        <div class="cnt-loc-node-label">RACK</div>
+                        <div class="cnt-loc-node-value" t-esc="state.task.rack_name"/>
+                    </div>
+                    <div class="cnt-loc-connector"/>
+                    <div class="cnt-loc-node cnt-loc-node-target">
+                        <div class="cnt-loc-node-label">LOCATION</div>
+                        <div class="cnt-loc-node-value" t-esc="state.task.location_name"/>
+                    </div>
+                </div>
+                <button class="cnt-btn-primary cnt-btn-full" t-on-click="goCount"
+                        t-att-disabled="state.products.length === 0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    ถึงแล้ว! เริ่มนับ
+                </button>
+            </div>
+
+            <!-- Right: products to count -->
+            <div class="cnt-panel cnt-panel-products">
+                <div class="cnt-panel-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    สินค้าที่ต้องนับ
+                    <span class="cnt-count-chip"><t t-esc="state.products.length"/> รายการ</span>
+                </div>
+                <div t-if="state.products.length === 0" class="cnt-empty-small">
+                    ไม่มีสินค้าในระบบสำหรับตำแหน่งนี้
+                </div>
+                <div t-else="" class="cnt-product-table">
+                    <div class="cnt-product-table-head">
+                        <span>SKU</span><span>ชื่อสินค้า</span><span>Lot</span>
+                    </div>
+                    <div t-foreach="state.products" t-as="p" t-key="p.product_id"
+                         class="cnt-product-table-row">
+                        <span class="cnt-mono cnt-text-muted" t-esc="p.product_code or '—'"/>
+                        <span class="cnt-product-name" t-esc="p.product_name"/>
+                        <span class="cnt-lot-badge"><t t-esc="p.lots.length"/></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ SCREEN 3 — COUNT ITEMS ══════════════════════════════════════════ -->
+    <div t-elif="state.screen === 'count'" class="cnt-page"
          t-att-class="{'wms-scan-flash-ok': state.scanFlash === 'ok',
                        'wms-scan-flash-err': state.scanFlash === 'error'}">
 
-        <!-- Hidden scan input (catches hardware scanner input) -->
         <input t-ref="scanInput" class="wms-count-scan-hidden"
                autocomplete="off" type="text" readonly="1"/>
 
-        <div class="wms-count-header">
-            <button class="wms-count-back-btn" t-on-click="goNavigate">←</button>
-            <span class="wms-count-title">📦 นับสินค้า</span>
-            <span class="wms-count-step-badge">STEP 2/3</span>
+        <header class="cnt-shell-header">
+            <button class="cnt-icon-btn" t-on-click="goNavigate" title="กลับ">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="cnt-shell-brand">
+                <span class="cnt-shell-app">KOB WMS</span>
+                <span class="cnt-shell-sep">/</span>
+                <span class="cnt-shell-screen">นับสินค้า</span>
+            </div>
+            <div class="cnt-step-indicator">
+                <span class="cnt-step">1</span>
+                <span class="cnt-step-line cnt-step-line-done"/>
+                <span class="cnt-step cnt-step-active">2</span>
+                <span class="cnt-step-line"/>
+                <span class="cnt-step">3</span>
+            </div>
+        </header>
+
+        <!-- Loc mini breadcrumb -->
+        <div class="cnt-loc-bar">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <t t-esc="state.task.zone_code"/>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            <t t-esc="state.task.rack_name"/>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            <strong t-esc="state.task.location_name"/>
         </div>
 
-        <!-- Location mini breadcrumb -->
-        <div class="wms-count-loc-mini">
-            <t t-esc="state.task.zone_code"/> ›
-            <t t-esc="state.task.rack_name"/> ›
-            <t t-esc="state.task.location_name"/>
-        </div>
+        <div t-if="currentProduct" class="cnt-content cnt-content-count">
 
-        <div t-if="currentProduct" class="wms-count-product-body">
-
-            <!-- Product header + progress -->
-            <div class="wms-count-product-header">
-                <div class="wms-count-product-progress">
-                    สินค้า <strong t-esc="progressLabel"/>
+            <!-- Product info panel (left on desktop) -->
+            <div class="cnt-panel cnt-product-panel">
+                <div class="cnt-progress-bar-wrap">
+                    <div class="cnt-progress-label">
+                        สินค้า <strong t-esc="progressLabel"/>
+                    </div>
+                    <div class="cnt-progress-track">
+                        <div class="cnt-progress-fill"
+                             t-attf-style="width:{{ ((state.productIdx+1)/state.products.length*100).toFixed(0) }}%"/>
+                    </div>
                 </div>
-                <div class="wms-count-product-title">
-                    <span class="wms-count-sku-badge" t-esc="currentProduct.product_code"/>
-                    <span t-esc="currentProduct.product_name"/>
+                <div class="cnt-product-info-card">
+                    <span class="cnt-sku-tag" t-esc="currentProduct.product_code"/>
+                    <p class="cnt-product-title" t-esc="currentProduct.product_name"/>
                 </div>
+                <!-- Product dots nav -->
+                <div class="cnt-dot-row">
+                    <t t-foreach="state.products" t-as="p" t-key="p.product_id">
+                        <span class="cnt-dot" t-att-class="{'cnt-dot-on': p_index === state.productIdx}"/>
+                    </t>
+                </div>
+                <button class="cnt-btn-scan" t-on-click="() => _focusScan()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+                    สแกนบาร์โค้ด
+                </button>
             </div>
 
-            <!-- Lot / Serial rows -->
-            <div class="wms-count-lots-container">
-                <div class="wms-count-lots-header">
+            <!-- Lot table panel (right on desktop) -->
+            <div class="cnt-panel cnt-lot-panel">
+                <div class="cnt-lot-table-head">
                     <span>Lot / Serial</span>
-                    <span>ระบบมี</span>
-                    <span>นับได้</span>
+                    <span class="cnt-ta-center">ระบบมี</span>
+                    <span class="cnt-ta-center">นับได้</span>
                 </div>
 
                 <div t-foreach="currentProduct.lots" t-as="lot" t-key="lot._key"
-                     class="wms-count-lot-row"
-                     t-att-class="{'wms-lot-variance': lot.counted_qty !== lot.expected_qty}">
+                     class="cnt-lot-row"
+                     t-att-class="{'cnt-lot-variance': lot.counted_qty !== lot.expected_qty}">
 
-                    <div class="wms-count-lot-info">
-                        <span class="wms-count-lot-name" t-esc="lot.lot_name"/>
-                        <span t-if="lot.lot_ref" class="wms-count-lot-ref" t-esc="lot.lot_ref"/>
-                        <span t-if="lot.expiry_date" class="wms-count-lot-expiry">
+                    <div class="cnt-lot-info">
+                        <span class="cnt-lot-name" t-esc="lot.lot_name"/>
+                        <span t-if="lot.lot_ref"  class="cnt-lot-ref"    t-esc="lot.lot_ref"/>
+                        <span t-if="lot.expiry_date" class="cnt-lot-expiry">
                             หมดอายุ: <t t-esc="lot.expiry_date"/>
                         </span>
-                        <span t-if="lot.lot_id === false" class="wms-count-lot-new-badge">NEW</span>
+                        <span t-if="lot.lot_id === false" class="cnt-badge-new">NEW</span>
                     </div>
 
-                    <div class="wms-count-lot-expected" t-esc="lot.expected_qty"/>
+                    <div class="cnt-ta-center cnt-expected-qty" t-esc="lot.expected_qty"/>
 
-                    <div class="wms-count-lot-qty">
-                        <button class="wms-count-qty-btn" t-on-click="() => adjustQty(lot, -1)">−</button>
-                        <input class="wms-count-qty-input"
-                               type="number" min="0" step="1"
+                    <div class="cnt-qty-ctrl">
+                        <button class="cnt-qty-btn" t-on-click="() => adjustQty(lot, -1)">−</button>
+                        <input class="cnt-qty-input" type="number" min="0" step="1"
                                t-att-value="lot.counted_qty"
                                t-on-change="(ev) => setQty(lot, ev)"/>
-                        <button class="wms-count-qty-btn" t-on-click="() => adjustQty(lot, 1)">+</button>
+                        <button class="cnt-qty-btn" t-on-click="() => adjustQty(lot, 1)">+</button>
                     </div>
                 </div>
 
-                <!-- Action buttons -->
-                <div class="wms-count-lot-actions">
-                    <button class="wms-count-btn-scan"
-                            t-on-click="() => _focusScan()">
-                        📷 สแกนสินค้า
+                <!-- Lot actions -->
+                <div class="cnt-lot-actions">
+                    <button class="cnt-btn-ghost" t-on-click="() => openLotPicker(currentProduct)">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        เพิ่ม Lot จากระบบ
                     </button>
-                    <button class="wms-count-btn-secondary"
-                            t-on-click="() => openLotPicker(currentProduct)">
-                        + เพิ่ม Lot จากระบบ
-                    </button>
-                    <button class="wms-count-btn-ghost"
-                            t-on-click="() => addUnknownLot(currentProduct)">
-                        + Lot ไม่มีในระบบ
+                    <button class="cnt-btn-ghost cnt-btn-dashed" t-on-click="() => addUnknownLot(currentProduct)">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Lot ไม่มีในระบบ
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Bottom nav -->
-        <div class="wms-count-footer wms-count-footer-nav">
-            <button class="wms-count-btn-secondary"
+        <!-- Footer nav -->
+        <div class="cnt-footer cnt-footer-nav">
+            <button class="cnt-btn-outline cnt-btn-nav"
                     t-att-disabled="state.productIdx === 0"
                     t-on-click="prevProduct">
-                ◀ ก่อนหน้า
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                ก่อนหน้า
             </button>
-            <span class="wms-count-product-dots">
-                <t t-foreach="state.products" t-as="p" t-key="p.product_id">
-                    <span class="wms-count-dot"
-                          t-att-class="{'wms-count-dot-active': p_index === state.productIdx}"/>
+            <button class="cnt-btn-primary cnt-btn-nav" t-on-click="nextProduct">
+                <t t-if="state.productIdx &lt; state.products.length - 1">
+                    ถัดไป
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 </t>
-            </span>
-            <button class="wms-count-btn-primary" t-on-click="nextProduct">
-                <t t-if="state.productIdx &lt; state.products.length - 1">ถัดไป ▶</t>
-                <t t-else="">สรุป ✓</t>
+                <t t-else="">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    สรุปผล
+                </t>
             </button>
         </div>
     </div>
 
-    <!-- ══ SCREEN 4: SUMMARY ═════════════════════════════════════════════ -->
-    <div t-elif="state.screen === 'summary'" class="wms-count-screen">
+    <!-- ══ SCREEN 4 — SUMMARY ══════════════════════════════════════════════ -->
+    <div t-elif="state.screen === 'summary'" class="cnt-page">
 
-        <div class="wms-count-header">
-            <button class="wms-count-back-btn" t-on-click="() => { state.productIdx = 0; state.screen = 'count'; }">←</button>
-            <span class="wms-count-title">✅ สรุปผลนับ</span>
-            <span class="wms-count-step-badge">STEP 3/3</span>
-        </div>
-
-        <div t-if="state.submitDone" class="wms-count-done">
-            <div class="wms-count-done-icon">🎉</div>
-            <div class="wms-count-done-msg">ส่งผลนับสำเร็จ!</div>
-            <button class="wms-count-btn-primary" t-on-click="backAfterSubmit">
-                กลับหน้าหลัก
+        <header class="cnt-shell-header">
+            <button class="cnt-icon-btn"
+                    t-on-click="() => { state.productIdx = 0; state.screen = 'count'; }"
+                    title="กลับ">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
+            <div class="cnt-shell-brand">
+                <span class="cnt-shell-app">KOB WMS</span>
+                <span class="cnt-shell-sep">/</span>
+                <span class="cnt-shell-screen">สรุปผลนับ</span>
+            </div>
+            <div class="cnt-step-indicator">
+                <span class="cnt-step">1</span>
+                <span class="cnt-step-line cnt-step-line-done"/>
+                <span class="cnt-step">2</span>
+                <span class="cnt-step-line cnt-step-line-done"/>
+                <span class="cnt-step cnt-step-active">3</span>
+            </div>
+        </header>
+
+        <!-- Done state -->
+        <div t-if="state.submitDone" class="cnt-done-state">
+            <div class="cnt-done-ring">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <p class="cnt-done-title">ส่งผลนับสำเร็จ!</p>
+            <p class="cnt-done-sub">ข้อมูลถูกบันทึกในระบบแล้ว</p>
+            <button class="cnt-btn-primary" t-on-click="backAfterSubmit">กลับหน้าหลัก</button>
         </div>
 
         <div t-else="">
-            <div class="wms-count-loc-mini">
-                <t t-esc="state.task.zone_code"/> ›
-                <t t-esc="state.task.rack_name"/> ›
-                <t t-esc="state.task.location_name"/>
+            <div class="cnt-loc-bar">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <t t-esc="state.task.zone_code"/>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                <t t-esc="state.task.rack_name"/>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                <strong t-esc="state.task.location_name"/>
             </div>
 
-            <div class="wms-count-summary-body">
-                <div t-foreach="state.products" t-as="p" t-key="p.product_id"
-                     class="wms-count-summary-product">
-
-                    <div class="wms-count-summary-product-title">
-                        <span class="wms-count-sku-badge" t-esc="p.product_code"/>
-                        <span t-esc="p.product_name"/>
-                    </div>
-
-                    <div t-foreach="p.lots" t-as="lot" t-key="lot._key"
-                         class="wms-count-summary-lot"
-                         t-att-class="{
-                             'wms-summary-ok':       lot.counted_qty === lot.expected_qty,
-                             'wms-summary-variance': lot.counted_qty !== lot.expected_qty
-                         }">
-                        <span t-esc="lot.lot_name"/>
-                        <span class="wms-summary-expected">ระบบ: <t t-esc="lot.expected_qty"/></span>
-                        <span class="wms-summary-counted">นับได้: <t t-esc="lot.counted_qty"/></span>
-                        <span t-if="lot.counted_qty !== lot.expected_qty"
-                              class="wms-summary-diff">
-                            (<t t-esc="lot.counted_qty - lot.expected_qty > 0 ? '+' : ''"/>
-                             <t t-esc="lot.counted_qty - lot.expected_qty"/>)
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Total variance -->
-                <div class="wms-count-summary-total"
-                     t-att-class="{'wms-summary-variance': totalVariance !== 0,
-                                   'wms-summary-ok': totalVariance === 0}">
-                    ส่วนต่างรวม:
-                    <strong>
+            <div class="cnt-summary-body">
+                <!-- Variance summary card -->
+                <div class="cnt-variance-card"
+                     t-att-class="{'cnt-variance-ok': totalVariance === 0,
+                                   'cnt-variance-diff': totalVariance !== 0}">
+                    <span class="cnt-variance-label">ส่วนต่างรวม</span>
+                    <span class="cnt-variance-value">
                         <t t-if="totalVariance > 0">+</t>
                         <t t-esc="totalVariance"/> ชิ้น
-                    </strong>
+                    </span>
+                    <span class="cnt-variance-icon">
+                        <t t-if="totalVariance === 0">✓ ถูกต้อง</t>
+                        <t t-else="">⚠ พบส่วนต่าง</t>
+                    </span>
+                </div>
+
+                <div t-foreach="state.products" t-as="p" t-key="p.product_id"
+                     class="cnt-summary-card">
+                    <div class="cnt-summary-card-head">
+                        <span class="cnt-sku-tag" t-esc="p.product_code"/>
+                        <span class="cnt-product-title" t-esc="p.product_name"/>
+                    </div>
+                    <div class="cnt-summary-lot-table">
+                        <div class="cnt-summary-lot-head">
+                            <span>Lot / Serial</span>
+                            <span class="cnt-ta-center">ระบบ</span>
+                            <span class="cnt-ta-center">นับได้</span>
+                            <span class="cnt-ta-center">ส่วนต่าง</span>
+                        </div>
+                        <div t-foreach="p.lots" t-as="lot" t-key="lot._key"
+                             class="cnt-summary-lot-row"
+                             t-att-class="{'cnt-sum-ok': lot.counted_qty === lot.expected_qty,
+                                           'cnt-sum-diff': lot.counted_qty !== lot.expected_qty}">
+                            <span class="cnt-lot-name" t-esc="lot.lot_name"/>
+                            <span class="cnt-ta-center cnt-text-muted" t-esc="lot.expected_qty"/>
+                            <span class="cnt-ta-center cnt-text-bold" t-esc="lot.counted_qty"/>
+                            <span class="cnt-ta-center cnt-diff-val"
+                                  t-if="lot.counted_qty !== lot.expected_qty">
+                                <t t-if="lot.counted_qty - lot.expected_qty > 0">+</t>
+                                <t t-esc="lot.counted_qty - lot.expected_qty"/>
+                            </span>
+                            <span class="cnt-ta-center cnt-diff-ok"
+                                  t-if="lot.counted_qty === lot.expected_qty">—</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="wms-count-footer">
-                <button class="wms-count-btn-primary"
-                        t-att-class="{'wms-btn-loading': state.submitting}"
+            <div class="cnt-footer">
+                <button class="cnt-btn-primary cnt-btn-submit"
+                        t-att-class="{'cnt-btn-loading': state.submitting}"
                         t-att-disabled="state.submitting"
                         t-on-click="submitCount">
-                    <t t-if="state.submitting">กำลังส่ง…</t>
-                    <t t-else="">ส่งผลนับ ✓</t>
+                    <t t-if="state.submitting">
+                        <span class="wms-count-spinner cnt-spinner-sm"/>
+                        กำลังส่ง…
+                    </t>
+                    <t t-else="">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        ส่งผลนับ
+                    </t>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ══ LOT PICKER OVERLAY (bottom sheet) ═══════════════════════════════ -->
-    <div t-if="state.lotPicker.visible" class="wms-lot-picker-overlay"
-         t-on-click="closeLotPicker">
-        <div class="wms-lot-picker-sheet" t-on-click.stop="">
+    <!-- ══ LOT PICKER OVERLAY ══════════════════════════════════════════════ -->
+    <div t-if="state.lotPicker.visible" class="cnt-overlay" t-on-click="closeLotPicker">
+        <div class="cnt-sheet" t-on-click.stop="">
 
-            <div class="wms-lot-picker-header">
-                <div class="wms-lot-picker-title">
+            <div class="cnt-sheet-header">
+                <div class="cnt-sheet-title">
                     เลือก Lot —
                     <span t-esc="state.lotPicker.product and state.lotPicker.product.product_name"/>
                 </div>
-                <button class="wms-lot-picker-close" t-on-click="closeLotPicker">✕</button>
+                <button class="cnt-sheet-close" t-on-click="closeLotPicker">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
             </div>
 
-            <div t-if="state.lotPicker.loading" class="wms-lot-picker-loading">
+            <div t-if="state.lotPicker.loading" class="cnt-sheet-loading">
                 <span class="wms-count-spinner"/>
                 กำลังโหลด Lot…
             </div>
-
-            <div t-elif="state.lotPicker.results.length === 0" class="wms-lot-picker-empty">
+            <div t-elif="state.lotPicker.results.length === 0" class="cnt-sheet-empty">
                 ไม่พบ Lot สำหรับสินค้านี้ในระบบ
             </div>
-
-            <div t-else="" class="wms-lot-picker-list">
+            <div t-else="" class="cnt-sheet-list">
                 <div t-foreach="state.lotPicker.results" t-as="lot" t-key="lot.lot_id"
-                     class="wms-lot-picker-item"
-                     t-on-click="() => pickLot(lot)">
-                    <div class="wms-lot-picker-name">
-                        <span t-esc="lot.lot_name"/>
-                        <span t-if="lot.lot_ref" class="wms-lot-picker-ref"
-                              t-esc="lot.lot_ref"/>
-                    </div>
-                    <div class="wms-lot-picker-meta">
-                        <span t-if="lot.expiry_date" class="wms-lot-picker-expiry">
+                     class="cnt-sheet-item" t-on-click="() => pickLot(lot)">
+                    <div class="cnt-sheet-item-main">
+                        <span class="cnt-lot-name" t-esc="lot.lot_name"/>
+                        <span t-if="lot.lot_ref" class="cnt-lot-ref" t-esc="lot.lot_ref"/>
+                        <span t-if="lot.expiry_date" class="cnt-lot-expiry">
                             หมดอายุ <t t-esc="lot.expiry_date"/>
                         </span>
-                        <span class="wms-lot-picker-qty">
-                            ระบบมี <strong t-esc="lot.qty"/>
-                        </span>
+                    </div>
+                    <div class="cnt-sheet-item-meta">
+                        <span class="cnt-qty-chip">ระบบมี <strong t-esc="lot.qty"/></span>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
