@@ -15,7 +15,7 @@
                 </button>
                 <button name="action_create_wms_order" type="object"
                         class="oe_stat_button" icon="fa-plus-square"
-                        invisible="wms_sales_order_count != 0">
+                        invisible="wms_sales_order_count != 0 or picking_type_code != 'outgoing'">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Create WMS</span>
                     </div>

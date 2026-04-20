@@ -35,6 +35,7 @@ Features
         'sale_management',
         'point_of_sale',
         'spreadsheet_dashboard',
+        'product_expiry',
     ],
     'data': [
         # ── Security (always first) ──────────────────────────────────────────

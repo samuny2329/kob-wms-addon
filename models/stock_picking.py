@@ -27,7 +27,78 @@ class StockPicking(models.Model):
                             'Please wait until counting is complete before '
                             'validating this transfer.'
                         ) % (loc.display_name, loc.counting_task_id.name))
-        return super().button_validate()
+        res = super().button_validate()
+        for picking in self:
+            picking._auto_create_cmn_packaging_receipt()
+        return res
+
+    def _auto_create_cmn_packaging_receipt(self):
+        """After KOB validates an incoming receipt, auto-create a draft
+        non-value receipt for CMN-WH for products flagged is_cmn_packaging."""
+        if self.state != 'done':
+            return
+        if self.picking_type_code != 'incoming':
+            return
+
+        # Only trigger from KOB company receipts
+        cmn_wh = self.env['stock.warehouse'].sudo().search(
+            [('code', '=', 'CMNW')], limit=1)
+        if not cmn_wh or self.company_id == cmn_wh.company_id:
+            return  # skip if already CMN or CMN not found
+
+        # Collect packaging move lines (done qty > 0)
+        cmn_lines = self.move_line_ids.filtered(
+            lambda l: l.product_id.is_cmn_packaging and l.quantity > 0
+        )
+        if not cmn_lines:
+            return
+
+        cmn_company = cmn_wh.company_id
+        cmn_picking_type = self.env['stock.picking.type'].sudo().search([
+            ('warehouse_id', '=', cmn_wh.id),
+            ('code', '=', 'incoming'),
+        ], limit=1)
+        if not cmn_picking_type:
+            return
+
+        supplier_loc = self.env.ref('stock.stock_location_suppliers', raise_if_not_found=False)
+        if not supplier_loc:
+            supplier_loc = self.env['stock.location'].sudo().search(
+                [('usage', '=', 'supplier')], limit=1)
+
+        # Group by product+uom
+        product_qtys = {}
+        for line in cmn_lines:
+            key = (line.product_id.id, line.product_uom_id.id)
+            product_qtys[key] = product_qtys.get(key, 0) + line.quantity
+
+        move_vals = [(0, 0, {
+            'name': self.env['product.product'].browse(pid).display_name,
+            'product_id': pid,
+            'product_uom': uom_id,
+            'product_uom_qty': qty,
+            'price_unit': 0.0,
+            'company_id': cmn_company.id,
+            'location_id': supplier_loc.id,
+            'location_dest_id': cmn_wh.lot_stock_id.id,
+        }) for (pid, uom_id), qty in product_qtys.items()]
+
+        cmn_receipt = self.env['stock.picking'].sudo().with_company(cmn_company).create({
+            'picking_type_id': cmn_picking_type.id,
+            'company_id': cmn_company.id,
+            'partner_id': self.partner_id.id if self.partner_id else False,
+            'location_id': supplier_loc.id,
+            'location_dest_id': cmn_wh.lot_stock_id.id,
+            'origin': _('Auto-transfer from KOB: %s') % self.name,
+            'note': _('Non-value transfer from KOB. Please attach transfer document before validating.'),
+            'move_ids': move_vals,
+        })
+        cmn_receipt.action_confirm()
+
+        self.message_post(body=_(
+            '📦 สร้าง CMN receipt อัตโนมัติ (non-value): <b>%s</b><br/>'
+            'กรุณาให้ CMN แนบเอกสารแล้ว validate'
+        ) % cmn_receipt.name)
 
     sale_order_type_id = fields.Many2one(
         'sale.order.type', string='Order Type',

@@ -4,10 +4,8 @@ import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 
 /**
- * WmsWorkerSystray — shows the currently-logged-in kob.wms.user
- * (read from localStorage) in Odoo's top-right systray bar.
- * Clicking Logout clears the WMS session and redirects to the
- * PIN login screen.
+ * WmsWorkerSystray — SAP HANA style badge.
+ * Visible in ALL Odoo apps when a WMS worker is logged in.
  */
 class WmsWorkerSystray extends Component {
     static template = "kob_wms.WmsWorkerSystray";
@@ -15,6 +13,7 @@ class WmsWorkerSystray extends Component {
 
     setup() {
         this.action = useService("action");
+
         try {
             this.worker = JSON.parse(
                 localStorage.getItem("wms_worker") || "null"
@@ -25,10 +24,15 @@ class WmsWorkerSystray extends Component {
     }
 
     get isLoggedIn()  { return !!this.worker.id; }
-    get workerName()  { return this.worker.name || ""; }
+    get workerName()  { return this.worker.name  || ""; }
+    get workerRole()  { return this.worker.role  || ""; }
     get initials() {
         return (this.workerName.match(/\b\w/g) || ["?"])
             .slice(0, 2).join("").toUpperCase();
+    }
+    get roleColor() {
+        const map = { manager: "#0070F2", supervisor: "#0A6ED1", worker: "#5B738B" };
+        return map[this.workerRole] || "#5B738B";
     }
 
     logout() {
@@ -40,5 +44,5 @@ class WmsWorkerSystray extends Component {
 registry.category("systray").add(
     "wms_worker_systray",
     { Component: WmsWorkerSystray },
-    { sequence: 1 }   // appears near the left of the systray (low = left)
+    { sequence: 1 }
 );

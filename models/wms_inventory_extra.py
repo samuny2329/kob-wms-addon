@@ -4,6 +4,24 @@ import random
 import math
 
 
+class ProductTemplateCmnPackaging(models.Model):
+    """Flag products that must be auto-transferred to CMN after KOB receipt."""
+    _inherit = 'product.template'
+
+    is_cmn_packaging = fields.Boolean(
+        string='โอนให้ CMN (Non-value)',
+        default=False,
+        help='เมื่อ KOB validate receipt สินค้านี้จะ auto สร้าง draft receipt ที่ CMN-WH (ราคา 0)',
+    )
+
+
+class ProductProductCmnPackaging(models.Model):
+    _inherit = 'product.product'
+
+    is_cmn_packaging = fields.Boolean(
+        related='product_tmpl_id.is_cmn_packaging', store=True)
+
+
 class StockLocationCountLock(models.Model):
     """Extend stock.location with a counting lock flag.
 
@@ -53,11 +71,11 @@ class StockLotExpiry(models.Model):
     def _compute_expiry_days(self):
         today = fields.Date.today()
         for lot in self:
-            if lot.expiration_date:
-                exp = lot.expiration_date
-                if hasattr(exp, 'date'):
-                    exp = exp.date()
-                lot.expiry_days = (exp - today).days
+            exp_date = getattr(lot, 'expiration_date', False)
+            if exp_date:
+                if hasattr(exp_date, 'date'):
+                    exp_date = exp_date.date()
+                lot.expiry_days = (exp_date - today).days
             else:
                 lot.expiry_days = 9999
 
