@@ -79,111 +79,111 @@
 
     <!-- Cross-Company Audit (Operations Director scope) -->
     <menuitem id="menu_cc_crossco"
-              name="🌐 Cross-Company Audit"
+              name="Cross-Company Audit"
               parent="menu_cc_root"
               sequence="10"/>
 
     <menuitem id="menu_cc_multiwh_stock"
-              name="🏭 Multi-WH Stock"
+              name="Multi-WH Stock"
               parent="menu_cc_crossco"
               action="action_wms_cc_multiwh_stock"
               sequence="10"/>
 
     <menuitem id="menu_cc_intercompany_transfer"
-              name="🔀 Inter-Company Transfers"
+              name="Inter-Company Transfers"
               parent="menu_cc_crossco"
               action="action_wms_cc_intercompany_transfer"
               sequence="20"/>
 
     <!-- Supply Chain Audit (Keaw/Aof/Benz scope) -->
     <menuitem id="menu_cc_supply"
-              name="📦 Supply Chain"
+              name="Supply Chain"
               parent="menu_cc_root"
               sequence="20"/>
 
     <menuitem id="menu_cc_reorder_monitor"
-              name="🔔 Reorder Monitor"
+              name="Reorder Monitor"
               parent="menu_cc_supply"
               action="action_wms_cc_reorder_monitor"
               sequence="10"/>
 
     <menuitem id="menu_cc_demand_forecast"
-              name="📈 Demand Forecast"
+              name="Demand Forecast"
               parent="menu_cc_supply"
               action="action_wms_cc_demand_forecast"
               sequence="20"/>
 
     <menuitem id="menu_cc_supplier_leadtime"
-              name="⏱️ Supplier Lead Time"
+              name="Supplier Lead Time"
               parent="menu_cc_supply"
               action="action_wms_cc_supplier_leadtime"
               sequence="30"/>
 
     <menuitem id="menu_cc_po_reminder"
-              name="📧 PO Reminders"
+              name="PO Reminders"
               parent="menu_cc_supply"
               action="action_wms_cc_po_reminder"
               sequence="40"/>
 
     <!-- Accounting (Nuch) -->
     <menuitem id="menu_cc_accounting"
-              name="💰 Accounting"
+              name="Accounting"
               parent="menu_cc_root"
               sequence="30"
               groups="group_wms_manager"/>
 
     <menuitem id="menu_cc_acct_hub"
-              name="💰 Accounting Hub"
+              name="Accounting Hub"
               parent="menu_cc_accounting"
               action="action_wms_cc_acct_hub"
               sequence="10"/>
 
     <menuitem id="menu_cc_opex"
-              name="💸 OpEx Tracker"
+              name="OpEx Tracker"
               parent="menu_cc_accounting"
               action="action_wms_cc_opex"
               sequence="20"/>
 
     <menuitem id="menu_cc_platform_fee"
-              name="🏷️ Platform Fee Audit"
+              name="Platform Fee Audit"
               parent="menu_cc_accounting"
               action="action_wms_cc_platform_fee"
               sequence="30"/>
 
     <!-- Logistics (Yong) -->
     <menuitem id="menu_cc_logistics"
-              name="🚚 Logistics"
+              name="Logistics"
               parent="menu_cc_root"
               sequence="40"/>
 
     <menuitem id="menu_cc_otif"
-              name="🎯 OTIF Monitor"
+              name="OTIF Monitor"
               parent="menu_cc_logistics"
               action="action_wms_cc_otif"
               sequence="10"/>
 
     <menuitem id="menu_cc_otd"
-              name="🚚 OTD Rate"
+              name="OTD Rate"
               parent="menu_cc_logistics"
               action="action_wms_cc_otd"
               sequence="20"/>
 
     <!-- HR (Aoy) -->
     <menuitem id="menu_cc_hr"
-              name="👥 HR"
+              name="HR"
               parent="menu_cc_root"
               sequence="50"
               groups="group_wms_supervisor"/>
 
     <menuitem id="menu_cc_turnover"
-              name="🚪 HR Turnover"
+              name="HR Turnover"
               parent="menu_cc_hr"
               action="action_wms_cc_turnover"
               sequence="10"
               groups="group_wms_manager"/>
 
     <menuitem id="menu_cc_training"
-              name="🎓 Training Log"
+              name="Training Log"
               parent="menu_cc_hr"
               action="action_wms_cc_training"
               sequence="20"/>
@@ -192,7 +192,7 @@
          📊 Reports
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_reports"
-              name="📊 Reports"
+              name="Reports"
               parent="menu_kob_wms_root"
               sequence="80"
               groups="group_wms_supervisor"/>
@@ -204,13 +204,13 @@
               sequence="10"/>
 
     <menuitem id="menu_wms_count_monitor"
-              name="🔴 Count Monitor"
+              name="Count Monitor"
               parent="menu_cc_reports"
               action="action_wms_count_monitor"
               sequence="20"/>
 
     <menuitem id="menu_wms_report_sla"
-              name="⏱️ SLA Monitor"
+              name="SLA Monitor"
               parent="menu_cc_reports"
               action="action_wms_sla_monitor"
               sequence="30"/>
@@ -225,7 +225,7 @@
          🏭 Warehouse
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_warehouse"
-              name="🏭 Warehouse"
+              name="Warehouse"
               parent="menu_kob_wms_root"
               sequence="85"
               groups="group_wms_supervisor"/>
@@ -237,7 +237,7 @@
               sequence="10"/>
 
     <menuitem id="menu_wms_pickface_restock"
-              name="🔄 Restock Pickface"
+              name="Restock Pickface"
               parent="menu_cc_warehouse"
               action="action_wms_pickface_restock"
               sequence="20"/>
@@ -300,13 +300,13 @@
          🎯 Quality
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_quality"
-              name="🎯 Quality"
+              name="Quality"
               parent="menu_kob_wms_root"
               sequence="90"
               groups="group_wms_supervisor"/>
 
     <menuitem id="menu_wms_quality_check"
-              name="🎯 Outgoing QC Checks"
+              name="Outgoing QC Checks"
               parent="menu_cc_quality"
               action="action_wms_quality_check"
               sequence="5"/>
@@ -339,7 +339,7 @@
          📈 Analytics
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_analytics"
-              name="📈 Analytics"
+              name="Analytics"
               parent="menu_kob_wms_root"
               sequence="95"
               groups="group_wms_supervisor"/>
@@ -375,7 +375,7 @@
               sequence="30"/>
 
     <menuitem id="menu_wms_box_recommender"
-              name="📦 Box Recommender"
+              name="Box Recommender"
               parent="menu_cc_analytics_box"
               action="action_wms_box_recommender"
               sequence="40"/>
@@ -384,7 +384,7 @@
          ✅ KPI Assessment
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_kpi"
-              name="✅ KPI Assessment"
+              name="KPI Assessment"
               parent="menu_kob_wms_root"
               sequence="100"/>
 
@@ -446,7 +446,7 @@
               sequence="40"/>
 
     <menuitem id="menu_wms_kpi_alert_rule"
-              name="🚨 KPI Alert Rules"
+              name="KPI Alert Rules"
               parent="menu_cc_kpi_admin"
               action="action_wms_kpi_alert_rule"
               sequence="60"/>
@@ -455,7 +455,7 @@
          🔄 Platform Sync
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_platform"
-              name="🔄 Platform Sync"
+              name="Platform Sync"
               parent="menu_kob_wms_root"
               sequence="110"
               groups="group_wms_supervisor"/>
@@ -477,7 +477,7 @@
          ⚙️ Configuration
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_config"
-              name="⚙️ Configuration"
+              name="Configuration"
               parent="menu_kob_wms_root"
               sequence="120"
               groups="group_wms_manager"/>
