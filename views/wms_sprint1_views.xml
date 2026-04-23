@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══ Expiry Alert ═══════════════════════════════════════════════ -->
+    <record id="view_wms_expiry_alert_list" model="ir.ui.view">
+        <field name="name">wms.expiry.alert.list</field>
+        <field name="model">wms.expiry.alert</field>
+        <field name="arch" type="xml">
+            <list string="Expiry Alerts" create="false"
+                  decoration-danger="severity == 'expired'"
+                  decoration-warning="severity == 'urgent'"
+                  decoration-info="severity == 'warning'">
+                <field name="alert_date"/>
+                <field name="severity" widget="badge"/>
+                <field name="product_id"/>
+                <field name="lot_id"/>
+                <field name="expiration_date"/>
+                <field name="expiry_days" string="Days Left"/>
+                <field name="product_qty"/>
+                <field name="acknowledged" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_expiry_alert_search" model="ir.ui.view">
+        <field name="name">wms.expiry.alert.search</field>
+        <field name="model">wms.expiry.alert</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="lot_id"/>
+                <filter string="Expired" name="f_expired"
+                        domain="[('severity','=','expired')]"/>
+                <filter string="Urgent (≤30d)" name="f_urgent"
+                        domain="[('severity','=','urgent')]"/>
+                <filter string="Not acknowledged" name="f_not_ack"
+                        domain="[('acknowledged','=',False)]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Severity" name="g_sev"
+                            context="{'group_by':'severity'}"/>
+                    <filter string="Date" name="g_date"
+                            context="{'group_by':'alert_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_expiry_alert" model="ir.actions.act_window">
+        <field name="name">Expiry Alerts</field>
+        <field name="res_model">wms.expiry.alert</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_f_not_ack': 1}</field>
+    </record>
+
+    <!-- ═══ Quality Defect ═════════════════════════════════════════════ -->
+    <record id="view_wms_quality_defect_list" model="ir.ui.view">
+        <field name="name">wms.quality.defect.list</field>
+        <field name="model">wms.quality.defect</field>
+        <field name="arch" type="xml">
+            <list string="Quality Defects"
+                  decoration-danger="severity == 'critical'"
+                  decoration-warning="severity == 'high'"
+                  decoration-muted="state == 'closed'">
+                <field name="report_date"/>
+                <field name="product_id"/>
+                <field name="lot_id" optional="show"/>
+                <field name="defect_qty"/>
+                <field name="defect_type"/>
+                <field name="severity" widget="badge"/>
+                <field name="reporter_id"/>
+                <field name="state" widget="badge"/>
+                <field name="resolution" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_quality_defect_form" model="ir.ui.view">
+        <field name="name">wms.quality.defect.form</field>
+        <field name="model">wms.quality.defect</field>
+        <field name="arch" type="xml">
+            <form string="Quality Defect">
+                <header>
+                    <button name="action_submit" type="object"
+                            string="📤 Submit" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_start_review" type="object"
+                            string="🔍 Start Review" class="oe_highlight"
+                            invisible="state != 'submitted'"
+                            groups="kob_wms.group_wms_manager"/>
+                    <button name="action_close" type="object"
+                            string="✅ Close" class="oe_highlight"
+                            invisible="state != 'reviewed'"
+                            groups="kob_wms.group_wms_manager"/>
+                    <button name="action_reset_draft" type="object"
+                            string="↺ Reset Draft"
+                            invisible="state == 'draft'"
+                            groups="kob_wms.group_wms_manager"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,reviewed,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="report_date"/>
+                            <field name="reporter_id"/>
+                            <field name="kob_reporter_id"/>
+                            <field name="picking_id"/>
+                            <field name="partner_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="defect_type"/>
+                            <field name="severity"/>
+                            <field name="resolution"/>
+                        </group>
+                    </group>
+                    <group string="Product Info">
+                        <group>
+                            <field name="product_id"/>
+                            <field name="lot_id"/>
+                        </group>
+                        <group>
+                            <field name="defect_qty"/>
+                            <field name="uom_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="desc">
+                            <field name="description" nolabel="1"
+                                   placeholder="Describe the defect..."/>
+                        </page>
+                        <page string="Resolution" name="resolution_tab"
+                              invisible="state == 'draft'">
+                            <group>
+                                <field name="resolution_note"/>
+                                <field name="resolved_by_id" readonly="1"/>
+                                <field name="resolved_at" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_wms_quality_defect_search" model="ir.ui.view">
+        <field name="name">wms.quality.defect.search</field>
+        <field name="model">wms.quality.defect</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="lot_id"/>
+                <field name="reporter_id"/>
+                <filter string="Open" name="f_open"
+                        domain="[('state','!=','closed')]"/>
+                <filter string="Critical" name="f_critical"
+                        domain="[('severity','=','critical')]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Defect Type" name="g_type"
+                            context="{'group_by':'defect_type'}"/>
+                    <filter string="State" name="g_state"
+                            context="{'group_by':'state'}"/>
+                    <filter string="Severity" name="g_sev"
+                            context="{'group_by':'severity'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_quality_defect" model="ir.actions.act_window">
+        <field name="name">Quality Defects</field>
+        <field name="res_model">wms.quality.defect</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_wms_quality_defect_search"/>
+        <field name="context">{'search_default_f_open': 1}</field>
+    </record>
+
+    <!-- ═══ Daily Report ═══════════════════════════════════════════════ -->
+    <record id="view_wms_daily_report_list" model="ir.ui.view">
+        <field name="name">wms.daily.report.list</field>
+        <field name="model">wms.daily.report</field>
+        <field name="arch" type="xml">
+            <list string="Daily Reports" create="false">
+                <field name="report_date"/>
+                <field name="total_orders"/>
+                <field name="shipped_orders"/>
+                <field name="pending_orders"/>
+                <field name="total_value" sum="Total"/>
+                <field name="sla_pick_pct" optional="show"/>
+                <field name="sla_pack_pct" optional="show"/>
+                <field name="defect_count" optional="show"/>
+                <field name="expiry_alert_count" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_daily_report_form" model="ir.ui.view">
+        <field name="name">wms.daily.report.form</field>
+        <field name="model">wms.daily.report</field>
+        <field name="arch" type="xml">
+            <form string="Daily Report">
+                <header>
+                    <button name="action_regenerate" type="object"
+                            string="🔄 Regenerate" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Daily WMS Report — <field name="report_date" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Orders">
+                            <field name="total_orders"/>
+                            <field name="shipped_orders"/>
+                            <field name="pending_orders"/>
+                            <field name="cancelled_orders"/>
+                        </group>
+                        <group string="Value">
+                            <field name="total_qty"/>
+                            <field name="total_value" widget="monetary"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Platform Breakdown">
+                            <field name="shopee_orders"/>
+                            <field name="lazada_orders"/>
+                            <field name="tiktok_orders"/>
+                            <field name="odoo_orders"/>
+                        </group>
+                        <group string="SLA">
+                            <field name="avg_pick_min"/>
+                            <field name="sla_pick_pct" widget="percentpie"/>
+                            <field name="avg_pack_min"/>
+                            <field name="sla_pack_pct" widget="percentpie"/>
+                        </group>
+                    </group>
+                    <group string="Quality">
+                        <field name="defect_count"/>
+                        <field name="expiry_alert_count"/>
+                    </group>
+                    <notebook>
+                        <page string="Report Body" name="body">
+                            <field name="body_html" nolabel="1" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wms_daily_report" model="ir.actions.act_window">
+        <field name="name">Daily Reports</field>
+        <field name="res_model">wms.daily.report</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ═══ QC Monthly Report ══════════════════════════════════════════ -->
+    <record id="view_wms_qc_monthly_list" model="ir.ui.view">
+        <field name="name">wms.qc.monthly.report.list</field>
+        <field name="model">wms.qc.monthly.report</field>
+        <field name="arch" type="xml">
+            <list string="QC Monthly Reports">
+                <field name="period_month"/>
+                <field name="total_defects"/>
+                <field name="critical_defects"/>
+                <field name="high_defects"/>
+                <field name="closed_defects"/>
+                <field name="avg_resolution_days"/>
+                <field name="top_product_name" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_qc_monthly_form" model="ir.ui.view">
+        <field name="name">wms.qc.monthly.report.form</field>
+        <field name="model">wms.qc.monthly.report</field>
+        <field name="arch" type="xml">
+            <form string="QC Monthly Report">
+                <header>
+                    <button name="action_regenerate" type="object"
+                            string="🔄 Recompute" class="btn-secondary"/>
+                    <button name="action_print_pdf" type="object"
+                            string="🖨️ Print PDF" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>QC Report — <field name="period_month" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="period_start"/>
+                            <field name="period_end"/>
+                            <field name="total_defects"/>
+                        </group>
+                        <group>
+                            <field name="critical_defects"/>
+                            <field name="high_defects"/>
+                            <field name="closed_defects"/>
+                            <field name="avg_resolution_days"/>
+                        </group>
+                    </group>
+                    <group string="Top Offender">
+                        <field name="top_product_name"/>
+                        <field name="top_product_count"/>
+                    </group>
+                    <group string="By Type">
+                        <field name="defects_by_type" nolabel="1" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Included Defects" name="defects">
+                            <field name="defect_ids" nolabel="1" readonly="1">
+                                <list>
+                                    <field name="report_date"/>
+                                    <field name="product_id"/>
+                                    <field name="defect_type"/>
+                                    <field name="severity"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wms_qc_monthly" model="ir.actions.act_window">
+        <field name="name">QC Monthly Reports</field>
+        <field name="res_model">wms.qc.monthly.report</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

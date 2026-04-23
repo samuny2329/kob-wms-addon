@@ -105,3 +105,14 @@ access_wms_automation_audit_director,wms.automation.audit.director,model_wms_aut
 access_wms_platform_order_supervisor,wms.platform.order.supervisor,model_wms_platform_order,group_wms_supervisor,1,1,0,0
 access_wms_platform_order_manager,wms.platform.order.manager,model_wms_platform_order,group_wms_manager,1,1,1,0
 access_wms_platform_order_director,wms.platform.order.director,model_wms_platform_order,group_wms_director,1,1,1,1
+access_wms_expiry_alert_worker,wms.expiry.alert.worker,model_wms_expiry_alert,group_wms_worker,1,1,0,0
+access_wms_expiry_alert_supervisor,wms.expiry.alert.supervisor,model_wms_expiry_alert,group_wms_supervisor,1,1,1,0
+access_wms_expiry_alert_manager,wms.expiry.alert.manager,model_wms_expiry_alert,group_wms_manager,1,1,1,1
+access_wms_quality_defect_worker,wms.quality.defect.worker,model_wms_quality_defect,group_wms_worker,1,1,1,0
+access_wms_quality_defect_supervisor,wms.quality.defect.supervisor,model_wms_quality_defect,group_wms_supervisor,1,1,1,0
+access_wms_quality_defect_manager,wms.quality.defect.manager,model_wms_quality_defect,group_wms_manager,1,1,1,1
+access_wms_daily_report_worker,wms.daily.report.worker,model_wms_daily_report,group_wms_worker,1,0,0,0
+access_wms_daily_report_supervisor,wms.daily.report.supervisor,model_wms_daily_report,group_wms_supervisor,1,1,0,0
+access_wms_daily_report_manager,wms.daily.report.manager,model_wms_daily_report,group_wms_manager,1,1,1,1
+access_wms_qc_monthly_supervisor,wms.qc.monthly.report.supervisor,model_wms_qc_monthly_report,group_wms_supervisor,1,1,0,0
+access_wms_qc_monthly_manager,wms.qc.monthly.report.manager,model_wms_qc_monthly_report,group_wms_manager,1,1,1,1

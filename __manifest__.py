@@ -1,6 +1,6 @@
 {
     'name': 'KOB WMS Pro',
-    'version': '18.0.2.19.0',
+    'version': '18.0.2.20.0',
     'category': 'Inventory/Warehouse',
     'summary': 'Enterprise Warehouse Management System (Kiss of Beauty)',
     'description': """
@@ -65,6 +65,7 @@ Features
         'views/wms_worker_performance_views.xml',
         'views/wms_kpi_target_views.xml',
         'views/wms_automation_audit_views.xml',
+        'views/wms_sprint1_views.xml',
         'views/wms_sla_config_views.xml',
 
         # ── Configuration ────────────────────────────────────────────────────
@@ -95,6 +96,7 @@ Features
         'data/wms_count_cron.xml',
         'data/wms_automation_audit_cron.xml',
         'data/wms_platform_sync_cron.xml',
+        'data/wms_sprint1_crons.xml',
         'data/wms_sale_order_types.xml',
         'data/wms_kpi_templates.xml',
         'data/wms_kpi_iso_sustainability.xml',  # P9: ISO, GMP & Sustainability pillar
@@ -109,6 +111,7 @@ Features
         'report/wms_box_label_template.xml',
         'report/wms_awb_label_template.xml',
         'report/wms_awb_label_100x150_template.xml',
+        'report/wms_qc_monthly_report_template.xml',
 
         # ── Inventory & Box Analytics ────────────────────────────────────────
         'views/wms_inventory_views.xml',

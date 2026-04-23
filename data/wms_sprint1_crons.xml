@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Daily expiry scan at 06:00 -->
+        <record id="ir_cron_expiry_alert" model="ir.cron">
+            <field name="name">WMS · Daily Expiry Alert Scan</field>
+            <field name="model_id" ref="model_wms_expiry_alert"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_scan_expiry()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Daily report generator at 07:00 -->
+        <record id="ir_cron_daily_report" model="ir.cron">
+            <field name="name">WMS · Daily Sales Report</field>
+            <field name="model_id" ref="model_wms_daily_report"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_generate_daily_report()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Monthly QC report on the 1st of each month 03:00 -->
+        <record id="ir_cron_qc_monthly" model="ir.cron">
+            <field name="name">WMS · QC Monthly Report</field>
+            <field name="model_id" ref="model_wms_qc_monthly_report"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_generate_monthly()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">months</field>
+            <field name="active" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

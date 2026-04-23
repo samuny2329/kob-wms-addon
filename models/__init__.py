@@ -25,3 +25,7 @@ from . import wms_box_analytics
 from . import wms_product_box_analytics
 from . import wms_automation_audit
 from . import wms_platform_order
+from . import wms_expiry_alert
+from . import wms_quality_defect
+from . import wms_daily_report
+from . import wms_qc_monthly_report

@@ -183,6 +183,41 @@
               sequence="20"
               groups="group_wms_manager"/>
 
+    <!-- Quality & Automation -->
+    <menuitem id="menu_wms_quality_root"
+              name="🎯 Quality"
+              parent="menu_kob_wms_root"
+              sequence="74"
+              groups="group_wms_supervisor"/>
+
+    <menuitem id="menu_wms_quality_defect"
+              name="Defect / Damage Log"
+              parent="menu_wms_quality_root"
+              action="action_wms_quality_defect"
+              sequence="10"
+              groups="group_wms_supervisor"/>
+
+    <menuitem id="menu_wms_expiry_alert"
+              name="Expiry Alerts"
+              parent="menu_wms_quality_root"
+              action="action_wms_expiry_alert"
+              sequence="20"
+              groups="group_wms_supervisor"/>
+
+    <menuitem id="menu_wms_qc_monthly"
+              name="QC Monthly Reports"
+              parent="menu_wms_quality_root"
+              action="action_wms_qc_monthly"
+              sequence="30"
+              groups="group_wms_supervisor"/>
+
+    <menuitem id="menu_wms_daily_report"
+              name="📊 Daily Reports"
+              parent="menu_kob_wms_root"
+              action="action_wms_daily_report"
+              sequence="73"
+              groups="group_wms_supervisor"/>
+
     <!-- 11. Employees (admin only) -->
     <menuitem id="menu_wms_users"
               name="Employees"
