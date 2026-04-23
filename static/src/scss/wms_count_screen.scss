@@ -2,21 +2,28 @@
    KOB WMS — Count Screen  v4  (SAP Fiori Analytical Table + Odoo 19 teal)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Design tokens (SAP Fiori Horizon theme + Odoo 19 teal) ─────────────── */
+/* ── Design tokens — Odoo 18 theme (purple + teal accent, white shell) ──── */
 :root {
-  --sap-bg:           #F2F4F7;
+  --sap-bg:           #F8F9FA;
   --sap-surface:      #FFFFFF;
-  --sap-surface-2:    #F7F8F9;
+  --sap-surface-2:    #F4F4F5;
 
-  /* Shell */
-  --sap-shell:        #1D2D3E;
-  --sap-shell-hover:  rgba(255,255,255,.08);
+  /* Shell — Odoo white navbar (was SAP dark navy) */
+  --sap-shell:        #FFFFFF;
+  --sap-shell-border: #DEE2E6;
+  --sap-shell-text:   #495057;
+  --sap-shell-hover:  rgba(113, 75, 103, .08);
 
-  /* Primary = Odoo 19 teal */
-  --sap-primary:      #00A99D;
-  --sap-primary-dk:   #007D73;
-  --sap-primary-lt:   #E0F5F4;
+  /* Primary = Odoo brand purple */
+  --sap-primary:      #714B67;
+  --sap-primary-dk:   #5D3D55;
+  --sap-primary-lt:   #F0E6EE;
   --sap-on-primary:   #FFFFFF;
+
+  /* Accent = Odoo teal (titles, counts, progress) */
+  --sap-accent:       #017E84;
+  --sap-accent-dk:    #015F64;
+  --sap-accent-lt:    #E0F5F4;
 
   /* Semantic */
   --sap-ok:           #1A7F5A;
@@ -31,15 +38,15 @@
   --sap-neg:          #C5392D;   /* negative variance = red  */
 
   /* Text */
-  --sap-text:         #1D2D3E;
-  --sap-text-2:       #556070;
-  --sap-text-3:       #9BA8B5;
+  --sap-text:         #212529;
+  --sap-text-2:       #495057;
+  --sap-text-3:       #868E96;
 
   /* Table */
-  --sap-th-bg:        #F2F4F7;
-  --sap-th-border:    #D5DAE0;
-  --sap-td-border:    #E8EAED;
-  --sap-tr-hover:     #F0F9F8;
+  --sap-th-bg:        #F8F9FA;
+  --sap-th-border:    #DEE2E6;
+  --sap-td-border:    #E9ECEF;
+  --sap-tr-hover:     #F0E6EE;
   --sap-tr-ok:        #F0FDF4;
   --sap-tr-err:       #FFF1F0;
 
@@ -117,9 +124,10 @@
   height: 48px;
   padding: 0 12px;
   background: var(--sap-shell);
-  color: #fff;
+  color: var(--sap-shell-text);
   gap: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.22);
+  border-bottom: 1px solid var(--sap-shell-border);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
   position: sticky;
   top: 0;
   z-index: 60;
@@ -135,12 +143,12 @@
   border-radius: 6px;
   background: none;
   border: none;
-  color: rgba(255,255,255,.75);
+  color: var(--sap-shell-text);
   cursor: pointer;
   flex-shrink: 0;
   transition: background .12s, color .12s;
 
-  &:hover { background: var(--sap-shell-hover); color: #fff; }
+  &:hover { background: var(--sap-shell-hover); color: var(--sap-primary); }
 }
 
 .sap-shellbar-logo {
@@ -156,14 +164,14 @@
 .sap-shellbar-title {
   font-size: 15px;
   font-weight: 600;
-  color: #fff;
+  color: var(--sap-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 
   &::before {
     content: '/';
-    color: rgba(255,255,255,.25);
+    color: var(--sap-text-3);
     margin-right: 6px;
     font-weight: 300;
   }
@@ -188,9 +196,9 @@
   border-radius: 50%;
   font-size: 11px;
   font-weight: 700;
-  background: rgba(255,255,255,.1);
-  color: rgba(255,255,255,.4);
-  border: 1.5px solid rgba(255,255,255,.15);
+  background: var(--sap-surface-2);
+  color: var(--sap-text-3);
+  border: 1.5px solid var(--sap-shell-border);
 
   &.sap-step-on {
     background: var(--sap-primary);
@@ -203,7 +211,7 @@
 .sap-step-line {
   width: 18px;
   height: 2px;
-  background: rgba(255,255,255,.15);
+  background: var(--sap-shell-border);
   border-radius: 1px;
 
   &.sap-step-line-done { background: var(--sap-primary); }
@@ -565,7 +573,7 @@
   display: inline-block;
   padding: 2px 8px;
   border-radius: var(--sap-radius-sm);
-  background: var(--sap-shell);
+  background: var(--sap-primary);
   color: #fff;
   font-size: 11px;
   font-weight: 700;
@@ -865,8 +873,8 @@
   width: 100%;
   height: 38px;
   border-radius: var(--sap-radius);
-  background: var(--sap-shell);
-  color: rgba(255,255,255,.8);
+  background: var(--sap-primary);
+  color: #fff;
   border: none;
   font-size: 13px;
   font-weight: 700;
@@ -874,7 +882,7 @@
   letter-spacing: .03em;
   transition: background .12s;
 
-  &:hover { background: #243447; color: #fff; }
+  &:hover { background: var(--sap-primary-dk); color: #fff; }
 }
 
 /* ── Done state ───────────────────────────────────────────────────────────── */
@@ -935,7 +943,7 @@
   justify-content: space-between;
   padding: 0 18px;
   height: 52px;
-  background: var(--sap-shell);
+  background: var(--sap-primary);
   color: #fff;
   flex-shrink: 0;
 }
@@ -948,6 +956,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   padding-right: 12px;
+  color: #fff;
 }
 
 .sap-dialog-close {
@@ -957,14 +966,14 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: rgba(255,255,255,.1);
+  background: rgba(255,255,255,.15);
   border: none;
-  color: rgba(255,255,255,.75);
+  color: rgba(255,255,255,.85);
   cursor: pointer;
   flex-shrink: 0;
   transition: background .12s;
 
-  &:hover { background: rgba(255,255,255,.22); color: #fff; }
+  &:hover { background: rgba(255,255,255,.3); color: #fff; }
 }
 
 .sap-dialog-loading {

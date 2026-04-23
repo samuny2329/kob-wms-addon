@@ -1,6 +1,6 @@
 {
     'name': 'KOB WMS Pro',
-    'version': '18.0.2.22.0',
+    'version': '18.0.2.24.0',
     'category': 'Inventory/Warehouse',
     'summary': 'Enterprise Warehouse Management System (Kiss of Beauty)',
     'description': """
