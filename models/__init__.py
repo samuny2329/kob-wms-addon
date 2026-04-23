@@ -33,3 +33,7 @@ from . import wms_quality_check
 from . import wms_kpi_alert_rule
 from . import wms_cc_multiwh_stock
 from . import wms_cc_intercompany_transfer
+from . import wms_cc_reorder_monitor
+from . import wms_cc_demand_forecast
+from . import wms_cc_supplier_leadtime
+from . import wms_cc_po_reminder

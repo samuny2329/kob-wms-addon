@@ -95,6 +95,36 @@
               action="action_wms_cc_intercompany_transfer"
               sequence="20"/>
 
+    <!-- Supply Chain Audit (Keaw/Aof/Benz scope) -->
+    <menuitem id="menu_cc_supply"
+              name="📦 Supply Chain"
+              parent="menu_cc_root"
+              sequence="20"/>
+
+    <menuitem id="menu_cc_reorder_monitor"
+              name="🔔 Reorder Monitor"
+              parent="menu_cc_supply"
+              action="action_wms_cc_reorder_monitor"
+              sequence="10"/>
+
+    <menuitem id="menu_cc_demand_forecast"
+              name="📈 Demand Forecast"
+              parent="menu_cc_supply"
+              action="action_wms_cc_demand_forecast"
+              sequence="20"/>
+
+    <menuitem id="menu_cc_supplier_leadtime"
+              name="⏱️ Supplier Lead Time"
+              parent="menu_cc_supply"
+              action="action_wms_cc_supplier_leadtime"
+              sequence="30"/>
+
+    <menuitem id="menu_cc_po_reminder"
+              name="📧 PO Reminders"
+              parent="menu_cc_supply"
+              action="action_wms_cc_po_reminder"
+              sequence="40"/>
+
     <!-- ══════════════════════════════════════════════════════════════
          📊 Reports
          ══════════════════════════════════════════════════════════════ -->

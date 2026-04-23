@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══ Reorder Monitor ════════════════════════════════════════════ -->
+    <record id="view_wms_cc_reorder_monitor_list" model="ir.ui.view">
+        <field name="name">wms.cc.reorder.monitor.list</field>
+        <field name="model">wms.cc.reorder.monitor</field>
+        <field name="arch" type="xml">
+            <list string="Reorder Point Monitor" create="false" edit="false"
+                  decoration-danger="severity == 'critical'"
+                  decoration-warning="severity == 'shortage'"
+                  decoration-info="severity == 'watch'"
+                  decoration-success="severity == 'ok'">
+                <field name="product_code"/>
+                <field name="product_id"/>
+                <field name="warehouse_id"/>
+                <field name="location_id" optional="hide"/>
+                <field name="product_min_qty"/>
+                <field name="current_qty"/>
+                <field name="shortage_qty"/>
+                <field name="product_max_qty" optional="hide"/>
+                <field name="severity" widget="badge"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_cc_reorder_search" model="ir.ui.view">
+        <field name="name">wms.cc.reorder.monitor.search</field>
+        <field name="model">wms.cc.reorder.monitor</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="product_code"/>
+                <field name="warehouse_id"/>
+                <filter string="🔴 Critical" name="f_critical"
+                        domain="[('severity','=','critical')]"/>
+                <filter string="🟠 Shortage" name="f_shortage"
+                        domain="[('severity','=','shortage')]"/>
+                <filter string="Needs Reorder" name="f_reorder"
+                        domain="[('need_reorder','=',True)]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Warehouse" name="g_wh"
+                            context="{'group_by':'warehouse_id'}"/>
+                    <filter string="Severity" name="g_sev"
+                            context="{'group_by':'severity'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_reorder_monitor" model="ir.actions.act_window">
+        <field name="name">🔔 Reorder Monitor</field>
+        <field name="res_model">wms.cc.reorder.monitor</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_wms_cc_reorder_search"/>
+        <field name="context">{'search_default_f_reorder': 1}</field>
+    </record>
+
+    <!-- ═══ Demand Forecast ════════════════════════════════════════════ -->
+    <record id="view_wms_cc_demand_forecast_list" model="ir.ui.view">
+        <field name="name">wms.cc.demand.forecast.list</field>
+        <field name="model">wms.cc.demand.forecast</field>
+        <field name="arch" type="xml">
+            <list string="Demand Forecast" create="false" edit="false"
+                  decoration-danger="days_of_stock &lt; 7"
+                  decoration-warning="days_of_stock &gt;= 7 and days_of_stock &lt; 14"
+                  decoration-success="trend_pct &gt; 10"
+                  decoration-muted="trend_pct &lt; -10">
+                <field name="product_code"/>
+                <field name="product_id"/>
+                <field name="qty_30d" sum="30d"/>
+                <field name="qty_60d" optional="show"/>
+                <field name="qty_90d" optional="hide"/>
+                <field name="avg_daily"/>
+                <field name="forecast_7d"/>
+                <field name="trend_pct" widget="percentage"/>
+                <field name="current_stock"/>
+                <field name="days_of_stock"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_cc_demand_search" model="ir.ui.view">
+        <field name="name">wms.cc.demand.forecast.search</field>
+        <field name="model">wms.cc.demand.forecast</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="product_code"/>
+                <filter string="⚠️ &lt;7 days stock" name="f_urgent"
+                        domain="[('days_of_stock','&lt;',7)]"/>
+                <filter string="📈 Trending up (+10%)" name="f_up"
+                        domain="[('trend_pct','&gt;',10)]"/>
+                <filter string="📉 Trending down (-10%)" name="f_down"
+                        domain="[('trend_pct','&lt;',-10)]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Company" name="g_co"
+                            context="{'group_by':'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_demand_forecast" model="ir.actions.act_window">
+        <field name="name">📈 Demand Forecast</field>
+        <field name="res_model">wms.cc.demand.forecast</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_wms_cc_demand_search"/>
+    </record>
+
+    <!-- ═══ Supplier Lead Time ═════════════════════════════════════════ -->
+    <record id="view_wms_cc_supplier_leadtime_list" model="ir.ui.view">
+        <field name="name">wms.cc.supplier.leadtime.list</field>
+        <field name="model">wms.cc.supplier.leadtime</field>
+        <field name="arch" type="xml">
+            <list string="Supplier Lead Time (90d)" create="false" edit="false"
+                  decoration-danger="on_time_pct &lt; 70"
+                  decoration-warning="on_time_pct &gt;= 70 and on_time_pct &lt; 90"
+                  decoration-success="on_time_pct &gt;= 95">
+                <field name="partner_id"/>
+                <field name="po_count"/>
+                <field name="avg_leadtime_days"/>
+                <field name="min_leadtime_days" optional="show"/>
+                <field name="max_leadtime_days" optional="show"/>
+                <field name="on_time_count" optional="show"/>
+                <field name="on_time_pct" widget="percentage"/>
+                <field name="last_po_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_supplier_leadtime" model="ir.actions.act_window">
+        <field name="name">⏱️ Supplier Lead Time</field>
+        <field name="res_model">wms.cc.supplier.leadtime</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ═══ PO Reminder ════════════════════════════════════════════════ -->
+    <record id="view_wms_cc_po_reminder_list" model="ir.ui.view">
+        <field name="name">wms.cc.po.reminder.list</field>
+        <field name="model">wms.cc.po.reminder</field>
+        <field name="arch" type="xml">
+            <list string="PO Reminder Log"
+                  decoration-danger="overdue_days &gt;= 14"
+                  decoration-warning="overdue_days &gt;= 7 and overdue_days &lt; 14"
+                  decoration-muted="acknowledged">
+                <field name="purchase_order_id"/>
+                <field name="partner_id"/>
+                <field name="date_order"/>
+                <field name="date_planned"/>
+                <field name="overdue_days"/>
+                <field name="reminder_count"/>
+                <field name="reminder_date"/>
+                <field name="acknowledged" widget="boolean_toggle"/>
+                <button name="action_acknowledge" type="object"
+                        string="✓ Ack" class="btn-sm"
+                        invisible="acknowledged"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_cc_po_reminder_form" model="ir.ui.view">
+        <field name="name">wms.cc.po.reminder.form</field>
+        <field name="model">wms.cc.po.reminder</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_acknowledge" type="object"
+                            string="✓ Acknowledge" class="oe_highlight"
+                            invisible="acknowledged"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="purchase_order_id"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="date_order" readonly="1"/>
+                            <field name="date_planned" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="reminder_date"/>
+                            <field name="overdue_days"/>
+                            <field name="reminder_count" readonly="1"/>
+                            <field name="acknowledged"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" nolabel="1"
+                               placeholder="Action taken / supplier response..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_po_reminder" model="ir.actions.act_window">
+        <field name="name">📧 PO Reminders</field>
+        <field name="res_model">wms.cc.po.reminder</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

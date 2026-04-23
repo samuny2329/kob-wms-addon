@@ -125,3 +125,11 @@ access_wms_cc_multiwh_supervisor,wms.cc.multiwh.stock.supervisor,model_wms_cc_mu
 access_wms_cc_multiwh_manager,wms.cc.multiwh.stock.manager,model_wms_cc_multiwh_stock,group_wms_manager,1,0,0,0
 access_wms_cc_intercompany_supervisor,wms.cc.intercompany.supervisor,model_wms_cc_intercompany_transfer,group_wms_supervisor,1,0,0,0
 access_wms_cc_intercompany_manager,wms.cc.intercompany.manager,model_wms_cc_intercompany_transfer,group_wms_manager,1,0,0,0
+access_wms_cc_reorder_supervisor,wms.cc.reorder.supervisor,model_wms_cc_reorder_monitor,group_wms_supervisor,1,0,0,0
+access_wms_cc_reorder_manager,wms.cc.reorder.manager,model_wms_cc_reorder_monitor,group_wms_manager,1,0,0,0
+access_wms_cc_demand_supervisor,wms.cc.demand.supervisor,model_wms_cc_demand_forecast,group_wms_supervisor,1,0,0,0
+access_wms_cc_demand_manager,wms.cc.demand.manager,model_wms_cc_demand_forecast,group_wms_manager,1,0,0,0
+access_wms_cc_leadtime_supervisor,wms.cc.leadtime.supervisor,model_wms_cc_supplier_leadtime,group_wms_supervisor,1,0,0,0
+access_wms_cc_leadtime_manager,wms.cc.leadtime.manager,model_wms_cc_supplier_leadtime,group_wms_manager,1,0,0,0
+access_wms_cc_po_reminder_supervisor,wms.cc.po.reminder.supervisor,model_wms_cc_po_reminder,group_wms_supervisor,1,1,0,0
+access_wms_cc_po_reminder_manager,wms.cc.po.reminder.manager,model_wms_cc_po_reminder,group_wms_manager,1,1,1,1
