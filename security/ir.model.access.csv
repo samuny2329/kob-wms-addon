@@ -121,3 +121,7 @@ access_wms_quality_check_supervisor,wms.quality.check.supervisor,model_wms_quali
 access_wms_quality_check_manager,wms.quality.check.manager,model_wms_quality_check,group_wms_manager,1,1,1,1
 access_wms_kpi_alert_rule_supervisor,wms.kpi.alert.rule.supervisor,model_wms_kpi_alert_rule,group_wms_supervisor,1,0,0,0
 access_wms_kpi_alert_rule_manager,wms.kpi.alert.rule.manager,model_wms_kpi_alert_rule,group_wms_manager,1,1,1,1
+access_wms_cc_multiwh_supervisor,wms.cc.multiwh.stock.supervisor,model_wms_cc_multiwh_stock,group_wms_supervisor,1,0,0,0
+access_wms_cc_multiwh_manager,wms.cc.multiwh.stock.manager,model_wms_cc_multiwh_stock,group_wms_manager,1,0,0,0
+access_wms_cc_intercompany_supervisor,wms.cc.intercompany.supervisor,model_wms_cc_intercompany_transfer,group_wms_supervisor,1,0,0,0
+access_wms_cc_intercompany_manager,wms.cc.intercompany.manager,model_wms_cc_intercompany_transfer,group_wms_manager,1,0,0,0

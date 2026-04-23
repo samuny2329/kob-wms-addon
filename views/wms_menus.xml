@@ -77,6 +77,24 @@
               sequence="75"
               groups="group_wms_supervisor"/>
 
+    <!-- Cross-Company Audit (Operations Director scope) -->
+    <menuitem id="menu_cc_crossco"
+              name="🌐 Cross-Company Audit"
+              parent="menu_cc_root"
+              sequence="10"/>
+
+    <menuitem id="menu_cc_multiwh_stock"
+              name="🏭 Multi-WH Stock"
+              parent="menu_cc_crossco"
+              action="action_wms_cc_multiwh_stock"
+              sequence="10"/>
+
+    <menuitem id="menu_cc_intercompany_transfer"
+              name="🔀 Inter-Company Transfers"
+              parent="menu_cc_crossco"
+              action="action_wms_cc_intercompany_transfer"
+              sequence="20"/>
+
     <!-- ══════════════════════════════════════════════════════════════
          📊 Reports
          ══════════════════════════════════════════════════════════════ -->

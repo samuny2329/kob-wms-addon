@@ -31,3 +31,5 @@ from . import wms_daily_report
 from . import wms_qc_monthly_report
 from . import wms_quality_check
 from . import wms_kpi_alert_rule
+from . import wms_cc_multiwh_stock
+from . import wms_cc_intercompany_transfer

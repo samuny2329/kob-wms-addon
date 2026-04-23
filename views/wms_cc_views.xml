@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══ Multi-WH Stock Comparison ══════════════════════════════════ -->
+    <record id="view_wms_cc_multiwh_stock_list" model="ir.ui.view">
+        <field name="name">wms.cc.multiwh.stock.list</field>
+        <field name="model">wms.cc.multiwh.stock</field>
+        <field name="arch" type="xml">
+            <list string="Multi-WH Stock Comparison" create="false" edit="false"
+                  decoration-warning="single_company_flag"
+                  decoration-info="others_qty > 0">
+                <field name="product_code"/>
+                <field name="product_id"/>
+                <field name="company_id"/>
+                <field name="warehouse_id" optional="show"/>
+                <field name="total_qty" sum="Total"/>
+                <field name="reserved_qty" optional="show"/>
+                <field name="available_qty" optional="show"/>
+                <field name="others_qty"/>
+                <field name="single_company_flag" widget="boolean"
+                       string="Only Here"/>
+                <field name="quant_count" optional="hide"/>
+                <field name="location_count" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_cc_multiwh_stock_search" model="ir.ui.view">
+        <field name="name">wms.cc.multiwh.stock.search</field>
+        <field name="model">wms.cc.multiwh.stock</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="product_code"/>
+                <field name="company_id"/>
+                <field name="warehouse_id"/>
+                <separator/>
+                <filter string="Only in 1 Company" name="f_single"
+                        domain="[('single_company_flag','=',True)]"/>
+                <filter string="Has qty in other companies" name="f_others"
+                        domain="[('others_qty','>',0)]"/>
+                <filter string="Has Reserved" name="f_reserved"
+                        domain="[('reserved_qty','>',0)]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Product" name="g_product"
+                            context="{'group_by':'product_id'}"/>
+                    <filter string="Company" name="g_company"
+                            context="{'group_by':'company_id'}"/>
+                    <filter string="Warehouse" name="g_wh"
+                            context="{'group_by':'warehouse_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_multiwh_stock" model="ir.actions.act_window">
+        <field name="name">🏭 Multi-WH Stock Comparison</field>
+        <field name="res_model">wms.cc.multiwh.stock</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_wms_cc_multiwh_stock_search"/>
+        <field name="context">{'search_default_g_product': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No multi-company stock yet.
+            </p>
+            <p>
+                This view aggregates <b>stock.quant</b> across all companies,
+                showing how the same SKU is distributed. Use the
+                <b>"Only in 1 Company"</b> filter to find candidates for
+                inter-company transfer.
+            </p>
+        </field>
+    </record>
+
+    <!-- ═══ Inter-Company Transfer Audit ═══════════════════════════════ -->
+    <record id="view_wms_cc_intercompany_transfer_list" model="ir.ui.view">
+        <field name="name">wms.cc.intercompany.transfer.list</field>
+        <field name="model">wms.cc.intercompany.transfer</field>
+        <field name="arch" type="xml">
+            <list string="Inter-Company Transfers" create="false" edit="false"
+                  decoration-success="state == 'done'"
+                  decoration-warning="state in ('assigned','confirmed')"
+                  decoration-muted="state == 'cancel'">
+                <field name="picking_name"/>
+                <field name="src_company_id"/>
+                <field name="dest_company_id"/>
+                <field name="product_id"/>
+                <field name="qty" sum="Total Qty"/>
+                <field name="state" widget="badge"/>
+                <field name="scheduled_date" optional="show"/>
+                <field name="date_done" optional="show"/>
+                <field name="origin" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_cc_intercompany_transfer_search" model="ir.ui.view">
+        <field name="name">wms.cc.intercompany.transfer.search</field>
+        <field name="model">wms.cc.intercompany.transfer</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="picking_name"/>
+                <field name="product_id"/>
+                <field name="src_company_id"/>
+                <field name="dest_company_id"/>
+                <filter string="Done" name="f_done"
+                        domain="[('state','=','done')]"/>
+                <filter string="In Progress" name="f_progress"
+                        domain="[('state','in',['assigned','confirmed','waiting'])]"/>
+                <filter string="This Month" name="f_month"
+                        domain="[('scheduled_date', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Source Company" name="g_src"
+                            context="{'group_by':'src_company_id'}"/>
+                    <filter string="Destination Company" name="g_dst"
+                            context="{'group_by':'dest_company_id'}"/>
+                    <filter string="State" name="g_state"
+                            context="{'group_by':'state'}"/>
+                    <filter string="Month" name="g_month"
+                            context="{'group_by':'scheduled_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_intercompany_transfer" model="ir.actions.act_window">
+        <field name="name">🔀 Inter-Company Transfers</field>
+        <field name="res_model">wms.cc.intercompany.transfer</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_wms_cc_intercompany_transfer_search"/>
+    </record>
+
+</odoo>
