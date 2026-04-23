@@ -229,12 +229,6 @@
               action="action_wms_worker_performance"
               sequence="10"/>
 
-    <menuitem id="menu_wms_automation_audit"
-              name="🤖 Automation Audit"
-              parent="menu_cc_analytics"
-              action="action_wms_automation_audit"
-              sequence="20"/>
-
     <!-- Analytics → Box -->
     <menuitem id="menu_cc_analytics_box"
               name="Box Analytics"
