@@ -1,23 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Root: KOB WMS — goes straight to Worker Login -->
+    <!-- ══════════════════════════════════════════════════════════════════
+         KOB WMS MENU STRUCTURE (v2.21)
+
+         Top bar keeps the 8 daily-use screens:
+           Dashboard · Worker Login · Pick/Pack/Out/Dispatch · Count · All Orders
+
+         Everything else is grouped under "🏠 Command Center" with
+         sub-categories: Reports · Warehouse · Quality · Analytics ·
+         KPI · Platform · Configuration.
+
+         Duplicates removed:
+           - menu_wms_config_api (was duplicated in Configuration and
+             Platform Sync — kept only under Platform Sync)
+    ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Root app -->
     <menuitem id="menu_kob_wms_root"
               name="KOB WMS"
               sequence="10"
               action="action_wms_login_screen"
               groups="group_wms_worker"/>
 
-    <!-- 1. Dashboard — Spreadsheet Dashboard seeded by this module
-         ("WMS Overview"). Uses the UAT Sales dashboard layout remapped
-         onto wms.sales.order data. -->
+    <!-- ══════════════════════════════════════════════════════════════
+         TOP BAR — 8 daily-use screens (keep at top level)
+         ══════════════════════════════════════════════════════════════ -->
+
     <menuitem id="menu_wms_dashboard"
               name="Dashboard"
               parent="menu_kob_wms_root"
               action="spreadsheet_dashboard.ir_actions_dashboard_action"
               sequence="10"/>
 
-    <!-- 1b. Worker Login Screen -->
     <menuitem id="menu_wms_login_screen"
               name="Worker Login"
               parent="menu_kob_wms_root"
@@ -25,364 +40,348 @@
               sequence="15"
               groups="group_wms_supervisor"/>
 
-    <!-- 2. Pick (F1) — POS-style fullscreen pick screen -->
     <menuitem id="menu_wms_pick"
               name="Pick (F1)"
               parent="menu_kob_wms_root"
               action="action_wms_pick_screen"
               sequence="20"/>
 
-    <!-- 3. Pack (F2) — POS-style pack screen -->
     <menuitem id="menu_wms_pack"
               name="Pack (F2)"
               parent="menu_kob_wms_root"
               action="action_wms_pack_screen"
               sequence="30"/>
 
-    <!-- 4. Outbound (F3) — fullscreen outbound/ship screen -->
     <menuitem id="menu_wms_out"
               name="Outbound (F3)"
               parent="menu_kob_wms_root"
               action="action_wms_outbound_screen"
               sequence="40"/>
 
-    <!-- 5. Dispatch (F4) -->
     <menuitem id="menu_wms_dispatch"
               name="Dispatch (F4)"
               parent="menu_kob_wms_root"
               action="action_wms_dispatch_screen"
               sequence="50"/>
 
-    <!-- 6. Count Screen (F5) — guided mobile/handheld count -->
     <menuitem id="menu_wms_count_screen"
               name="🔢 Count (F5)"
               parent="menu_kob_wms_root"
               action="action_wms_count_screen"
               sequence="60"/>
 
-    <!-- 7. All Orders -->
     <menuitem id="menu_wms_list"
               name="All Orders"
               parent="menu_kob_wms_root"
               action="action_wms_sales_order_all"
               sequence="70"/>
 
-    <!-- POS launcher removed from main menu -->
-
-    <!-- 8. Reports -->
-    <menuitem id="menu_wms_report"
-              name="Reports"
+    <!-- ══════════════════════════════════════════════════════════════
+         🏠 COMMAND CENTER (all management features grouped here)
+         ══════════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_cc_root"
+              name="🏠 Command Center"
               parent="menu_kob_wms_root"
-              sequence="75"/>
+              sequence="80"
+              groups="group_wms_supervisor"/>
 
-    <menuitem id="menu_wms_report_activity"
-              name="Activity Log"
-              parent="menu_wms_report"
-              action="action_wms_activity_log"
+    <!-- ── 1. 📊 Reports (daily / live monitors) ───────────────────── -->
+    <menuitem id="menu_cc_reports"
+              name="📊 Reports"
+              parent="menu_cc_root"
               sequence="10"/>
-
-    <menuitem id="menu_wms_report_performance"
-              name="Worker Performance (KPI)"
-              parent="menu_wms_report"
-              action="action_wms_worker_performance"
-              sequence="20"/>
-
-    <menuitem id="menu_wms_report_sla"
-              name="SLA Monitor"
-              parent="menu_wms_report"
-              action="action_wms_sla_monitor"
-              sequence="30"/>
-
-    <!-- 9. KPI Assessment -->
-    <menuitem id="menu_wms_kpi_root"
-              name="KPI Assessment"
-              parent="menu_kob_wms_root"
-              sequence="78"/>
-
-    <!-- My Assessment: shows only own record (hard domain uid filter) -->
-    <menuitem id="menu_wms_kpi_my"
-              name="My Assessment"
-              parent="menu_wms_kpi_root"
-              action="action_wms_kpi_assessment"
-              sequence="10"/>
-
-    <!-- All Assessments: supervisor+ sees everyone with search filter -->
-    <menuitem id="menu_wms_kpi_all"
-              name="All Assessments"
-              parent="menu_wms_kpi_root"
-              action="action_wms_kpi_assessment_all"
-              sequence="15"
-              groups="group_wms_supervisor"/>
-
-    <menuitem id="menu_wms_kpi_pending"
-              name="Pending Reviews"
-              parent="menu_wms_kpi_root"
-              action="action_wms_kpi_assessment_pending"
-              sequence="20"
-              groups="group_wms_supervisor"/>
-
-    <menuitem id="menu_wms_kpi_history"
-              name="History"
-              parent="menu_wms_kpi_root"
-              action="action_wms_kpi_assessment_history"
-              sequence="30"/>
-
-    <menuitem id="menu_wms_kpi_seasons"
-              name="Seasons"
-              parent="menu_wms_kpi_root"
-              action="action_wms_kpi_season"
-              sequence="40"
-              groups="group_wms_manager"/>
-
-    <menuitem id="menu_wms_kpi_calibration"
-              name="Calibration"
-              parent="menu_wms_kpi_root"
-              action="action_wms_kpi_calibration"
-              sequence="35"
-              groups="group_wms_manager"/>
-
-    <menuitem id="menu_wms_kpi_templates"
-              name="Templates"
-              parent="menu_wms_kpi_root"
-              action="action_wms_kpi_template"
-              sequence="50"
-              groups="group_wms_manager"/>
-
-    <menuitem id="menu_wms_kpi_pillars"
-              name="Pillars"
-              parent="menu_wms_kpi_root"
-              action="action_wms_kpi_pillar"
-              sequence="60"
-              groups="group_wms_manager"/>
-
-    <menuitem id="menu_wms_automation_audit"
-              name="🤖 Automation Audit"
-              parent="menu_wms_kpi_root"
-              action="action_wms_automation_audit"
-              sequence="70"
-              groups="group_wms_supervisor"/>
-
-    <!-- Platform Sync -->
-    <menuitem id="menu_wms_platform_root"
-              name="🔄 Platform Sync"
-              parent="menu_kob_wms_root"
-              sequence="72"
-              groups="group_wms_supervisor"/>
-
-    <menuitem id="menu_wms_platform_orders"
-              name="Platform Orders"
-              parent="menu_wms_platform_root"
-              action="action_wms_platform_order"
-              sequence="10"
-              groups="group_wms_supervisor"/>
-
-    <menuitem id="menu_wms_platform_configs"
-              name="API Configurations"
-              parent="menu_wms_platform_root"
-              action="action_wms_api_config"
-              sequence="20"
-              groups="group_wms_manager"/>
-
-    <!-- Quality & Automation -->
-    <menuitem id="menu_wms_quality_root"
-              name="🎯 Quality"
-              parent="menu_kob_wms_root"
-              sequence="74"
-              groups="group_wms_supervisor"/>
-
-    <menuitem id="menu_wms_quality_defect"
-              name="Defect / Damage Log"
-              parent="menu_wms_quality_root"
-              action="action_wms_quality_defect"
-              sequence="10"
-              groups="group_wms_supervisor"/>
-
-    <menuitem id="menu_wms_expiry_alert"
-              name="Expiry Alerts"
-              parent="menu_wms_quality_root"
-              action="action_wms_expiry_alert"
-              sequence="20"
-              groups="group_wms_supervisor"/>
-
-    <menuitem id="menu_wms_qc_monthly"
-              name="QC Monthly Reports"
-              parent="menu_wms_quality_root"
-              action="action_wms_qc_monthly"
-              sequence="30"
-              groups="group_wms_supervisor"/>
 
     <menuitem id="menu_wms_daily_report"
-              name="📊 Daily Reports"
-              parent="menu_kob_wms_root"
+              name="Daily Reports"
+              parent="menu_cc_reports"
               action="action_wms_daily_report"
-              sequence="73"
-              groups="group_wms_supervisor"/>
-
-    <!-- 11. Employees (admin only) -->
-    <menuitem id="menu_wms_users"
-              name="Employees"
-              parent="menu_kob_wms_root"
-              sequence="83"
-              groups="group_wms_manager"/>
-
-    <menuitem id="menu_wms_users_workers"
-              name="Employees"
-              parent="menu_wms_users"
-              action="action_kob_wms_user"
-              sequence="10"
-              groups="group_wms_manager"/>
-
-    <menuitem id="menu_wms_users_approvers"
-              name="Approver Setup (KPI)"
-              parent="menu_wms_users"
-              action="action_wms_kpi_approver_config"
-              sequence="20"
-              groups="group_wms_manager"/>
-
-    <menuitem id="menu_wms_users_odoo"
-              name="Odoo Accounts"
-              parent="menu_wms_users"
-              action="action_wms_users"
-              sequence="30"
-              groups="group_wms_manager"/>
-
-    <!-- Inventory (extra — zones, racks, counts) -->
-    <menuitem id="menu_wms_inventory"
-              name="Inventory"
-              parent="menu_kob_wms_root"
-              sequence="85"
-              groups="group_wms_supervisor"/>
-
-    <menuitem id="menu_wms_stock_on_hand"
-              name="Stock on Hand"
-              parent="menu_wms_inventory"
-              action="action_wms_stock_on_hand"
-              sequence="5"/>
-
-    <menuitem id="menu_wms_near_expiry"
-              name="Near Expiry"
-              parent="menu_wms_inventory"
-              action="action_wms_near_expiry"
-              sequence="6"/>
-
-    <menuitem id="menu_wms_pickface_restock"
-              name="Restock Pickface"
-              parent="menu_wms_inventory"
-              action="action_wms_pickface_restock"
-              sequence="7"/>
-
-    <menuitem id="menu_wms_zone_layout"
-              name="Zone Layout"
-              parent="menu_wms_inventory"
-              action="action_wms_zone_layout"
-              sequence="8"/>
-
-    <menuitem id="menu_wms_inventory_count"
-              name="Count Sessions"
-              parent="menu_wms_inventory"
-              action="action_wms_count_session"
               sequence="10"/>
 
     <menuitem id="menu_wms_count_monitor"
               name="🔴 Count Monitor"
-              parent="menu_wms_inventory"
+              parent="menu_cc_reports"
               action="action_wms_count_monitor"
-              sequence="15"
-              groups="group_wms_supervisor"/>
+              sequence="20"/>
+
+    <menuitem id="menu_wms_report_sla"
+              name="⏱️ SLA Monitor"
+              parent="menu_cc_reports"
+              action="action_wms_sla_monitor"
+              sequence="30"/>
+
+    <menuitem id="menu_wms_report_activity"
+              name="Activity Log"
+              parent="menu_cc_reports"
+              action="action_wms_activity_log"
+              sequence="40"/>
+
+    <!-- ── 2. 🏭 Warehouse ─────────────────────────────────────────── -->
+    <menuitem id="menu_cc_warehouse"
+              name="🏭 Warehouse"
+              parent="menu_cc_root"
+              sequence="20"/>
+
+    <menuitem id="menu_wms_stock_on_hand"
+              name="Stock on Hand"
+              parent="menu_cc_warehouse"
+              action="action_wms_stock_on_hand"
+              sequence="10"/>
+
+    <menuitem id="menu_wms_pickface_restock"
+              name="🔄 Restock Pickface"
+              parent="menu_cc_warehouse"
+              action="action_wms_pickface_restock"
+              sequence="20"/>
+
+    <!-- Warehouse → Layout -->
+    <menuitem id="menu_cc_warehouse_layout"
+              name="Layout"
+              parent="menu_cc_warehouse"
+              sequence="30"/>
+
+    <menuitem id="menu_wms_zone_layout"
+              name="Zone Layout"
+              parent="menu_cc_warehouse_layout"
+              action="action_wms_zone_layout"
+              sequence="10"/>
+
+    <menuitem id="menu_wms_inventory_zone"
+              name="Zones"
+              parent="menu_cc_warehouse_layout"
+              action="action_wms_zone"
+              sequence="20"/>
+
+    <menuitem id="menu_wms_inventory_rack"
+              name="Racks"
+              parent="menu_cc_warehouse_layout"
+              action="action_wms_rack"
+              sequence="30"/>
+
+    <menuitem id="menu_wms_inventory_pickface"
+              name="Pickfaces"
+              parent="menu_cc_warehouse_layout"
+              action="action_wms_pickface"
+              sequence="40"/>
+
+    <!-- Warehouse → Cycle Count (admin / oversight) -->
+    <menuitem id="menu_cc_warehouse_count"
+              name="Cycle Count"
+              parent="menu_cc_warehouse"
+              sequence="40"/>
+
+    <menuitem id="menu_wms_inventory_count"
+              name="Sessions"
+              parent="menu_cc_warehouse_count"
+              action="action_wms_count_session"
+              sequence="10"/>
 
     <menuitem id="menu_wms_inventory_count_task"
-              name="Count Tasks"
-              parent="menu_wms_inventory"
+              name="Tasks"
+              parent="menu_cc_warehouse_count"
               action="action_wms_count_task"
               sequence="20"/>
 
     <menuitem id="menu_wms_inventory_adjustments"
               name="Pending Adjustments"
-              parent="menu_wms_inventory"
+              parent="menu_cc_warehouse_count"
               action="action_wms_count_adjustment"
-              sequence="25"
-              groups="group_wms_supervisor"/>
-
-    <menuitem id="menu_wms_inventory_zone"
-              name="Zones"
-              parent="menu_wms_inventory"
-              action="action_wms_zone"
               sequence="30"/>
 
-    <menuitem id="menu_wms_inventory_rack"
-              name="Racks"
-              parent="menu_wms_inventory"
-              action="action_wms_rack"
+    <!-- ── 3. 🎯 Quality ───────────────────────────────────────────── -->
+    <menuitem id="menu_cc_quality"
+              name="🎯 Quality"
+              parent="menu_cc_root"
+              sequence="30"/>
+
+    <menuitem id="menu_wms_quality_defect"
+              name="Defect / Damage Log"
+              parent="menu_cc_quality"
+              action="action_wms_quality_defect"
+              sequence="10"/>
+
+    <menuitem id="menu_wms_near_expiry"
+              name="Near Expiry (live)"
+              parent="menu_cc_quality"
+              action="action_wms_near_expiry"
+              sequence="20"/>
+
+    <menuitem id="menu_wms_expiry_alert"
+              name="Expiry Alerts (history)"
+              parent="menu_cc_quality"
+              action="action_wms_expiry_alert"
+              sequence="30"/>
+
+    <menuitem id="menu_wms_qc_monthly"
+              name="QC Monthly Reports"
+              parent="menu_cc_quality"
+              action="action_wms_qc_monthly"
               sequence="40"/>
 
-    <menuitem id="menu_wms_inventory_pickface"
-              name="Pickfaces"
-              parent="menu_wms_inventory"
-              action="action_wms_pickface"
-              sequence="50"/>
+    <!-- ── 4. 📈 Analytics ─────────────────────────────────────────── -->
+    <menuitem id="menu_cc_analytics"
+              name="📈 Analytics"
+              parent="menu_cc_root"
+              sequence="40"/>
 
-    <!-- Legacy menus removed — use Pick Screen instead -->
-    <!-- Scan Screen removed from menu -->
+    <menuitem id="menu_wms_report_performance"
+              name="Worker Performance"
+              parent="menu_cc_analytics"
+              action="action_wms_worker_performance"
+              sequence="10"/>
 
-    <!-- 10. Box Analytics -->
-    <menuitem id="menu_wms_box_analytics_root"
+    <menuitem id="menu_wms_automation_audit"
+              name="🤖 Automation Audit"
+              parent="menu_cc_analytics"
+              action="action_wms_automation_audit"
+              sequence="20"/>
+
+    <!-- Analytics → Box -->
+    <menuitem id="menu_cc_analytics_box"
               name="Box Analytics"
-              parent="menu_kob_wms_root"
-              sequence="80"
-              groups="group_wms_supervisor"/>
+              parent="menu_cc_analytics"
+              sequence="30"/>
 
     <menuitem id="menu_wms_box_analytics"
-              name="360° Usage Analytics"
-              parent="menu_wms_box_analytics_root"
+              name="360° Usage"
+              parent="menu_cc_analytics_box"
               action="action_wms_box_analytics"
-              sequence="10"
-              groups="group_wms_supervisor"/>
-
-    <menuitem id="menu_wms_box_catalogue"
-              name="Box Catalogue"
-              parent="menu_wms_box_analytics_root"
-              action="action_wms_box_size"
-              sequence="20"
-              groups="group_wms_supervisor"/>
+              sequence="10"/>
 
     <menuitem id="menu_wms_product_box_analytics"
               name="Product vs Box"
-              parent="menu_wms_box_analytics_root"
+              parent="menu_cc_analytics_box"
               action="action_wms_product_box_analytics"
-              sequence="15"
-              groups="group_wms_supervisor"/>
+              sequence="20"/>
+
+    <menuitem id="menu_wms_box_catalogue"
+              name="Box Catalogue"
+              parent="menu_cc_analytics_box"
+              action="action_wms_box_size"
+              sequence="30"/>
 
     <menuitem id="menu_wms_box_recommender"
               name="📦 Box Recommender"
-              parent="menu_wms_box_analytics_root"
+              parent="menu_cc_analytics_box"
               action="action_wms_box_recommender"
-              sequence="25"
+              sequence="40"/>
+
+    <!-- ── 5. ✅ KPI Assessment ────────────────────────────────────── -->
+    <menuitem id="menu_cc_kpi"
+              name="✅ KPI Assessment"
+              parent="menu_cc_root"
+              sequence="50"/>
+
+    <menuitem id="menu_wms_kpi_my"
+              name="My Assessment"
+              parent="menu_cc_kpi"
+              action="action_wms_kpi_assessment"
+              sequence="10"/>
+
+    <menuitem id="menu_wms_kpi_all"
+              name="All Assessments"
+              parent="menu_cc_kpi"
+              action="action_wms_kpi_assessment_all"
+              sequence="20"
               groups="group_wms_supervisor"/>
 
-    <!-- 9. Settings / Configuration (React tab: settings) -->
-    <menuitem id="menu_wms_configuration"
-              name="Configuration"
-              parent="menu_kob_wms_root"
+    <menuitem id="menu_wms_kpi_pending"
+              name="Pending Reviews"
+              parent="menu_cc_kpi"
+              action="action_wms_kpi_assessment_pending"
+              sequence="30"
+              groups="group_wms_supervisor"/>
+
+    <menuitem id="menu_wms_kpi_history"
+              name="History"
+              parent="menu_cc_kpi"
+              action="action_wms_kpi_assessment_history"
+              sequence="40"/>
+
+    <!-- KPI → Admin -->
+    <menuitem id="menu_cc_kpi_admin"
+              name="Admin"
+              parent="menu_cc_kpi"
+              sequence="50"
+              groups="group_wms_manager"/>
+
+    <menuitem id="menu_wms_kpi_seasons"
+              name="Seasons"
+              parent="menu_cc_kpi_admin"
+              action="action_wms_kpi_season"
+              sequence="10"/>
+
+    <menuitem id="menu_wms_kpi_calibration"
+              name="Calibration"
+              parent="menu_cc_kpi_admin"
+              action="action_wms_kpi_calibration"
+              sequence="20"/>
+
+    <menuitem id="menu_wms_kpi_templates"
+              name="Templates"
+              parent="menu_cc_kpi_admin"
+              action="action_wms_kpi_template"
+              sequence="30"/>
+
+    <menuitem id="menu_wms_kpi_pillars"
+              name="Pillars"
+              parent="menu_cc_kpi_admin"
+              action="action_wms_kpi_pillar"
+              sequence="40"/>
+
+    <!-- ── 6. 🔄 Platform Sync ─────────────────────────────────────── -->
+    <menuitem id="menu_cc_platform"
+              name="🔄 Platform Sync"
+              parent="menu_cc_root"
+              sequence="60"/>
+
+    <menuitem id="menu_wms_platform_orders"
+              name="Platform Orders"
+              parent="menu_cc_platform"
+              action="action_wms_platform_order"
+              sequence="10"/>
+
+    <menuitem id="menu_wms_platform_configs"
+              name="API Configurations"
+              parent="menu_cc_platform"
+              action="action_wms_api_config"
+              sequence="20"
+              groups="group_wms_manager"/>
+
+    <!-- ── 7. ⚙️ Configuration ─────────────────────────────────────── -->
+    <menuitem id="menu_cc_config"
+              name="⚙️ Configuration"
+              parent="menu_cc_root"
               sequence="90"
               groups="group_wms_manager"/>
 
-    <menuitem id="menu_wms_config_couriers"
-              name="Couriers"
-              parent="menu_wms_configuration"
-              action="action_wms_courier"
+    <menuitem id="menu_wms_users_workers"
+              name="Employees"
+              parent="menu_cc_config"
+              action="action_kob_wms_user"
               sequence="10"/>
 
-    <menuitem id="menu_wms_config_api"
-              name="API Configurations"
-              parent="menu_wms_configuration"
-              action="action_wms_api_config"
+    <menuitem id="menu_wms_users_odoo"
+              name="Odoo Accounts"
+              parent="menu_cc_config"
+              action="action_wms_users"
               sequence="20"/>
+
+    <menuitem id="menu_wms_users_approvers"
+              name="KPI Approver Setup"
+              parent="menu_cc_config"
+              action="action_wms_kpi_approver_config"
+              sequence="30"/>
+
+    <menuitem id="menu_wms_config_couriers"
+              name="Couriers"
+              parent="menu_cc_config"
+              action="action_wms_courier"
+              sequence="40"/>
 
     <menuitem id="menu_wms_config_sla"
               name="SLA Thresholds"
-              parent="menu_wms_configuration"
+              parent="menu_cc_config"
               action="action_wms_sla_config"
-              sequence="30"/>
-
+              sequence="50"/>
 
 </odoo>
