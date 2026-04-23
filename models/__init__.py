@@ -37,3 +37,5 @@ from . import wms_cc_reorder_monitor
 from . import wms_cc_demand_forecast
 from . import wms_cc_supplier_leadtime
 from . import wms_cc_po_reminder
+from . import wms_cc_accounting
+from . import wms_cc_logistics_hr

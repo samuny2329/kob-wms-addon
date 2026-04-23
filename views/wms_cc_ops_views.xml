@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══ Accounting Hub ═════════════════════════════════════════════ -->
+    <record id="view_wms_cc_acct_hub_list" model="ir.ui.view">
+        <field name="name">wms.cc.accounting.hub.list</field>
+        <field name="model">wms.cc.accounting.hub</field>
+        <field name="arch" type="xml">
+            <list string="Accounting Hub (365d)" create="false" edit="false">
+                <field name="date"/>
+                <field name="move_name"/>
+                <field name="partner_id"/>
+                <field name="account_code"/>
+                <field name="account_type" widget="badge"/>
+                <field name="amount" sum="Total"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_acct_hub" model="ir.actions.act_window">
+        <field name="name">💰 Accounting Hub</field>
+        <field name="res_model">wms.cc.accounting.hub</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ═══ OpEx Monthly Tracker ═══════════════════════════════════════ -->
+    <record id="view_wms_cc_opex_list" model="ir.ui.view">
+        <field name="name">wms.cc.opex.tracker.list</field>
+        <field name="model">wms.cc.opex.tracker</field>
+        <field name="arch" type="xml">
+            <list string="OpEx Monthly Tracker (24mo)" create="false" edit="false">
+                <field name="period_month"/>
+                <field name="account_code"/>
+                <field name="account_name"/>
+                <field name="total_amount" sum="Total"/>
+                <field name="line_count" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_cc_opex_search" model="ir.ui.view">
+        <field name="name">wms.cc.opex.tracker.search</field>
+        <field name="model">wms.cc.opex.tracker</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="period_month"/>
+                <field name="account_code"/>
+                <field name="account_name"/>
+                <group expand="1" string="Group By">
+                    <filter string="Month" name="g_month"
+                            context="{'group_by':'period_month'}"/>
+                    <filter string="Account" name="g_acc"
+                            context="{'group_by':'account_code'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_opex" model="ir.actions.act_window">
+        <field name="name">💸 OpEx Tracker</field>
+        <field name="res_model">wms.cc.opex.tracker</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_wms_cc_opex_search"/>
+        <field name="context">{'search_default_g_month': 1}</field>
+    </record>
+
+    <!-- ═══ Platform Fee Audit ═════════════════════════════════════════ -->
+    <record id="view_wms_cc_platform_fee_list" model="ir.ui.view">
+        <field name="name">wms.cc.platform.fee.audit.list</field>
+        <field name="model">wms.cc.platform.fee.audit</field>
+        <field name="arch" type="xml">
+            <list string="Platform Fee Audit (12mo)" create="false" edit="false">
+                <field name="period_month"/>
+                <field name="platform_label"/>
+                <field name="account_code" optional="hide"/>
+                <field name="fee_amount" sum="Total"/>
+                <field name="line_count" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_platform_fee" model="ir.actions.act_window">
+        <field name="name">🏷️ Platform Fee Audit</field>
+        <field name="res_model">wms.cc.platform.fee.audit</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ═══ OTIF Monitor ═══════════════════════════════════════════════ -->
+    <record id="view_wms_cc_otif_list" model="ir.ui.view">
+        <field name="name">wms.cc.otif.monitor.list</field>
+        <field name="model">wms.cc.otif.monitor</field>
+        <field name="arch" type="xml">
+            <list string="OTIF Monitor (90d)" create="false" edit="false"
+                  decoration-success="is_otif"
+                  decoration-warning="is_on_time and not is_in_full"
+                  decoration-danger="not is_on_time">
+                <field name="picking_name"/>
+                <field name="partner_id"/>
+                <field name="scheduled_date"/>
+                <field name="date_done"/>
+                <field name="delay_days"/>
+                <field name="demand_qty"/>
+                <field name="delivered_qty"/>
+                <field name="is_on_time" widget="boolean"/>
+                <field name="is_in_full" widget="boolean"/>
+                <field name="is_otif" widget="boolean" string="OTIF"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_otif" model="ir.actions.act_window">
+        <field name="name">🎯 OTIF Monitor</field>
+        <field name="res_model">wms.cc.otif.monitor</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ═══ OTD Rate ═══════════════════════════════════════════════════ -->
+    <record id="view_wms_cc_otd_list" model="ir.ui.view">
+        <field name="name">wms.cc.otd.rate.list</field>
+        <field name="model">wms.cc.otd.rate</field>
+        <field name="arch" type="xml">
+            <list string="OTD / OTIF Rate (monthly)" create="false" edit="false"
+                  decoration-success="otif_pct &gt;= 95"
+                  decoration-warning="otif_pct &gt;= 85 and otif_pct &lt; 95"
+                  decoration-danger="otif_pct &lt; 85">
+                <field name="period_month"/>
+                <field name="total_pickings"/>
+                <field name="on_time_count"/>
+                <field name="otd_pct" widget="percentage"/>
+                <field name="otif_count"/>
+                <field name="otif_pct" widget="percentage"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_otd" model="ir.actions.act_window">
+        <field name="name">🚚 OTD Rate</field>
+        <field name="res_model">wms.cc.otd.rate</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ═══ HR Turnover ════════════════════════════════════════════════ -->
+    <record id="view_wms_cc_turnover_list" model="ir.ui.view">
+        <field name="name">wms.cc.hr.turnover.list</field>
+        <field name="model">wms.cc.hr.turnover</field>
+        <field name="arch" type="xml">
+            <list string="HR Turnover" create="false" edit="false"
+                  decoration-warning="turnover_pct &gt;= 10"
+                  decoration-danger="turnover_pct &gt;= 20">
+                <field name="department_id"/>
+                <field name="active_count"/>
+                <field name="inactive_count"/>
+                <field name="total_count"/>
+                <field name="turnover_pct" widget="percentage"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_turnover" model="ir.actions.act_window">
+        <field name="name">🚪 HR Turnover</field>
+        <field name="res_model">wms.cc.hr.turnover</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ═══ Training Log ═══════════════════════════════════════════════ -->
+    <record id="view_wms_cc_training_list" model="ir.ui.view">
+        <field name="name">wms.cc.training.log.list</field>
+        <field name="model">wms.cc.training.log</field>
+        <field name="arch" type="xml">
+            <list string="Training Sessions">
+                <field name="training_date"/>
+                <field name="employee_id"/>
+                <field name="department_id" optional="show"/>
+                <field name="name"/>
+                <field name="training_type"/>
+                <field name="trainer" optional="show"/>
+                <field name="hours" sum="Total Hours"/>
+                <field name="topic" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_cc_training_form" model="ir.ui.view">
+        <field name="name">wms.cc.training.log.form</field>
+        <field name="model">wms.cc.training.log</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. Safety Training Session"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="training_date"/>
+                            <field name="employee_id"/>
+                            <field name="department_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="training_type"/>
+                            <field name="hours"/>
+                            <field name="trainer"/>
+                            <field name="topic"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="notes" nolabel="1" placeholder="Training outcomes..."/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_wms_cc_training_search" model="ir.ui.view">
+        <field name="name">wms.cc.training.log.search</field>
+        <field name="model">wms.cc.training.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="employee_id"/>
+                <field name="name"/>
+                <filter string="Last 30 days" name="f_30d"
+                        domain="[('training_date', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Employee" name="g_emp"
+                            context="{'group_by':'employee_id'}"/>
+                    <filter string="Department" name="g_dept"
+                            context="{'group_by':'department_id'}"/>
+                    <filter string="Type" name="g_type"
+                            context="{'group_by':'training_type'}"/>
+                    <filter string="Month" name="g_month"
+                            context="{'group_by':'training_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_cc_training" model="ir.actions.act_window">
+        <field name="name">🎓 Training Log</field>
+        <field name="res_model">wms.cc.training.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_wms_cc_training_search"/>
+    </record>
+
+</odoo>

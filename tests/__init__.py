@@ -5,3 +5,4 @@ from . import test_wms_sprint1
 from . import test_wms_sprint2
 from . import test_wms_cc_sprint
 from . import test_wms_cc_supply
+from . import test_wms_cc_ops

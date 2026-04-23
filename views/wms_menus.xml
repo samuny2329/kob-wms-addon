@@ -125,6 +125,69 @@
               action="action_wms_cc_po_reminder"
               sequence="40"/>
 
+    <!-- Accounting (Nuch) -->
+    <menuitem id="menu_cc_accounting"
+              name="💰 Accounting"
+              parent="menu_cc_root"
+              sequence="30"
+              groups="group_wms_manager"/>
+
+    <menuitem id="menu_cc_acct_hub"
+              name="💰 Accounting Hub"
+              parent="menu_cc_accounting"
+              action="action_wms_cc_acct_hub"
+              sequence="10"/>
+
+    <menuitem id="menu_cc_opex"
+              name="💸 OpEx Tracker"
+              parent="menu_cc_accounting"
+              action="action_wms_cc_opex"
+              sequence="20"/>
+
+    <menuitem id="menu_cc_platform_fee"
+              name="🏷️ Platform Fee Audit"
+              parent="menu_cc_accounting"
+              action="action_wms_cc_platform_fee"
+              sequence="30"/>
+
+    <!-- Logistics (Yong) -->
+    <menuitem id="menu_cc_logistics"
+              name="🚚 Logistics"
+              parent="menu_cc_root"
+              sequence="40"/>
+
+    <menuitem id="menu_cc_otif"
+              name="🎯 OTIF Monitor"
+              parent="menu_cc_logistics"
+              action="action_wms_cc_otif"
+              sequence="10"/>
+
+    <menuitem id="menu_cc_otd"
+              name="🚚 OTD Rate"
+              parent="menu_cc_logistics"
+              action="action_wms_cc_otd"
+              sequence="20"/>
+
+    <!-- HR (Aoy) -->
+    <menuitem id="menu_cc_hr"
+              name="👥 HR"
+              parent="menu_cc_root"
+              sequence="50"
+              groups="group_wms_supervisor"/>
+
+    <menuitem id="menu_cc_turnover"
+              name="🚪 HR Turnover"
+              parent="menu_cc_hr"
+              action="action_wms_cc_turnover"
+              sequence="10"
+              groups="group_wms_manager"/>
+
+    <menuitem id="menu_cc_training"
+              name="🎓 Training Log"
+              parent="menu_cc_hr"
+              action="action_wms_cc_training"
+              sequence="20"/>
+
     <!-- ══════════════════════════════════════════════════════════════
          📊 Reports
          ══════════════════════════════════════════════════════════════ -->

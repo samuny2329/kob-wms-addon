@@ -133,3 +133,14 @@ access_wms_cc_leadtime_supervisor,wms.cc.leadtime.supervisor,model_wms_cc_suppli
 access_wms_cc_leadtime_manager,wms.cc.leadtime.manager,model_wms_cc_supplier_leadtime,group_wms_manager,1,0,0,0
 access_wms_cc_po_reminder_supervisor,wms.cc.po.reminder.supervisor,model_wms_cc_po_reminder,group_wms_supervisor,1,1,0,0
 access_wms_cc_po_reminder_manager,wms.cc.po.reminder.manager,model_wms_cc_po_reminder,group_wms_manager,1,1,1,1
+access_wms_cc_acct_hub_manager,wms.cc.accounting.hub.manager,model_wms_cc_accounting_hub,group_wms_manager,1,0,0,0
+access_wms_cc_opex_manager,wms.cc.opex.manager,model_wms_cc_opex_tracker,group_wms_manager,1,0,0,0
+access_wms_cc_platform_fee_manager,wms.cc.platform.fee.manager,model_wms_cc_platform_fee_audit,group_wms_manager,1,0,0,0
+access_wms_cc_otif_supervisor,wms.cc.otif.supervisor,model_wms_cc_otif_monitor,group_wms_supervisor,1,0,0,0
+access_wms_cc_otif_manager,wms.cc.otif.manager,model_wms_cc_otif_monitor,group_wms_manager,1,0,0,0
+access_wms_cc_otd_supervisor,wms.cc.otd.supervisor,model_wms_cc_otd_rate,group_wms_supervisor,1,0,0,0
+access_wms_cc_otd_manager,wms.cc.otd.manager,model_wms_cc_otd_rate,group_wms_manager,1,0,0,0
+access_wms_cc_turnover_manager,wms.cc.turnover.manager,model_wms_cc_hr_turnover,group_wms_manager,1,0,0,0
+access_wms_cc_training_worker,wms.cc.training.worker,model_wms_cc_training_log,group_wms_worker,1,0,0,0
+access_wms_cc_training_supervisor,wms.cc.training.supervisor,model_wms_cc_training_log,group_wms_supervisor,1,1,1,0
+access_wms_cc_training_manager,wms.cc.training.manager,model_wms_cc_training_log,group_wms_manager,1,1,1,1

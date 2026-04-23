@@ -1,6 +1,6 @@
 {
     'name': 'KOB WMS Pro',
-    'version': '18.0.2.27.0',
+    'version': '18.0.2.28.0',
     'category': 'Inventory/Warehouse',
     'summary': 'Enterprise Warehouse Management System (Kiss of Beauty)',
     'description': """
@@ -34,6 +34,8 @@ Features
         'mail',
         'sale_management',
         'purchase',
+        'account',
+        'hr',
         'point_of_sale',
         'spreadsheet_dashboard',
         'product_expiry',
@@ -70,6 +72,7 @@ Features
         'views/wms_sprint2_views.xml',
         'views/wms_cc_views.xml',
         'views/wms_cc_supply_views.xml',
+        'views/wms_cc_ops_views.xml',
         'views/wms_sla_config_views.xml',
 
         # ── Configuration ────────────────────────────────────────────────────
