@@ -162,6 +162,27 @@
               sequence="70"
               groups="group_wms_supervisor"/>
 
+    <!-- Platform Sync -->
+    <menuitem id="menu_wms_platform_root"
+              name="🔄 Platform Sync"
+              parent="menu_kob_wms_root"
+              sequence="72"
+              groups="group_wms_supervisor"/>
+
+    <menuitem id="menu_wms_platform_orders"
+              name="Platform Orders"
+              parent="menu_wms_platform_root"
+              action="action_wms_platform_order"
+              sequence="10"
+              groups="group_wms_supervisor"/>
+
+    <menuitem id="menu_wms_platform_configs"
+              name="API Configurations"
+              parent="menu_wms_platform_root"
+              action="action_wms_api_config"
+              sequence="20"
+              groups="group_wms_manager"/>
+
     <!-- 11. Employees (admin only) -->
     <menuitem id="menu_wms_users"
               name="Employees"

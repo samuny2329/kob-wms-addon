@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- ═══ wms.api.config ════════════════════════════════════════════════ -->
     <record id="view_wms_api_config_list" model="ir.ui.view">
         <field name="name">wms.api.config.list</field>
         <field name="model">wms.api.config</field>
         <field name="arch" type="xml">
-            <list string="API Configurations">
+            <list string="Platform API Configurations"
+                  decoration-success="last_sync_status == 'ok'"
+                  decoration-warning="last_sync_status == 'partial'"
+                  decoration-danger="last_sync_status == 'error'">
                 <field name="platform"/>
-                <field name="endpoint_url"/>
                 <field name="shop_id"/>
                 <field name="enabled" widget="boolean_toggle"/>
+                <field name="auto_sync" widget="boolean_toggle" optional="show"/>
+                <field name="sync_interval_minutes" optional="show"/>
+                <field name="last_sync_at" optional="show"/>
+                <field name="last_sync_status" widget="badge" optional="show"/>
+                <field name="total_synced" optional="show"/>
+                <field name="sync_errors" optional="show"/>
             </list>
         </field>
     </record>
@@ -18,30 +27,190 @@
         <field name="name">wms.api.config.form</field>
         <field name="model">wms.api.config</field>
         <field name="arch" type="xml">
-            <form string="API Configuration">
+            <form string="Platform API Configuration">
+                <header>
+                    <button name="action_sync_now" type="object"
+                            string="🔄 Sync Now" class="oe_highlight"
+                            invisible="not enabled"
+                            help="Pull orders from platform immediately"/>
+                    <field name="last_sync_status" widget="statusbar"
+                           statusbar_visible="ok,partial,error"/>
+                </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_platform_orders" type="object"
+                                class="oe_stat_button" icon="fa-shopping-cart">
+                            <field name="platform_order_count" widget="statinfo"
+                                   string="Platform Orders"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="platform" readonly="1"/></h1>
+                    </div>
                     <group>
-                        <group>
-                            <field name="platform"/>
+                        <group string="Connection">
                             <field name="enabled"/>
-                            <field name="endpoint_url"/>
+                            <field name="endpoint_url"
+                                   placeholder="https://partner.shopeemobile.com"/>
                             <field name="shop_id"/>
-                        </group>
-                        <group>
                             <field name="api_key" password="True"/>
-                            <field name="api_secret" password="True"/>
+                            <field name="api_secret" password="True"
+                                   groups="kob_wms.group_wms_manager"/>
+                            <field name="webhook_secret" password="True"
+                                   groups="kob_wms.group_wms_manager"
+                                   placeholder="HMAC-SHA256 key for webhooks"/>
+                        </group>
+                        <group string="OAuth Tokens" groups="kob_wms.group_wms_manager">
+                            <field name="access_token" password="True"/>
+                            <field name="refresh_token" password="True"/>
+                            <field name="token_expires_at"/>
                         </group>
                     </group>
+                    <group string="Sync Schedule">
+                        <group>
+                            <field name="auto_sync"/>
+                            <field name="sync_interval_minutes"
+                                   invisible="not auto_sync"/>
+                            <field name="last_sync_at" readonly="1"/>
+                            <field name="next_sync_at" readonly="1"
+                                   invisible="not auto_sync"/>
+                        </group>
+                        <group>
+                            <field name="total_synced" readonly="1"/>
+                            <field name="sync_errors" readonly="1"/>
+                            <field name="last_sync_message" readonly="1"/>
+                        </group>
+                    </group>
+                    <separator string="Webhook URL"/>
+                    <div class="alert alert-info" role="alert">
+                        <p>Configure the marketplace to POST events to:</p>
+                        <code>
+                            <field name="platform" readonly="1" nolabel="1"
+                                   options="{'inline': true}"/>
+                        </code>
+                        <p>
+                            <strong>/kob/webhook/&lt;platform&gt;</strong>
+                            — signed with HMAC-SHA256 over <em>webhook_secret</em>
+                        </p>
+                    </div>
                     <field name="note" placeholder="Notes..."/>
                 </sheet>
+                <chatter/>
             </form>
         </field>
     </record>
 
     <record id="action_wms_api_config" model="ir.actions.act_window">
-        <field name="name">API Configurations</field>
+        <field name="name">Platform API Configs</field>
         <field name="res_model">wms.api.config</field>
         <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ═══ wms.platform.order ════════════════════════════════════════════ -->
+    <record id="view_wms_platform_order_list" model="ir.ui.view">
+        <field name="name">wms.platform.order.list</field>
+        <field name="model">wms.platform.order</field>
+        <field name="arch" type="xml">
+            <list string="Platform Orders"
+                  decoration-info="state == 'received'"
+                  decoration-warning="state == 'mapped'"
+                  decoration-success="state == 'fulfilled'"
+                  decoration-danger="state == 'error'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="platform"/>
+                <field name="platform_order_no"/>
+                <field name="buyer_name"/>
+                <field name="total_amount" sum="Total"/>
+                <field name="currency_code" optional="hide"/>
+                <field name="platform_status"/>
+                <field name="state" widget="badge"/>
+                <field name="platform_date"/>
+                <field name="sale_order_id" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wms_platform_order_form" model="ir.ui.view">
+        <field name="name">wms.platform.order.form</field>
+        <field name="model">wms.platform.order</field>
+        <field name="arch" type="xml">
+            <form string="Platform Order">
+                <header>
+                    <button name="action_map_to_sale_order" type="object"
+                            string="🔗 Map to Sale Order" class="oe_highlight"
+                            invisible="state != 'received' or sale_order_id"/>
+                    <button name="action_open_sale_order" type="object"
+                            string="Open Sale Order"
+                            invisible="not sale_order_id"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="received,mapped,fulfilled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="platform" readonly="1"/>
+                            <field name="api_config_id"/>
+                            <field name="platform_order_no"/>
+                            <field name="platform_status"/>
+                            <field name="platform_date"/>
+                        </group>
+                        <group>
+                            <field name="buyer_name"/>
+                            <field name="total_amount"/>
+                            <field name="currency_code"/>
+                            <field name="sale_order_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Raw Payload" name="payload">
+                            <field name="payload_json" widget="text" readonly="1"/>
+                        </page>
+                        <page string="Error" name="error"
+                              invisible="state != 'error'">
+                            <field name="error_message" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_wms_platform_order_search" model="ir.ui.view">
+        <field name="name">wms.platform.order.search</field>
+        <field name="model">wms.platform.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="platform_order_no"/>
+                <field name="buyer_name"/>
+                <field name="platform"/>
+                <separator/>
+                <filter string="Received" name="f_received"
+                        domain="[('state','=','received')]"/>
+                <filter string="Mapped" name="f_mapped"
+                        domain="[('state','=','mapped')]"/>
+                <filter string="Errors" name="f_error"
+                        domain="[('state','=','error')]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Platform" name="g_platform"
+                            context="{'group_by': 'platform'}"/>
+                    <filter string="State" name="g_state"
+                            context="{'group_by': 'state'}"/>
+                    <filter string="Date" name="g_date"
+                            context="{'group_by': 'platform_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wms_platform_order" model="ir.actions.act_window">
+        <field name="name">Platform Orders</field>
+        <field name="res_model">wms.platform.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_wms_platform_order_search"/>
     </record>
 
 </odoo>

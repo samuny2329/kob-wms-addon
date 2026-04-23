@@ -102,3 +102,6 @@ access_wms_worker_performance_manager,wms.worker.performance.manager,model_wms_w
 access_wms_automation_audit_supervisor,wms.automation.audit.supervisor,model_wms_automation_audit,group_wms_supervisor,1,0,0,0
 access_wms_automation_audit_manager,wms.automation.audit.manager,model_wms_automation_audit,group_wms_manager,1,1,1,0
 access_wms_automation_audit_director,wms.automation.audit.director,model_wms_automation_audit,group_wms_director,1,1,1,1
+access_wms_platform_order_supervisor,wms.platform.order.supervisor,model_wms_platform_order,group_wms_supervisor,1,1,0,0
+access_wms_platform_order_manager,wms.platform.order.manager,model_wms_platform_order,group_wms_manager,1,1,1,0
+access_wms_platform_order_director,wms.platform.order.director,model_wms_platform_order,group_wms_director,1,1,1,1

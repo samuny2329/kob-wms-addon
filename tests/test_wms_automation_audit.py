@@ -15,7 +15,7 @@ class TestWmsAutomationAudit(TransactionCase):
     # ── Scoring ───────────────────────────────────────────────────────────
     def test_01_all_manual_zero_score(self):
         audit = self.Audit.create({
-            'audit_date': date.today(),
+            'audit_date': date.today() + timedelta(days=100),
             'receive_level': 'manual', 'putaway_level': 'manual',
             'pick_level': 'manual', 'pack_level': 'manual',
             'ship_level': 'manual', 'invoice_level': 'manual',
@@ -25,7 +25,7 @@ class TestWmsAutomationAudit(TransactionCase):
 
     def test_02_all_full_auto_hundred_score(self):
         audit = self.Audit.create({
-            'audit_date': date.today() - timedelta(days=1),
+            'audit_date': date.today() + timedelta(days=100 -1),
             'receive_level': 'full', 'putaway_level': 'full',
             'pick_level': 'full', 'pack_level': 'full',
             'ship_level': 'full', 'invoice_level': 'full',
@@ -36,7 +36,7 @@ class TestWmsAutomationAudit(TransactionCase):
     def test_03_mixed_semi_full_formula(self):
         # 3 full (300) + 3 semi (150) = 450 / 600 × 100 = 75%
         audit = self.Audit.create({
-            'audit_date': date.today() - timedelta(days=2),
+            'audit_date': date.today() + timedelta(days=100 -2),
             'receive_level': 'full', 'putaway_level': 'full',
             'pick_level': 'full', 'pack_level': 'semi',
             'ship_level': 'semi', 'invoice_level': 'semi',
@@ -51,7 +51,7 @@ class TestWmsAutomationAudit(TransactionCase):
         # Actually 4 full (400) + 1 full (100) + 1 manual (0) = 500 → 83.33%
         # Must assert status boundary only
         audit = self.Audit.create({
-            'audit_date': date.today() - timedelta(days=3),
+            'audit_date': date.today() + timedelta(days=100 -3),
             'receive_level': 'semi', 'putaway_level': 'semi',
             'pick_level': 'semi', 'pack_level': 'semi',
             'ship_level': 'semi', 'invoice_level': 'semi',
@@ -63,7 +63,7 @@ class TestWmsAutomationAudit(TransactionCase):
     def test_05_below_30_critical(self):
         # 1 semi + 5 manual = 50/600 = 8.33%
         audit = self.Audit.create({
-            'audit_date': date.today() - timedelta(days=4),
+            'audit_date': date.today() + timedelta(days=100 -4),
             'receive_level': 'semi', 'putaway_level': 'manual',
             'pick_level': 'manual', 'pack_level': 'manual',
             'ship_level': 'manual', 'invoice_level': 'manual',
@@ -81,7 +81,7 @@ class TestWmsAutomationAudit(TransactionCase):
     def test_07_unique_per_day_per_company(self):
         from psycopg2 import IntegrityError
         from odoo.tools.misc import mute_logger
-        d = date.today() - timedelta(days=10)
+        d = date.today() + timedelta(days=100 -10)
         self.Audit.create({'audit_date': d})
         with mute_logger('odoo.sql_db'):
             with self.assertRaises(IntegrityError):
@@ -91,7 +91,7 @@ class TestWmsAutomationAudit(TransactionCase):
     # ── Auto-detect action ────────────────────────────────────────────────
     def test_08_run_audit_populates_counters(self):
         audit = self.Audit.create({
-            'audit_date': date.today() - timedelta(days=20),
+            'audit_date': date.today() + timedelta(days=100 -20),
         })
         audit.action_run_audit()
         # Counters must be >= 0 (no crash)
@@ -103,7 +103,7 @@ class TestWmsAutomationAudit(TransactionCase):
     def test_09_run_audit_triggers_recompute_of_levels(self):
         """After running audit, levels must be auto-suggested (not all manual)."""
         audit = self.Audit.create({
-            'audit_date': date.today() - timedelta(days=30),
+            'audit_date': date.today() + timedelta(days=100 -30),
             'receive_level': 'manual', 'putaway_level': 'manual',
             'pick_level': 'manual', 'pack_level': 'manual',
             'ship_level': 'manual', 'invoice_level': 'manual',
@@ -118,7 +118,7 @@ class TestWmsAutomationAudit(TransactionCase):
     # ── Recommendations ───────────────────────────────────────────────────
     def test_10_recommendations_generated_for_weak_steps(self):
         audit = self.Audit.create({
-            'audit_date': date.today() - timedelta(days=40),
+            'audit_date': date.today() + timedelta(days=100 -40),
             'receive_level': 'manual',
             'putaway_level': 'manual',
             'pick_level': 'manual',
@@ -133,7 +133,7 @@ class TestWmsAutomationAudit(TransactionCase):
 
     def test_11_recommendations_clean_when_all_full(self):
         audit = self.Audit.create({
-            'audit_date': date.today() - timedelta(days=50),
+            'audit_date': date.today() + timedelta(days=100 -50),
             'receive_level': 'full', 'putaway_level': 'full',
             'pick_level': 'full', 'pack_level': 'full',
             'ship_level': 'full', 'invoice_level': 'full',
