@@ -13,6 +13,13 @@ class ProductTemplateCmnPackaging(models.Model):
         default=False,
         help='เมื่อ KOB validate receipt สินค้านี้จะ auto สร้าง draft receipt ที่ CMN-WH (ราคา 0)',
     )
+    qc_required_outgoing = fields.Boolean(
+        string='Outgoing QC Required',
+        default=False,
+        help='When enabled, this product requires an outgoing QC checkpoint '
+             'before pack validation. Auto-creates wms.quality.check records '
+             'when the order enters packing.',
+    )
 
 
 class ProductProductCmnPackaging(models.Model):

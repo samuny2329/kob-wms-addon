@@ -39,6 +39,12 @@ class WmsSalesOrder(models.Model):
     ], string='Status', default='pending', tracking=True)
     line_ids = fields.One2many('wms.sales.order.line', 'order_id',
                                string='Items')
+    quality_check_ids = fields.One2many('wms.quality.check', 'wms_order_id',
+                                        string='Outgoing QC Checks')
+    quality_check_count = fields.Integer(
+        compute='_compute_qc_count', string='QC Checks')
+    quality_check_pending = fields.Integer(
+        compute='_compute_qc_count', string='Pending QC')
     picker_id = fields.Many2one('res.users', string='Picker (Odoo User)')
     packer_id = fields.Many2one('res.users', string='Packer (Odoo User)')
     shipper_id = fields.Many2one('res.users', string='Shipper (Odoo User)')
@@ -151,6 +157,13 @@ class WmsSalesOrder(models.Model):
         string='AI Hit',
         compute='_compute_box_analytics', store=True,
         help='True when packer chose the AI-suggested box')
+
+    @api.depends('quality_check_ids', 'quality_check_ids.state')
+    def _compute_qc_count(self):
+        for o in self:
+            o.quality_check_count = len(o.quality_check_ids)
+            o.quality_check_pending = len(o.quality_check_ids.filtered(
+                lambda q: q.state == 'pending'))
 
     @api.depends('box_barcode')
     def _compute_actual_box(self):
@@ -586,10 +599,14 @@ class WmsSalesOrder(models.Model):
             self.packer_id = self.env.user
         if not self.pack_start_at:
             self.pack_start_at = now
+        previous_status = self.status
         self.status = 'packing'
         self._log_action('pack', sku, kob_user_id=kob_wid)
         if kob_wid and not self.kob_packer_id:
             self.kob_packer_id = kob_wid
+        # Outgoing QC: create pending checks on first transition into packing
+        if previous_status != 'packing':
+            self.env['wms.quality.check'].sudo().register_for_order(self)
         return {'ok': True, 'all_packed': self.all_packed}
 
     def close_box(self, box_barcode=False, box_size=False, kob_worker_id=None):
@@ -597,6 +614,18 @@ class WmsSalesOrder(models.Model):
         self.ensure_one()
         if not self.all_packed:
             return {'ok': False, 'error': _('Not all items are packed yet.')}
+        # Outgoing QC gate — block if any pending or failed checks
+        pending = self.quality_check_ids.filtered(lambda q: q.state == 'pending')
+        if pending:
+            return {'ok': False, 'error': _(
+                '🎯 Outgoing QC required — %d pending checks on: %s'
+            ) % (len(pending),
+                 ', '.join(pending.mapped('product_id.default_code')[:5]))}
+        failed = self.quality_check_ids.filtered(lambda q: q.state == 'failed')
+        if failed:
+            return {'ok': False, 'error': _(
+                '❌ Pack blocked — %d failed QC checks. Resolve defects first.'
+            ) % len(failed)}
 
         # 0. Count lock — block BEFORE setting any status or posting invoice
         lock_msg = self._count_lock_msg()

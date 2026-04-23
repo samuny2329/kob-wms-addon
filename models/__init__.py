@@ -29,3 +29,5 @@ from . import wms_expiry_alert
 from . import wms_quality_defect
 from . import wms_daily_report
 from . import wms_qc_monthly_report
+from . import wms_quality_check
+from . import wms_kpi_alert_rule

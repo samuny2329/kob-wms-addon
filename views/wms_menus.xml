@@ -2,17 +2,10 @@
 <odoo>
 
     <!-- ══════════════════════════════════════════════════════════════════
-         KOB WMS MENU STRUCTURE (v2.23)
+         KOB WMS MENU (v2.25)
 
-         Top bar layout:
-         • 8 daily-use screens (kept at root)
-         • 🏠 Command Center (empty — user will add custom items)
-         • 7 category tabs each with their own organized subtabs
-
-         Duplicates removed:
-           - menu_wms_config_api (was duplicated in Configuration and
-             Platform Sync — kept only under Platform Sync)
-           - 🤖 Automation Audit menu removed (code kept in repo)
+         TOP BAR: 8 daily screens + 🏠 Command Center (empty placeholder)
+                  + 7 separate category tabs with their own subtabs
     ══════════════════════════════════════════════════════════════════ -->
 
     <!-- Root app -->
@@ -23,7 +16,7 @@
               groups="group_wms_worker"/>
 
     <!-- ══════════════════════════════════════════════════════════════
-         1–8. TOP BAR — 8 daily-use screens
+         TOP BAR — 8 daily-use screens
          ══════════════════════════════════════════════════════════════ -->
 
     <menuitem id="menu_wms_dashboard"
@@ -76,7 +69,7 @@
               sequence="70"/>
 
     <!-- ══════════════════════════════════════════════════════════════
-         9. 🏠 Command Center (empty — user will populate)
+         🏠 Command Center (empty placeholder — user-defined content)
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_root"
               name="🏠 Command Center"
@@ -85,7 +78,7 @@
               groups="group_wms_supervisor"/>
 
     <!-- ══════════════════════════════════════════════════════════════
-         10. 📊 Reports (daily / live monitors)
+         📊 Reports
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_reports"
               name="📊 Reports"
@@ -118,7 +111,7 @@
               sequence="40"/>
 
     <!-- ══════════════════════════════════════════════════════════════
-         11. 🏭 Warehouse
+         🏭 Warehouse
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_warehouse"
               name="🏭 Warehouse"
@@ -168,7 +161,7 @@
               action="action_wms_pickface"
               sequence="40"/>
 
-    <!-- Warehouse → Cycle Count (admin oversight) -->
+    <!-- Warehouse → Cycle Count -->
     <menuitem id="menu_cc_warehouse_count"
               name="Cycle Count"
               parent="menu_cc_warehouse"
@@ -193,13 +186,19 @@
               sequence="30"/>
 
     <!-- ══════════════════════════════════════════════════════════════
-         12. 🎯 Quality
+         🎯 Quality
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_quality"
               name="🎯 Quality"
               parent="menu_kob_wms_root"
               sequence="90"
               groups="group_wms_supervisor"/>
+
+    <menuitem id="menu_wms_quality_check"
+              name="🎯 Outgoing QC Checks"
+              parent="menu_cc_quality"
+              action="action_wms_quality_check"
+              sequence="5"/>
 
     <menuitem id="menu_wms_quality_defect"
               name="Defect / Damage Log"
@@ -226,7 +225,7 @@
               sequence="40"/>
 
     <!-- ══════════════════════════════════════════════════════════════
-         13. 📈 Analytics
+         📈 Analytics
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_analytics"
               name="📈 Analytics"
@@ -271,7 +270,7 @@
               sequence="40"/>
 
     <!-- ══════════════════════════════════════════════════════════════
-         14. ✅ KPI Assessment
+         ✅ KPI Assessment
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_kpi"
               name="✅ KPI Assessment"
@@ -335,8 +334,14 @@
               action="action_wms_kpi_pillar"
               sequence="40"/>
 
+    <menuitem id="menu_wms_kpi_alert_rule"
+              name="🚨 KPI Alert Rules"
+              parent="menu_cc_kpi_admin"
+              action="action_wms_kpi_alert_rule"
+              sequence="60"/>
+
     <!-- ══════════════════════════════════════════════════════════════
-         15. 🔄 Platform Sync
+         🔄 Platform Sync
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_platform"
               name="🔄 Platform Sync"
@@ -358,7 +363,7 @@
               groups="group_wms_manager"/>
 
     <!-- ══════════════════════════════════════════════════════════════
-         16. ⚙️ Configuration
+         ⚙️ Configuration
          ══════════════════════════════════════════════════════════════ -->
     <menuitem id="menu_cc_config"
               name="⚙️ Configuration"
