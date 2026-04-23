@@ -1,6 +1,6 @@
 {
     'name': 'KOB WMS Pro',
-    'version': '18.0.2.15.0',
+    'version': '18.0.2.17.0',
     'category': 'Inventory/Warehouse',
     'summary': 'Enterprise Warehouse Management System (Kiss of Beauty)',
     'description': """
@@ -94,6 +94,7 @@ Features
         'data/wms_count_cron.xml',
         'data/wms_sale_order_types.xml',
         'data/wms_kpi_templates.xml',
+        'data/wms_kpi_iso_sustainability.xml',  # P9: ISO, GMP & Sustainability pillar
         'data/wms_box_size_data.xml',
         'data/wms_pin_init.xml',
 

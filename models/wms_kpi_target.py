@@ -36,6 +36,14 @@ class WmsKpiPillar(models.Model):
     description = fields.Text()
     active = fields.Boolean(default=True)
     color = fields.Integer(default=0)
+    dimension = fields.Selection([
+        ('finance',    'Finance & Cost'),
+        ('customer',   'Customer & Quality'),
+        ('operations', 'Operations & SLA'),
+        ('people',     'People & Development'),
+        ('strategic',  'Strategic & Innovation'),
+    ], string='KPI Dimension',
+       help='Dimension alignment (based on 5-dimension KPI framework)')
 
 
 # =====================================================================
@@ -52,6 +60,8 @@ class WmsKpiTemplate(models.Model):
                                string='Pillar Weights')
     sop_ids = fields.One2many('wms.kpi.sop', 'template_id',
                               string='SOP Documents')
+    goal_template_ids = fields.One2many('wms.kpi.goal', 'template_id',
+                                        string='Default Goals / Action Items')
     total_weight = fields.Float(compute='_compute_total_weight', store=True)
     company_id = fields.Many2one('res.company',
                                  default=lambda self: self.env.company)
@@ -95,11 +105,21 @@ class WmsKpiCriterion(models.Model):
     weight = fields.Float(string='Weight %', default=0, digits=(5, 1))
 
     score_0 = fields.Char(default='Not applicable / Not observed')
-    score_1 = fields.Char(default='Significantly below expectation')
-    score_2 = fields.Char(default='Below expected standard')
-    score_3 = fields.Char(default='Meets the expected standard')
-    score_4 = fields.Char(default='Consistently above standard')
-    score_5 = fields.Char(default='Exceptional performance')
+    score_1 = fields.Char(string='Scale 1 — Need Improvement',   default='Significantly below expectation')
+    score_2 = fields.Char(string='Scale 2 — Partially Meet',     default='Below expected standard')
+    score_3 = fields.Char(string='Scale 3 — Meet (Target)',      default='Meets the expected standard')
+    score_4 = fields.Char(string='Scale 4 — Exceed',             default='Consistently above standard')
+    score_5 = fields.Char(string='Scale 5 — Outstanding/Stretch',default='Exceptional performance')
+
+    # SMART KPI additions (from KPI Setting 2026 framework)
+    kpi_type = fields.Selection([
+        ('task',         'Task-based (งานเสร็จ)'),
+        ('quantitative', 'Quantitative (เชิงปริมาณ)'),
+        ('qualitative',  'Qualitative (เชิงคุณภาพ)'),
+    ], string='KPI Type', default='quantitative',
+       help='Task-based: completion metric; Quantitative: numeric target; Qualitative: quality standard')
+    unit = fields.Char(string='Unit',
+                       help='Measurement unit, e.g. orders/day, %, ฿, pieces')
 
 
 # =====================================================================
@@ -357,6 +377,14 @@ class WmsKpiAssessment(models.Model):
     director_comment = fields.Text()
 
     goal_ids = fields.One2many('wms.kpi.goal', 'assessment_id')
+    idp_ids = fields.One2many('wms.kpi.idp', 'assessment_id',
+                              string='Individual Development Plan')
+    career_goal_short = fields.Char(
+        string='Short-term Career Goal (1-3 yrs)',
+        help='Where do you want to grow in the next 1-3 years?')
+    career_goal_long = fields.Char(
+        string='Long-term Career Goal (4-5 yrs)',
+        help='Where do you want to be in 4-5 years?')
 
     # SOP reference (read-only, from template)
     sop_ids = fields.One2many(related='template_id.sop_ids', readonly=True)
@@ -447,6 +475,69 @@ class WmsKpiAssessment(models.Model):
     # --- Workflow ---
     def action_start_self_review(self):
         self.write({'state': 'self_review'})
+        self._auto_populate_performance_evidence()
+
+    def _auto_populate_performance_evidence(self):
+        """Auto-fill `actual_value` on quantitative criterion scores from
+        `wms.worker.performance` for the assessment period.
+
+        Pulls UPH, error_rate, quality_score, worker_score, total pick/pack
+        counts and writes a summary string into actual_value for criteria
+        whose kpi_type == 'quantitative'. Worker can still override.
+        """
+        Perf = self.env['wms.worker.performance'].sudo()
+        for rec in self:
+            if not rec.season_id:
+                continue
+            date_start = rec.season_id.date_start
+            date_end = rec.season_id.date_end
+            if not (date_start and date_end):
+                continue
+
+            domain = [('date', '>=', date_start), ('date', '<=', date_end)]
+            if rec.kob_user_id:
+                domain.append(('kob_user_id', '=', rec.kob_user_id.id))
+            elif rec.user_id:
+                domain.append(('user_id', '=', rec.user_id.id))
+            else:
+                continue
+
+            perf_rows = Perf.search(domain)
+            if not perf_rows:
+                continue
+
+            # Aggregate over the period
+            total_actions = sum(perf_rows.mapped('total_actions'))
+            total_errors = sum(perf_rows.mapped('total_errors'))
+            total_picks = sum(perf_rows.mapped('pick_count'))
+            total_packs = sum(perf_rows.mapped('pack_count'))
+            days = len(perf_rows)
+
+            avg_uph = (sum(perf_rows.mapped('uph')) / days) if days else 0
+            avg_quality = (
+                sum(perf_rows.mapped('quality_score')) / days) if days else 100
+            avg_error = (
+                sum(perf_rows.mapped('error_rate')) / days) if days else 0
+            avg_score = (
+                sum(perf_rows.mapped('worker_score')) / days) if days else 0
+
+            summary = (
+                "UPH avg: %.1f | Quality: %.2f%% | Error: %.2f%% | "
+                "Score: %.1f | Picks: %d | Packs: %d | Days: %d"
+            ) % (avg_uph, avg_quality, avg_error, avg_score,
+                 total_picks, total_packs, days)
+
+            # Write summary to every quantitative criterion that has no actual_value
+            for line in rec.line_ids:
+                for score in line.score_ids:
+                    if (score.criterion_id
+                            and score.criterion_id.kpi_type == 'quantitative'
+                            and not score.actual_value):
+                        score.actual_value = summary
+
+            rec.message_post(body=_(
+                '📊 Auto-filled performance evidence: %s'
+            ) % summary)
 
     def action_submit_to_supervisor(self):
         self.write({'state': 'supervisor'})
@@ -558,6 +649,14 @@ class WmsKpiAssessment(models.Model):
                     'score_ids': scores,
                 }))
             self.line_ids = lines
+        if self.template_id and not self.goal_ids:
+            goals = [(0, 0, {
+                'name': g.name,
+                'pillar_id': g.pillar_id.id if g.pillar_id else False,
+                'deadline': g.deadline,
+                'state': 'todo',
+            }) for g in self.template_id.goal_template_ids]
+            self.goal_ids = goals
 
 
 # =====================================================================
@@ -641,6 +740,12 @@ class WmsKpiAssessmentScore(models.Model):
     score_3 = fields.Char(related='criterion_id.score_3')
     score_4 = fields.Char(related='criterion_id.score_4')
     score_5 = fields.Char(related='criterion_id.score_5')
+    kpi_type = fields.Selection(related='criterion_id.kpi_type', readonly=True)
+    unit = fields.Char(related='criterion_id.unit', readonly=True)
+
+    actual_value = fields.Char(
+        string='Actual',
+        help='Record actual performance for quantitative KPIs, e.g. "97.5%", "310 orders/day"')
 
     @api.depends('self_score_sel', 'reviewer_score_sel')
     def _compute_numeric(self):
@@ -657,12 +762,15 @@ class WmsKpiGoal(models.Model):
     _description = 'KPI Goal / Action Item'
     _order = 'deadline, id'
 
-    assessment_id = fields.Many2one('wms.kpi.assessment', ondelete='cascade',
-                                    required=True)
+    assessment_id = fields.Many2one('wms.kpi.assessment', ondelete='cascade')
+    template_id = fields.Many2one('wms.kpi.template', ondelete='cascade',
+                                  index=True,
+                                  help='When set (no assessment_id), this is a template default goal.')
     name = fields.Char(string='Goal', required=True)
     description = fields.Text()
     pillar_id = fields.Many2one('wms.kpi.pillar')
     deadline = fields.Date()
+    completed_date = fields.Date(string='Completed Date')
     state = fields.Selection([
         ('todo', 'To Do'),
         ('in_progress', 'In Progress'),
@@ -670,4 +778,41 @@ class WmsKpiGoal(models.Model):
         ('cancelled', 'Cancelled'),
     ], default='todo')
     progress_note = fields.Text()
-    completed_date = fields.Date()
+
+    @api.constrains('assessment_id', 'template_id')
+    def _check_owner(self):
+        for rec in self:
+            if not rec.assessment_id and not rec.template_id:
+                raise ValidationError('Goal must belong to either an Assessment or a Template.')
+
+
+# =====================================================================
+# IDP — Individual Development Plan  (70-20-10 model)
+# =====================================================================
+class WmsKpiIdp(models.Model):
+    _name = 'wms.kpi.idp'
+    _description = 'Individual Development Plan'
+    _order = 'learning_type, deadline, id'
+
+    assessment_id = fields.Many2one('wms.kpi.assessment', ondelete='cascade',
+                                    required=True)
+    name = fields.Char(string='Development Activity', required=True)
+    skill_gap = fields.Char(
+        string='Skill to Develop',
+        help='Competency or skill gap this activity addresses')
+    pillar_id = fields.Many2one('wms.kpi.pillar', string='Related Pillar')
+    learning_type = fields.Selection([
+        ('70_ojt',    '70% — On-the-Job (ลงมือทำจริง)'),
+        ('20_social', '20% — Social Learning (Coaching/Mentoring)'),
+        ('10_formal', '10% — Formal Training (อบรม/e-Learning)'),
+    ], string='Learning Method', required=True, default='70_ojt',
+       help='70-20-10 integrated learning model')
+    deadline = fields.Date(string='Target Date')
+    completed_date = fields.Date(string='Completed Date')
+    state = fields.Selection([
+        ('todo',        'To Do'),
+        ('in_progress', 'In Progress'),
+        ('done',        'Done'),
+    ], default='todo', tracking=True)
+    note = fields.Text(string='Progress / Evidence',
+                       help='Record progress, outcomes, or evidence of learning')

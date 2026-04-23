@@ -11,7 +11,7 @@
 |-------|-------|
 | **Module name** | `kob_wms` |
 | **Display name** | KOB WMS Pro |
-| **Version** | `18.0.2.11.0` |
+| **Version** | `18.0.2.16.0` (see `__manifest__.py` for current) |
 | **Company** | Kiss of Beauty (KOB) / SKINOXY |
 | **Author** | KOB — sivaporn.t@kissofbeauty.co.th |
 | **GitHub** | https://github.com/samuny2329/kob-wms |
@@ -182,22 +182,45 @@ kob_wms/
 - QWeb PDF report: Count Session Summary
 - Spreadsheet Dashboard: Count Adjustments
 
-### 5.6 KPI Assessment
-- Seasons → Templates → Pillars → Assessments
-- Worker performance tracking
-- Approver setup
+### 5.6 KPI Assessment (Phase D — complete as of v2.17)
+- Seasons → Templates → Pillars → Criteria → Assessments
+- 4-level approval workflow: `draft → self_review → supervisor → asst_manager → manager → director → done`
+- Auto-assign approvers via `wms.kpi.approver.config` (per-position + per-user overrides)
+- Auto-populate quantitative evidence from `wms.worker.performance` on `action_start_self_review()`
+- Goals (per assessment) + IDP 70-20-10 (on-job/social/formal)
+- Grade mapping A/B/C/D/E from final_score (0-5 scale)
+- Rejection paths at every level → state=rejected with reject_reason
+- Bulk-create assessments: `Season.action_bulk_create_assessments()` creates 1 per kob.wms.user + 1 per supervisor/manager/director Odoo user
+- Security: `group_wms_director` with implied_ids chain (director → manager → supervisor → worker)
+- Tests: `tests/test_wms_kpi_assessment.py` — 11 cases covering state machine, scoring, uniqueness, evidence auto-populate
 
 ### 5.7 SLA
 - Per-platform SLA minutes (pick / pack / ship)
 - Working hours config (net minutes calculation)
 - SLA status: on_track / at_risk / breached / done
 
-### 5.8 Security Groups
+### 5.8 Security Groups (hierarchical via implied_ids)
 ```
 kob_wms.group_wms_worker      → scan only
-kob_wms.group_wms_supervisor  → analytics + count
-kob_wms.group_wms_manager     → full access
+kob_wms.group_wms_supervisor  → analytics + count (implies worker)
+kob_wms.group_wms_manager     → full access (implies supervisor)
+kob_wms.group_wms_director    → KPI final approval (implies manager)
 ```
+
+### 5.10 Inter-company CMN Packaging Transfer (v2.16)
+- Flag `product.template.is_cmn_packaging` (boolean column + bulk Action menu)
+- When KOB validates an incoming receipt → auto-creates a draft non-value
+  receipt for CMN-WH for flagged products (price=0, origin links back to
+  KOB receipt, partner=original vendor for cross-check)
+- CMN manually validates after attaching transfer documents
+- Implemented in `stock_picking._auto_create_cmn_packaging_receipt()`
+
+### 5.11 Count Screen (v2.16 SAP Fiori)
+- Fullscreen count screen redesigned in SAP Fiori Analytical Table style
+- Odoo 19 teal palette (`#00A99D`) + SAP navy shell (`#1D2D3E`)
+- 4 screens: Task List → Navigate → Count (Sidebar+Table) → Summary
+- Lot picker as centered SAP Dialog
+- Status dots: green=ok, red=variance, gray=pending
 
 ### 5.9 Platform Fee Accounts
 ```
