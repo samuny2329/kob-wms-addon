@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ─────────── List ─────────── -->
+    <record id="view_wms_automation_audit_list" model="ir.ui.view">
+        <field name="name">wms.automation.audit.list</field>
+        <field name="model">wms.automation.audit</field>
+        <field name="arch" type="xml">
+            <list string="Automation Audits" sample="1"
+                  decoration-success="status == 'pass'"
+                  decoration-warning="status == 'watch'"
+                  decoration-danger="status in ('over','critical')">
+                <field name="audit_date"/>
+                <field name="total_score" string="Auto Level %" widget="progressbar"/>
+                <field name="status" widget="badge"/>
+                <field name="receive_level" optional="show"/>
+                <field name="putaway_level" optional="hide"/>
+                <field name="pick_level" optional="show"/>
+                <field name="pack_level" optional="show"/>
+                <field name="ship_level" optional="show"/>
+                <field name="invoice_level" optional="hide"/>
+                <field name="active_cron_count" optional="hide"/>
+                <field name="platform_api_configs" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ─────────── Form ─────────── -->
+    <record id="view_wms_automation_audit_form" model="ir.ui.view">
+        <field name="name">wms.automation.audit.form</field>
+        <field name="model">wms.automation.audit</field>
+        <field name="arch" type="xml">
+            <form string="Automation Audit">
+                <header>
+                    <button name="action_run_audit"
+                            type="object"
+                            string="🤖 Run Audit Now"
+                            class="oe_highlight"
+                            help="Scan Odoo configuration and auto-suggest levels + counters"/>
+                    <field name="status" widget="statusbar"
+                           statusbar_visible="critical,over,watch,pass"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="audit_date"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="total_score" widget="percentpie"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- ── Tab 1: Workflow Step Scoring ──────────────── -->
+                        <page string="📊 Workflow Steps" name="steps">
+                            <group string="Scoring (Manual=0 / Semi=50 / Full=100)">
+                                <group>
+                                    <field name="receive_level"/>
+                                    <field name="putaway_level"/>
+                                    <field name="pick_level"/>
+                                </group>
+                                <group>
+                                    <field name="pack_level"/>
+                                    <field name="ship_level"/>
+                                    <field name="invoice_level"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ── Tab 2: Detected Config ────────────────────── -->
+                        <page string="🔍 Detected Odoo Config" name="detected">
+                            <group>
+                                <group string="Automation Signals">
+                                    <field name="active_cron_count"/>
+                                    <field name="active_stock_rule_count"/>
+                                    <field name="auto_lot_picking_types"/>
+                                    <field name="auto_print_picking_types"/>
+                                </group>
+                                <group string="Integration Signals">
+                                    <field name="wms_active_workers"/>
+                                    <field name="platform_api_configs"/>
+                                    <field name="server_action_count"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ── Tab 3: Recommendations ────────────────────── -->
+                        <page string="🚀 Recommendations" name="recs">
+                            <field name="recommendations" nolabel="1"
+                                   readonly="1"
+                                   widget="text"/>
+                        </page>
+
+                        <!-- ── Tab 4: Notes ──────────────────────────────── -->
+                        <page string="📝 Notes" name="notes">
+                            <field name="notes" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ─────────── Kanban (by status) ─────────── -->
+    <record id="view_wms_automation_audit_kanban" model="ir.ui.view">
+        <field name="name">wms.automation.audit.kanban</field>
+        <field name="model">wms.automation.audit</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="audit_date"/>
+                <field name="total_score"/>
+                <field name="status"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <strong><field name="name"/></strong>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div>
+                                    <strong style="font-size:20px">
+                                        <field name="total_score"/> %
+                                    </strong>
+                                </div>
+                                <div>
+                                    <field name="audit_date"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ─────────── Search ─────────── -->
+    <record id="view_wms_automation_audit_search" model="ir.ui.view">
+        <field name="name">wms.automation.audit.search</field>
+        <field name="model">wms.automation.audit</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="audit_date"/>
+                <separator/>
+                <filter string="Pass (≥70%)" name="status_pass"
+                        domain="[('status','=','pass')]"/>
+                <filter string="Watch (50-70%)" name="status_watch"
+                        domain="[('status','=','watch')]"/>
+                <filter string="Critical (&lt;30%)" name="status_critical"
+                        domain="[('status','=','critical')]"/>
+                <separator/>
+                <filter string="Last 90 days" name="last_90"
+                        domain="[('audit_date', '&gt;=', (context_today() - datetime.timedelta(days=90)).strftime('%Y-%m-%d'))]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Status" name="group_status"
+                            context="{'group_by': 'status'}"/>
+                    <filter string="Month" name="group_month"
+                            context="{'group_by': 'audit_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ─────────── Action ─────────── -->
+    <record id="action_wms_automation_audit" model="ir.actions.act_window">
+        <field name="name">Automation Audit</field>
+        <field name="res_model">wms.automation.audit</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="view_wms_automation_audit_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No automation audits yet.
+            </p>
+            <p>
+                Click <b>New</b> to create your first audit — or let the monthly
+                cron create one automatically. Click <b>🤖 Run Audit Now</b> to scan
+                the database and auto-suggest automation levels.
+            </p>
+        </field>
+    </record>
+
+</odoo>

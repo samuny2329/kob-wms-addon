@@ -23,3 +23,4 @@ from . import wms_count_auto
 from . import wms_box_size
 from . import wms_box_analytics
 from . import wms_product_box_analytics
+from . import wms_automation_audit

@@ -155,6 +155,13 @@
               sequence="60"
               groups="group_wms_manager"/>
 
+    <menuitem id="menu_wms_automation_audit"
+              name="🤖 Automation Audit"
+              parent="menu_wms_kpi_root"
+              action="action_wms_automation_audit"
+              sequence="70"
+              groups="group_wms_supervisor"/>
+
     <!-- 11. Employees (admin only) -->
     <menuitem id="menu_wms_users"
               name="Employees"
